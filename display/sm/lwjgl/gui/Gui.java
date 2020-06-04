@@ -1,8 +1,9 @@
-package sm.lwjgl.worldViewer.mesh;
+package sm.lwjgl.gui;
 
 import org.lwjgl.opengl.GL11;
 
-import sm.lwjgl.worldViewer.Camera;
+import sm.lwjgl.Camera;
+import sm.lwjgl.mesh.WorldRender;
 
 public class Gui {
 	private WorldRender parent;

@@ -1,4 +1,4 @@
-package sm.lwjgl.worldViewer.mesh;
+package sm.lwjgl.gui;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -12,10 +12,13 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
+
+import sm.lwjgl.mesh.Texture;
 
 public class Text {
 	private static final String CHARACTERS =
@@ -28,13 +31,13 @@ public class Text {
 	private static final int ATTLAS_WIDTH = 1024;
 	private static final float ATTLAS_SIZE = 44.3f;
 	private static final int ATTLAS_SPACE = (int)(0.08265 * ATTLAS_SIZE);
-	private Texture texture;
+	public static Texture texture;
 	
 	public Text(String name) {
 		try {
 			//createFontAttlas(name);
-			texture = Texture.loadLocalTexture("/font.png", GL11.GL_LINEAR);
-		} catch(IOException e) {
+			texture = Texture.loadResourceTexture("/font.png", GL11.GL_LINEAR);
+		} catch(IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}

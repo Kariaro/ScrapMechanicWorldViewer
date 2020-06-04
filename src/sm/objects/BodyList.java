@@ -49,7 +49,7 @@ public class BodyList extends SQLiteObject {
 		public int yPos_33_2 = 0; // 33 offset, 2 size
 		public int zPos_35_2 = 0; // 35 offset, 2 size
 		
-		public int color_37_4 = 0;
+		public int color_abgr_37_4 = 0;
 		public int rotation_41_1 = 0;
 		
 		// Only for 'shapeType' == '0x1f'
@@ -73,7 +73,7 @@ public class BodyList extends SQLiteObject {
 			xPos_31_2 = Util.getShort(data, 31, true);
 			yPos_33_2 = Util.getShort(data, 33, true);
 			zPos_35_2 = Util.getShort(data, 35, true);
-			color_37_4 = Util.getInt(data, 37, true);
+			color_abgr_37_4 = Util.getInt(data, 37, true);
 			rotation_41_1 = Byte.toUnsignedInt(data[41]);
 			
 			
@@ -85,7 +85,7 @@ public class BodyList extends SQLiteObject {
 			// This data is sometimes absent
 			// TODO: Type specific data
 			
-			
+			/*
 			System.out.println("id = " + id);
 			System.out.println("bodyId = " + bodyId);
 			int a = 1;
@@ -105,7 +105,7 @@ public class BodyList extends SQLiteObject {
 			System.out.printf("   = z = %d\n", zPos_35_2);
 			System.out.printf("rot = %8s\n", Integer.toBinaryString(rotation_41_1));
 			//System.out.println("   = " + Util.getInt(bytes, 39, true));
-			
+			*/
 			// bot: [z-]
 			// top four repeats every four 
 			// top is behind bot one
@@ -232,7 +232,7 @@ public class BodyList extends SQLiteObject {
 			byte[] data = rigidBody.getBytes("data");
 			
 			bounds = new RigidBodyBounds(sqlite.execute("SELECT * FROM RigidBodyBounds WHERE id = " + id));
-			System.out.println(bounds);
+			//System.out.println(bounds);
 			
 			ResultSet childSet = sqlite.execute("SELECT * FROM ChildShape WHERE bodyId = " + id);
 			while(childSet.next()) {

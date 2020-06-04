@@ -1,85 +1,122 @@
-package sm.lwjgl.worldViewer.mesh;
+package sm.lwjgl.mesh;
 
 import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL20;
 
 public class Texture {
+	public static final Texture NONE = new Texture();
+	private static final Map<String, Texture> cache = new HashMap<>();
 	public final BufferedImage bi;
+	public final int activeId;
 	public final int textureId;
 	public final int height;
 	public final int width;
 	
-	private Texture(URL path, int interpolation) throws IOException {
-		bi = ImageIO.read(path);
-		height = bi.getHeight();
-		width = bi.getWidth();
+	private Texture() {
+		bi = null;
+		activeId = -1;
+		textureId = -1;
+		height = -1;
+		width = -1;
+	}
+	
+	private Texture(File file, int id, int interpolation) throws IOException {
+		this.activeId = GL20.GL_TEXTURE0 + id;
+		String path = file.getAbsolutePath();
 		
-		ByteBuffer buf = loadBuffer(bi, true);
+		ByteBuffer buf;
+		if(file.getName().toLowerCase().endsWith(".tga")) {
+			int[] w = new int[1];
+			int[] h = new int[1];
+			buf = org.lwjgl.stb.STBImage.stbi_load(path, w, h, new int[] { 0 }, 4);
+			height = w[0];
+			width = h[0];
+			bi = null;
+		} else {
+			bi = ImageIO.read(file);
+			System.out.println(file);
+			buf = loadBuffer(bi, true);
+			height = bi.getHeight();
+			width = bi.getWidth();
+		}
+		
 		textureId = GL11.glGenTextures();
+		load(buf, interpolation);
+		
+		cache.put(path, this);
+	}
+	
+	private void load(ByteBuffer buf, int interpolation) {
 		GL11.glBindTexture(GL_TEXTURE_2D, textureId);
 		GL11.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		GL11.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-		GL11.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL12.GL_REPEAT);
+		GL11.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL12.GL_REPEAT);
 		GL11.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, interpolation);
 		GL11.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, interpolation);
 		GL11.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
 	}
 	
 	public void bind() {
+		if(this == NONE) return;
+		GL20.glActiveTexture(activeId);
 		GL11.glBindTexture(GL_TEXTURE_2D, textureId);
 	}
 	
 	public void unbind() {
+		if(this == NONE) return;
+		GL20.glActiveTexture(activeId);
 		GL11.glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	public void cleanup() {
+		if(this == NONE) return;
 		glDeleteTextures(textureId);
 	}
 	
 	@Override
 	public String toString() {
+		if(this == NONE) return "Texture[none]";
 		return new StringBuilder().append("Texture[id=").append(textureId).append("] (").append(width).append("x").append(height).append(")").toString();
 	}
 	
-	public static Texture loadTexture(URL path, int interpolation) throws IOException {
-		return new Texture(path, interpolation);
-	}
-	
-	public static Texture loadGlobalTexture(String path, int interpolation) throws IOException {
-		return loadTexture(new URL(path), interpolation);
-	}
-	
-	public static Texture loadLocalTexture(String path, int interpolation) throws IOException {
-		return loadTexture(Texture.class.getResource(path), interpolation);
-	}
-	
-	public static BufferedImage loadLocalImage(String path) {
-		try {
-			return ImageIO.read(Texture.class.getResourceAsStream(path));
-		} catch(IOException e) {
-			e.printStackTrace();
+	public static Texture loadTexture(String path, int textureId, int interpolation) throws IOException {
+		File file = new File(path);
+		
+		String pathCheck = file.getAbsolutePath();
+		if(cache.containsKey(pathCheck)) {
+			return cache.get(pathCheck);
 		}
-		return null;
+		
+		if(!file.exists()) {
+			return NONE;
+		}
+		
+		return new Texture(file, textureId, interpolation);
 	}
 	
-	public static ByteBuffer loadBufferLocal(String path) {
-		try {
-			return loadBuffer(loadLocalImage(path));
-		} catch(Exception e) {
-			e.printStackTrace();
+	public static Texture loadResourceTexture(String path, int interpolation) throws IOException, URISyntaxException {
+		File file = new File(Texture.class.getResource(path).toURI());
+		
+		String pathCheck = file.getAbsolutePath();
+		if(cache.containsKey(pathCheck)) {
+			return cache.get(pathCheck);
 		}
-		return null;
+		
+		return new Texture(file, 0, interpolation);
 	}
 	
 	public static ByteBuffer loadBuffer(BufferedImage bi) {

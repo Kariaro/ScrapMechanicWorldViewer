@@ -1,4 +1,4 @@
-package sm.lwjgl.worldViewer.mesh;
+package sm.lwjgl.shader;
 
 import static org.lwjgl.opengl.GL20.*;
 
@@ -15,23 +15,15 @@ import org.lwjgl.system.MemoryStack;
 
 import sm.util.FileUtils;
 
-public class WorldShader {
-	private final int programId;
-	private int vertexShaderId;
-	private int fragmentShaderId;
+public class Shader {
+	private Map<String, Integer> uniforms = new HashMap<>();
 	
-	private final Map<String, Integer> uniforms;
+	protected int programId;
+	protected int vertexShaderId;
+	protected int fragmentShaderId;
 	
-	public WorldShader() throws Exception {
-		programId = GL20.glCreateProgram();
-		if(programId == 0) {
-			throw new Exception("Could not create Shader");
-		}
-		
-		uniforms = new HashMap<>();
-	}
-	
-	public WorldShader(String vertexPath, String fragmentPath) throws Exception {
+	/*
+	public Shader(String vertexPath, String fragmentPath) throws Exception {
 		programId = GL20.glCreateProgram();
 		if(programId == 0) {
 			throw new Exception("Could not create Shader");
@@ -40,9 +32,8 @@ public class WorldShader {
 		createVertexShader(vertexPath);
 		createFragmentShader(fragmentPath);
 		link();
-		
-		uniforms = new HashMap<>();
 	}
+	*/
 	
 	public void createVertexShader(String shaderPath) throws Exception {
 		vertexShaderId = createShader(shaderPath, GL20.GL_VERTEX_SHADER);
@@ -87,27 +78,7 @@ public class WorldShader {
 		return shaderId;
 	}
 	
-	public void link() throws Exception {
-		glLinkProgram(programId);
-		if(glGetProgrami(programId, GL_LINK_STATUS) == 0) {
-			throw new Exception("Error linking Shader code: " + glGetProgramInfoLog(programId, 1024));
-		}
-		
-		if(vertexShaderId != 0) {
-			glDetachShader(programId, vertexShaderId);
-		}
-		
-		if(fragmentShaderId != 0) {
-			glDetachShader(programId, fragmentShaderId);
-		}
-		
-		glValidateProgram(programId);
-		if(glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
-			System.err.println("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
-		}
-	}
-	
-	public void bindAttrib(int index, String name) {
+	public final void bindAttrib(int index, String name) {
 		GL20.glBindAttribLocation(programId, index, name);
 	}
 	
@@ -144,6 +115,10 @@ public class WorldShader {
 		glUniform4f(_uniform(uniformName), x, y, z, w);
 	}
 	
+	public void setUniform(String uniformName, float x, float y, float z) {
+		glUniform3f(_uniform(uniformName), x, y, z);
+	}
+	
 	public void setUniform(String uniformName, float x, float y) {
 		glUniform2f(_uniform(uniformName), x, y);
 	}
@@ -165,15 +140,35 @@ public class WorldShader {
 		return uniforms.get(uniformName);
 	}
 	
-	public void bind() {
+	public final void link() throws Exception {
+		glLinkProgram(programId);
+		if(glGetProgrami(programId, GL_LINK_STATUS) == 0) {
+			throw new Exception("Error linking Shader code: " + glGetProgramInfoLog(programId, 1024));
+		}
+		
+		if(vertexShaderId != 0) {
+			glDetachShader(programId, vertexShaderId);
+		}
+		
+		if(fragmentShaderId != 0) {
+			glDetachShader(programId, fragmentShaderId);
+		}
+		
+		glValidateProgram(programId);
+		if(glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
+			System.err.println("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
+		}
+	}
+	
+	public final void bind() {
 		glUseProgram(programId);
 	}
 	
-	public void unbind() {
+	public final void unbind() {
 		glUseProgram(0);
 	}
 	
-	public void cleanup() {
+	public final void cleanup() {
 		unbind();
 		if(programId != 0) {
 			glDeleteProgram(programId);
