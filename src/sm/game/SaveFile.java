@@ -42,6 +42,7 @@ public class SaveFile implements AutoCloseable {
 		
 		return null;
 	}
+	
 	public static final SaveFile loadSaveFile(String path) {
 		return loadSaveFile(new File(path));
 	}

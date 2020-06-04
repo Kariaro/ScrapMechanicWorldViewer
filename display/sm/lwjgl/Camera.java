@@ -1,4 +1,4 @@
-package sm.lwjgl.worldViewer;
+package sm.lwjgl;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -21,6 +21,9 @@ public class Camera {
 	
 	public Camera(long window) {
 		this.window = window;
+		//x = -1;
+		//y =  4;
+		//z = -5;
 	}
 	
 	// TODO: Rework :P
@@ -39,6 +42,7 @@ public class Camera {
 	}
 	
 	public boolean freeze = false;
+	public boolean fast = false;
 	public void update() {
 		updateMouse();
 		
@@ -62,8 +66,10 @@ public class Camera {
 		boolean backwards = Input.keys[GLFW_KEY_S];
 		boolean up = Input.keys[GLFW_KEY_SPACE];
 		boolean down = Input.keys[GLFW_KEY_LEFT_SHIFT];
-		float speed = 0.1f;
-		
+		float speed = 0.1f * (fast ? 10:1);
+		if(Input.pollKey(GLFW_KEY_LEFT_CONTROL)) {
+			fast = !fast;
+		}
 		
 		int xd = 0;
 		int yd = 0;
@@ -84,6 +90,13 @@ public class Camera {
 		y += yy * speed;
 		z += zz * speed;
 		
+		// x = y = z = 0;
+	}
+	
+	public Matrix4f getViewMatrix(float fov, float width, float height) {
+		Matrix4f projectionMatrix = new Matrix4f();
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.0001f, 100);
+		return projectionMatrix;
 	}
 	
 	public Matrix4f getProjectionViewMatrix(float fov, float width, float height) {

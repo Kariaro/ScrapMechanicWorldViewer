@@ -1,22 +1,28 @@
-package sm.lwjgl.worldViewer.mesh;
+package sm.lwjgl.mesh;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
 
+import sm.lwjgl.Camera;
+import sm.lwjgl.LwjglWorldViewer;
+import sm.lwjgl.gui.Gui;
 import sm.lwjgl.input.Input;
-import sm.lwjgl.worldViewer.Camera;
-import sm.lwjgl.worldViewer.LwjglWorldViewer;
+import sm.lwjgl.shader.BlockShader;
+import sm.lwjgl.shader.PartShader;
 import sm.objects.BodyList.ChildShape;
 import sm.objects.BodyList.RigidBody;
-import sm.util.FileUtils;
+import sm.world.Block;
+import sm.world.Part;
 import sm.world.World;
 
 public class WorldRender {
@@ -27,30 +33,32 @@ public class WorldRender {
 	private int height;
 	private int width;
 	
-	private WorldShader shader;
+	private BlockShader blockShader;
+	private PartShader partShader;
 	public Camera camera;
 	private Gui gui;
 	
-	//private TilingMesh background;
-	
 	private World world;
 	private List<RigidBody> bodies = new ArrayList<>();
+	private Map<UUID, WorldBlockRender> blocks;
+	private Map<UUID, WorldPartRender> parts;
 	
 	public WorldRender(LwjglWorldViewer parent, long window, int width, int height) {
 		this.parent = parent;
 		this.window = window;
+		blocks = new HashMap<>();
+		parts = new HashMap<>();
 		
 		camera = new Camera(window);
 		gui = new Gui(this);
 		setViewport(width, height);
 		
 		try {
+			updateBodies();
 			init();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		
-		updateBodies();
 	}
 	
 	public void updateBodies() {
@@ -80,18 +88,18 @@ public class WorldRender {
 	}
 	
 	private void init() throws Exception {
-		shader = new WorldShader();
-		shader.createShaderCode(FileUtils.readStream(WorldRender.class.getResourceAsStream("/shaders/world_fragment.fs")), GL20.GL_FRAGMENT_SHADER);
-		shader.createShaderCode(FileUtils.readStream(WorldRender.class.getResourceAsStream("/shaders/world_vertex.vs")), GL20.GL_VERTEX_SHADER);
+		blockShader = new BlockShader();
+		partShader = new PartShader();
 		
-		shader.bindAttrib(0, "in_Position");
-		shader.bindAttrib(1, "in_Uv");
-		shader.bindAttrib(2, "in_Color");
+		for(Block block : world.getAllBlocks()) {
+			System.out.println("Init: " + block);
+			blocks.put(block.uuid, new WorldBlockRender(block, blockShader));
+		}
 		
-		
-		shader.link();
-		shader.createUniform("projectionView");
-		shader.createUniform("transformationMatrix");
+		for(Part part : world.getAllParts()) {
+			System.out.println("Init: " + part);
+			parts.put(part.uuid, new WorldPartRender(part, partShader));
+		}
 	}
 	
 	public int getFps() {
@@ -104,10 +112,7 @@ public class WorldRender {
 		camera.update();
 	}
 	
-	public void renderCube(float x, float y, float z, int rgba) {
-		renderCube(x, y, z, 1, 1, 1, rgba);
-	}
-	public void renderCube(float x, float y, float z, float xs, float ys, float zs, int rgba) {
+	private void renderCube(float x, float y, float z, float xs, float ys, float zs, int rgba) {
 		float rc, gc, bc, ac;
 		{
 			ac = ((rgba >> 24) & 0xff) / 255.0f;
@@ -116,11 +121,15 @@ public class WorldRender {
 			bc = ((rgba      ) & 0xff) / 255.0f;
 		}
 		
+		if(xs < 1) xs = 0.5f;
+		if(ys < 1) ys = 0.5f;
+		if(zs < 1) zs = 0.5f;
+		
 		x -= 0.5f;
 		y -= 0.5f;
 		z -= 0.5f;
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-			GL11.glColor3f(1, 1, 1);
+			GL11.glColor4f(1, 1, 1, 0.5f);
 			GL11.glVertex3f(x     , y + ys, z);
 			GL11.glColor4f(rc, gc, bc, ac);
 			GL11.glVertex3f(x + xs, y + ys, z);
@@ -129,7 +138,7 @@ public class WorldRender {
 		GL11.glEnd();
 		
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-			GL11.glColor3f(1, 1, 0);
+			GL11.glColor4f(1, 1, 0, 0.5f);
 			GL11.glVertex3f(x + xs, y + ys, z     );
 			GL11.glColor4f(rc, gc, bc, ac);
 			GL11.glVertex3f(x + xs, y + ys, z + zs);
@@ -138,7 +147,7 @@ public class WorldRender {
 		GL11.glEnd();
 		
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-			GL11.glColor3f(1, 0, 1);
+			GL11.glColor4f(1, 0, 1, 0.5f);
 			GL11.glVertex3f(x     , y     , z + zs);
 			GL11.glColor4f(rc, gc, bc, ac);
 			GL11.glVertex3f(x + xs, y     , z + zs);
@@ -147,7 +156,7 @@ public class WorldRender {
 		GL11.glEnd();
 		
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-			GL11.glColor3f(0, 1, 1);
+			GL11.glColor4f(0, 1, 1, 0.5f);
 			GL11.glVertex3f(x, y + ys, z + zs);
 			GL11.glColor4f(rc, gc, bc, ac);
 			GL11.glVertex3f(x, y + ys, z     );
@@ -156,7 +165,7 @@ public class WorldRender {
 		GL11.glEnd();
 		
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-			GL11.glColor3f(1, 0, 0);
+			GL11.glColor4f(1, 0, 0, 0.5f);
 			GL11.glVertex3f(x     , y + ys, z     );
 			GL11.glColor4f(rc, gc, bc, ac);
 			GL11.glVertex3f(x     , y + ys, z + zs);
@@ -165,7 +174,7 @@ public class WorldRender {
 		GL11.glEnd();
 		
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-			GL11.glColor3f(0, 0, 1);
+			GL11.glColor4f(0, 0, 1, 0.5f);
 			GL11.glVertex3f(x     , y, z + zs);
 			GL11.glColor4f(rc, gc, bc, ac);
 			GL11.glVertex3f(x     , y, z     );
@@ -178,18 +187,65 @@ public class WorldRender {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		Matrix4f projectionView = camera.getProjectionViewMatrix(60, width, height);
 		Matrix4f projectionTran = camera.getProjectionMatrix(60, width, height);
+		Matrix4f viewMatrix = camera.getViewMatrix(60, width, height);
 		
 		GL11.glEnable(GL_DEPTH_TEST);
-		shader.bind();
-		shader.setUniform("projectionView", projectionView);
-		shader.setUniform("transformationMatrix", new Matrix4f());
-		shader.unbind();
+		GL11.glEnable(GL_CULL_FACE);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		//GL11.glEnable(GL11.GL_BLEND);
+		//GL11.glEnable(GL11.GL_ALPHA);
+		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		//shader.bind();
+		//shader.setUniform("projectionView", projectionView);
+		//shader.setUniform("transformationMatrix", new Matrix4f());
+		//shader.unbind();
 		
-		GL11.glPushMatrix();
-		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
+		blockShader.bind();
+		blockShader.setUniform("projectionView", projectionTran);
+		blockShader.setUniform("transformationMatrix", new Matrix4f());
+		blockShader.setUniform("colors", 1, 1, 1, 1);
 		
 		for(RigidBody body : bodies) {
 			for(ChildShape shape : body.shapes) {
+				WorldBlockRender mesh = blocks.getOrDefault(shape.uuid_11_16, null);
+				
+				if(mesh != null) {
+					mesh.render(shape);
+				}
+			}
+		}
+		
+		blockShader.unbind();
+		
+		
+		partShader.bind();
+		blockShader.setUniform("projectionView", projectionTran);
+		blockShader.setUniform("transformationMatrix", new Matrix4f());
+		blockShader.setUniform("colors", 1, 1, 1, 1);
+		for(RigidBody body : bodies) {
+			for(ChildShape shape : body.shapes) {
+				WorldPartRender mesh = parts.getOrDefault(shape.uuid_11_16, null);
+				
+				if(mesh != null) {
+					mesh.render(shape);
+				}
+			}
+		}
+		partShader.unbind();
+		
+		GL11.glPushMatrix();
+		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
+		for(RigidBody body : bodies) {
+			for(ChildShape shape : body.shapes) {
+				if(blocks.containsKey(shape.uuid_11_16)) {
+					continue;
+				}
+				if(parts.containsKey(shape.uuid_11_16)) {
+					continue;
+				}
+				
+				//if(true) continue;
+				//render(shape);
 				renderCube(
 					shape.yPos_33_2,
 					shape.zPos_35_2,
@@ -200,7 +256,7 @@ public class WorldRender {
 					shape.xs_41_2,
 					
 					
-					shape.color_37_4
+					0x20ffffff//shape.color_37_4
 				);
 			}
 		}
@@ -211,6 +267,7 @@ public class WorldRender {
 		
 		GL11.glPopMatrix();
 		GL11.glDisable(GL_DEPTH_TEST);
+		GL11.glDisable(GL_CULL_FACE);
 		
 		gui.render();
 	}

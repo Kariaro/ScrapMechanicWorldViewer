@@ -2,14 +2,12 @@ package sm.main;
 
 import java.io.ByteArrayInputStream;
 import java.io.PrintStream;
-import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import sm.objects.BodyList.RigidBody;
-import sm.lwjgl.worldViewer.LwjglWorldViewer;
+import sm.lwjgl.LwjglWorldViewer;
 import sm.objects.Game;
 import sm.objects.Game.Mod;
 import sm.world.World;
@@ -48,7 +46,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		LwjglWorldViewer viewer = new LwjglWorldViewer();
 		viewer.start();
-		// new Main();
+		//new Main();
 	}
 	
 	public Main() {
@@ -73,7 +71,7 @@ public class Main {
 			LOGGER.log(Level.INFO, "      localId: {0}", mod.localId);
 			LOGGER.log(Level.INFO, "      fileId : {0,number,#}", mod.fileId);
 		}
-		
+		/*
 		LOGGER.log(Level.INFO, "");
 		LOGGER.log(Level.INFO, "RigidBodies");
 		List<RigidBody> bodies = world.getSaveFile().getBodyList().getAllRigidBodies();
@@ -83,5 +81,6 @@ public class Main {
 			LOGGER.log(Level.INFO, "      Bounds: {0}", body.bounds);
 			LOGGER.log(Level.INFO, "");
 		}
+		*/
 	}
 }

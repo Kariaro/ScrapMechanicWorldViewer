@@ -1,7 +1,6 @@
-package sm.lwjgl.worldViewer;
+package sm.lwjgl;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 import java.awt.image.BufferedImage;
@@ -10,11 +9,10 @@ import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
 
 import sm.lwjgl.input.Input;
-import sm.lwjgl.worldViewer.mesh.Texture;
-import sm.lwjgl.worldViewer.mesh.WorldRender;
+import sm.lwjgl.mesh.Texture;
+import sm.lwjgl.mesh.WorldRender;
 
 public class LwjglWorldViewer implements Runnable {
 	public static final BufferedImage ICON = null;
@@ -82,7 +80,6 @@ public class LwjglWorldViewer implements Runnable {
 		}
 		
 		GL.createCapabilities();
-		GL11.glEnable(GL_CULL_FACE);
 		
 		render = new WorldRender(this, window, width, height);
 		glfwShowWindow(window);
