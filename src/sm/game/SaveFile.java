@@ -1,14 +1,17 @@
 package sm.game;
 
 import java.io.File;
-import java.net.URL;
 import java.sql.SQLException;
 
 import sm.objects.BodyList;
 import sm.objects.Game;
 import sm.sqlite.Sqlite;
-import sm.world.World;
 
+/**
+ * Should load a '.db' file and give us access to read data from it.
+ * 
+ * @author HardCoded
+ */
 public class SaveFile implements AutoCloseable {
 	private final Sqlite sqlite;
 	private final Game game;
@@ -45,19 +48,5 @@ public class SaveFile implements AutoCloseable {
 	
 	public static final SaveFile loadSaveFile(String path) {
 		return loadSaveFile(new File(path));
-	}
-	
-	public static final SaveFile loadSaveFile(URL url) {
-		try {
-			return new SaveFile(new File(url.toURI()));
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-	
-	public static final SaveFile loadLocalSaveFile(String name) {
-		return loadSaveFile(World.class.getResource("/world/" + name));
 	}
 }

@@ -103,9 +103,6 @@ public class Text {
 			double x1 = ((int)(xx + box.getWidth())) / (double)ATTLAS_WIDTH;
 			double y1 = ((int)(yy + box.getHeight())) / (double)ATTLAS_HEIGHT;
 			
-			y0 = 1 - y0;
-			y1 = 1 - y1;
-			
 			double vx = scale * box.getWidth() * i + x;
 			double vy = y;
 			double vw = scale * box.getWidth();

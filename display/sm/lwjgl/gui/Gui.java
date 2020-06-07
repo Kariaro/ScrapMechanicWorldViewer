@@ -37,7 +37,7 @@ public class Gui {
 		text.drawText("Testing", 0, 0, 24);
 		text.drawText("Fps: " + parent.getFps(), 0, 24, 24);
 		Camera cam = parent.camera;
-		text.drawText(String.format("Pos: %8.5f, %8.5f, %8.5f", cam.x, cam.y, cam.z), 0, 48, 24);
+		text.drawText(String.format("Pos: %8.5f, %8.5f, %8.5f", cam.x / 4.0f, cam.y / 4.0f, cam.z / 4.0f), 0, 48, 24);
 		
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_ALPHA);

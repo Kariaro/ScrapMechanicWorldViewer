@@ -4,6 +4,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import sm.lwjgl.input.Input;
@@ -43,6 +44,7 @@ public class Camera {
 	
 	public boolean freeze = false;
 	public boolean fast = false;
+	public int speedMod = 1;
 	public void update() {
 		updateMouse();
 		
@@ -66,10 +68,15 @@ public class Camera {
 		boolean backwards = Input.keys[GLFW_KEY_S];
 		boolean up = Input.keys[GLFW_KEY_SPACE];
 		boolean down = Input.keys[GLFW_KEY_LEFT_SHIFT];
-		float speed = 0.1f * (fast ? 10:1);
 		if(Input.pollKey(GLFW_KEY_LEFT_CONTROL)) {
-			fast = !fast;
+			speedMod++;
+			if(speedMod > 3) {
+				speedMod = 1;
+			}
 		}
+		
+		float speed = 0.1f * (float)Math.pow(5, speedMod - 1);
+		
 		
 		int xd = 0;
 		int yd = 0;
@@ -113,6 +120,14 @@ public class Camera {
 				.rotate(MathUtils.toRadians(rx), 0, 1, 0)
 				.rotate(MathUtils.toRadians(rz), 0, 0, 1)
 				.translate(-x, -y, -z);
+	}
+	
+	public Vector3f getViewDirection() {
+		Vector3f vector = new Vector3f(0, 0, 1)
+				.rotateAxis(MathUtils.toRadians(ry), 1, 0, 0)
+				.rotateAxis(MathUtils.toRadians(rx), 0, 1, 0)
+				.rotateAxis(MathUtils.toRadians(rz), 0, 0, 1);
+		return vector;
 	}
 	
 	public void setTransform() {

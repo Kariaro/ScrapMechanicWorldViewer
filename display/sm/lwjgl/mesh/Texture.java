@@ -15,12 +15,14 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 
 public class Texture {
 	public static final Texture NONE = new Texture();
-	private static final Map<String, Texture> cache = new HashMap<>();
+	private static final Map<String, Integer> cacheTextureId = new HashMap<>();
 	public final BufferedImage bi;
+	public final String name;
 	public final int activeId;
 	public final int textureId;
 	public final int height;
@@ -28,6 +30,7 @@ public class Texture {
 	
 	private Texture() {
 		bi = null;
+		name = null;
 		activeId = -1;
 		textureId = -1;
 		height = -1;
@@ -35,8 +38,9 @@ public class Texture {
 	}
 	
 	private Texture(File file, int id, int interpolation) throws IOException {
-		this.activeId = GL20.GL_TEXTURE0 + id;
+		this.activeId = GL13.GL_TEXTURE0 + id;
 		String path = file.getAbsolutePath();
+		this.name = path;
 		
 		ByteBuffer buf;
 		if(file.getName().toLowerCase().endsWith(".tga")) {
@@ -49,7 +53,7 @@ public class Texture {
 		} else {
 			bi = ImageIO.read(file);
 			System.out.println(file);
-			buf = loadBuffer(bi, true);
+			buf = loadBuffer(bi, false);
 			height = bi.getHeight();
 			width = bi.getWidth();
 		}
@@ -57,10 +61,20 @@ public class Texture {
 		textureId = GL11.glGenTextures();
 		load(buf, interpolation);
 		
-		cache.put(path, this);
+		cacheTextureId.put(path, this.textureId);
+	}
+	
+	private Texture(int textureId, int activeId) {
+		this.textureId = textureId;
+		this.activeId = GL13.GL_TEXTURE0 + activeId;
+		this.name = null;
+		height = -1;
+		width = -1;
+		bi = null;
 	}
 	
 	private void load(ByteBuffer buf, int interpolation) {
+		GL20.glActiveTexture(this.activeId);
 		GL11.glBindTexture(GL_TEXTURE_2D, textureId);
 		GL11.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		GL11.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL12.GL_REPEAT);
@@ -93,27 +107,27 @@ public class Texture {
 		return new StringBuilder().append("Texture[id=").append(textureId).append("] (").append(width).append("x").append(height).append(")").toString();
 	}
 	
-	public static Texture loadTexture(String path, int textureId, int interpolation) throws IOException {
+	public static Texture loadTexture(String path, int activeId, int interpolation) throws IOException {
 		File file = new File(path);
 		
 		String pathCheck = file.getAbsolutePath();
-		if(cache.containsKey(pathCheck)) {
-			return cache.get(pathCheck);
+		if(cacheTextureId.containsKey(pathCheck)) {
+			return new Texture(cacheTextureId.get(pathCheck), activeId);
 		}
 		
 		if(!file.exists()) {
 			return NONE;
 		}
 		
-		return new Texture(file, textureId, interpolation);
+		return new Texture(file, activeId, interpolation);
 	}
 	
 	public static Texture loadResourceTexture(String path, int interpolation) throws IOException, URISyntaxException {
 		File file = new File(Texture.class.getResource(path).toURI());
 		
 		String pathCheck = file.getAbsolutePath();
-		if(cache.containsKey(pathCheck)) {
-			return cache.get(pathCheck);
+		if(cacheTextureId.containsKey(pathCheck)) {
+			return new Texture(cacheTextureId.get(pathCheck), 0);
 		}
 		
 		return new Texture(file, 0, interpolation);

@@ -17,13 +17,15 @@ public class PartShader extends Shader {
 		bindAttrib(1, "in_Uv");
 		link();
 		
+		bind();
 		createUniform("projectionView");
 		createUniform("transformationMatrix");
 		createUniform("color");
 		
-		setUniform("dif", 0);
-		setUniform("asg", 1);
-		setUniform("nor", 2);
-		setUniform("ao", 3);
+		setUniform("dif_tex", 0);
+		setUniform("asg_tex", 1);
+		setUniform("nor_tex", 2);
+		setUniform("ao_tex", 3);
+		unbind();
 	}
 }

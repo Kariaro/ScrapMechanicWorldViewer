@@ -1,4 +1,4 @@
-package sm.world;
+package sm.world.types;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import sm.asset.ScrapMechanicAssets;
 import sm.util.FileUtils;
 
 public class Renderable {
@@ -25,7 +26,7 @@ public class Renderable {
 	}
 	
 	Renderable(String path) throws IOException {
-		String json = FileUtils.readFile(World.getPath(path));
+		String json = FileUtils.readFile(ScrapMechanicAssets.resolvePath(path));
 		// Remove all comments
 		json = json.replaceAll("//.*?[\r\n]+", "\r\n");
 		
@@ -53,6 +54,8 @@ public class Renderable {
 		@JsonIgnore
 		private boolean isMeshList;
 		
+		public final List<Animation> animationList = null;
+		
 		@JsonSetter(value = "subMeshList")
 		private void setSubMeshList(List<MeshMap> list) {
 			isMeshList = true;
@@ -64,6 +67,7 @@ public class Renderable {
 		@JsonAnySetter
 		public void setAnything(String string, Object obj) {
 			System.out.println("setAnything: " + string);
+			System.out.println("setAnything: " + obj);
 		}
 		
 		public boolean isMeshList() {
@@ -74,5 +78,11 @@ public class Renderable {
 	public static class MeshMap {
 		public final List<String> textureList = null;
 		public final String material = null;
+	}
+	
+	public static class Animation {
+		public String name = null;
+		public String file = null;
+		public Boolean looping = false;
 	}
 }

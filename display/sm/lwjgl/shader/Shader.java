@@ -6,6 +6,7 @@ import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -95,6 +96,14 @@ public class Shader {
 		}
 	}
 	
+	public void setUniform(String uniformName, Matrix3f value) {
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			FloatBuffer fb = stack.mallocFloat(12);
+			value.get(fb);
+			glUniformMatrix3fv(_uniform(uniformName), false, fb);
+		}
+	}
+	
 	public void setUniform(String uniformName, Vector4f v) {
 		glUniform4f(_uniform(uniformName), v.x, v.y, v.z, v.w);
 	}
@@ -133,8 +142,8 @@ public class Shader {
 	
 	private int _uniform(String uniformName) {
 		if(!uniforms.containsKey(uniformName)) {
-			uniforms.put(uniformName, -1);
-			return -1;
+			createUniform(uniformName);
+			return uniforms.get(uniformName);
 		}
 		
 		return uniforms.get(uniformName);

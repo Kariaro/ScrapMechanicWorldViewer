@@ -18,12 +18,19 @@ public class BlockShader extends Shader {
 		
 		createUniform("projectionView");
 		createUniform("transformationMatrix");
+		createUniform("localTransform");
 		createUniform("tiling");
 		createUniform("color");
 		createUniform("scale");
 		
-		setUniform("dif", 0);
-		setUniform("asg", 1);
-		setUniform("nor", 2);
+		createUniform("dif_tex");
+		createUniform("asg_tex");
+		createUniform("nor_tex");
+		
+		bind();
+		setUniform("dif_tex", 0);
+		setUniform("asg_tex", 1);
+		setUniform("nor_tex", 2);
+		unbind();
 	}
 }

@@ -1,4 +1,4 @@
-package sm.world;
+package sm.world.types;
 
 import java.util.UUID;
 
@@ -14,14 +14,14 @@ public class Block {
 	public final String asg = null;
 	public final String nor = null;
 	public final Boolean glass = false;
-	public final String physicsMaterial = null;
 	
 	@JsonIgnore
 	public final Object ratings = null; // TODO: ????
 	
-	public final boolean flammable = false;
-	public final Double density = 0.0;
+	public final String physicsMaterial = null;
+	public final Boolean flammable = false;
 	public final Integer qualityLevel = 0;
+	public final Double density = 0.0;
 	
 	@Override
 	public String toString() {

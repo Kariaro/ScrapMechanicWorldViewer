@@ -1,6 +1,7 @@
 #version 130
 
 in vec3 pass_Normal;
+in vec3 pass_Cam;
 in vec2 dif_uv;
 in vec2 asg_uv;
 in vec2 nor_uv;
@@ -27,6 +28,10 @@ void main() {
 	vec3 col_b = color.rgb * (1 - dif.a);
 	vec4 diffuse = vec4(col_a + col_b, 1);
 	
-	// diffuse = vec4((diffuse.xyz / 2) + vec3(0.5), 1);
+	
+	diffuse = vec4((diffuse.xyz / 6) * 5 + vec3(1 / 6.0), asg.r);
+	//float diff = max(dot(pass_Normal, pass_Cam), 0);
+	//diffuse.xyz *= clamp(diff, 0.6, 1);
+	
 	out_color = diffuse;
 }

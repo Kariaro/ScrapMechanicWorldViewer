@@ -11,12 +11,15 @@ out vec2 asg_uv;
 out vec2 nor_uv;
 out vec2 ao_uv;
 out vec3 pass_Normal;
+out vec3 pass_Cam;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionView;
 
 void main() {
 	gl_Position = projectionView * transformationMatrix * in_Position;
+	
+	pass_Cam = normalize(vec3(projectionView[0][2], projectionView[1][2], projectionView[2][2]));
 	
 	dif_uv = in_Uv;
 	asg_uv = vec2(0);
