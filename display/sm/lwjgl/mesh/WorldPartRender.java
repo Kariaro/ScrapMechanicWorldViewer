@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
 
 import sm.lwjgl.shader.PartShader;
 import sm.lwjgl.util.StaticMeshLoader;
 import sm.objects.BodyList.ChildShape;
-import sm.world.Part;
-import sm.world.Renderable;
-import sm.world.Renderable.Lod;
 import sm.world.World;
+import sm.world.types.Part;
+import sm.world.types.Renderable;
+import sm.world.types.Renderable.Lod;
 
 public class WorldPartRender {
 	private final Part part;
@@ -28,7 +29,7 @@ public class WorldPartRender {
 		try {
 			Renderable rend = part.renderable;
 			for(Lod lod : rend.lodList) {
-				meshes.add(new PartMesh(lod, shader));
+				meshes.add(new PartMesh(lod, shader, part));
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -47,6 +48,7 @@ public class WorldPartRender {
 		// TODO: Implement Lod objects
 		*/
 		
+
 		for(PartMesh mesh : meshes) {
 			mesh.render(shape);
 		}

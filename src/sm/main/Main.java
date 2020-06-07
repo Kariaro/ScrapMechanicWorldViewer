@@ -52,7 +52,7 @@ public class Main {
 	public Main() {
 		World world;
 		try {
-			world = World.loadWorld("C:\\Users\\Admin\\AppData\\Roaming\\Axolot Games\\Scrap Mechanic\\User\\User_76561198251506208\\Save\\TestingSQLite.db");
+			world = World.loadWorldFromAppdata("TestingSQLite.db");
 		} catch(Exception e) {
 			LOGGER.severe("Failed to load world file");
 			e.printStackTrace();
@@ -71,16 +71,5 @@ public class Main {
 			LOGGER.log(Level.INFO, "      localId: {0}", mod.localId);
 			LOGGER.log(Level.INFO, "      fileId : {0,number,#}", mod.fileId);
 		}
-		/*
-		LOGGER.log(Level.INFO, "");
-		LOGGER.log(Level.INFO, "RigidBodies");
-		List<RigidBody> bodies = world.getSaveFile().getBodyList().getAllRigidBodies();
-		for(RigidBody body : bodies) {
-			LOGGER.log(Level.INFO, "    Body: {0}", body);
-			LOGGER.log(Level.INFO, "      Shapes: {0}", body.shapes);
-			LOGGER.log(Level.INFO, "      Bounds: {0}", body.bounds);
-			LOGGER.log(Level.INFO, "");
-		}
-		*/
 	}
 }
