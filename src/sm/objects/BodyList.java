@@ -11,7 +11,6 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import sm.sqlite.Sqlite;
 import sm.util.Util;
@@ -93,9 +92,9 @@ public class BodyList extends SQLiteObject {
 		/** offset:11 size:16 */ public UUID uuid = null;
 		public int uniqueId_27_4 = 0;
 		
-		/** offset:31 size:2 */ public int zPos = 0;
-		/** offset:33 size:2 */ public int xPos = 0;
-		/** offset:35 size:2 */ public int yPos = 0;
+		/** offset:31 size:2 */ public int xPos = 0;
+		/** offset:33 size:2 */ public int yPos = 0;
+		/** offset:35 size:2 */ public int zPos = 0;
 		
 		/** offset:37 size:4 */ public int colorRGBA = 0;
 		
@@ -103,9 +102,9 @@ public class BodyList extends SQLiteObject {
 		public int rotation_41_1 = 0;
 		
 		// Only for 'shapeType' == '0x1f'
-		/** offset:41 size:2 */ public int zSize = 0; // z size
-		/** offset:43 size:2 */ public int xSize = 0; // x size
-		/** offset:45 size:2 */ public int ySize = 0; // y size
+		/** offset:41 size:2 */ public int xSize = 0; // x size
+		/** offset:43 size:2 */ public int ySize = 0; // y size
+		/** offset:45 size:2 */ public int zSize = 0; // z size
 		
 		
 		protected ChildShape(RigidBody body, ResultSet childShape) throws SQLException {
@@ -133,9 +132,9 @@ public class BodyList extends SQLiteObject {
 			uuid = Util.getUUID(data, 11, false);
 			uniqueId_27_4 = Util.getInt(data, 27, true);
 			
-			zPos = Util.getShort(data, 31, true);
-			xPos = Util.getShort(data, 33, true);
-			yPos = Util.getShort(data, 35, true);
+			xPos = Util.getShort(data, 31, true);
+			yPos = Util.getShort(data, 33, true);
+			zPos = Util.getShort(data, 35, true);
 			
 			colorRGBA = Util.getInt(data, 37, false);
 			rotation_41_1 = Byte.toUnsignedInt(data[41]);
@@ -143,9 +142,9 @@ public class BodyList extends SQLiteObject {
 			
 			System.out.printf("rot: %8s\n", Integer.toBinaryString(rotation_41_1));
 			if(shapeType_1_1 == 0x1f && data.length >= 47) {
-				zSize = Util.getShort(data, 41, true);
-				xSize = Util.getShort(data, 43, true);
-				ySize = Util.getShort(data, 45, true);
+				xSize = Util.getShort(data, 41, true);
+				ySize = Util.getShort(data, 43, true);
+				zSize = Util.getShort(data, 45, true);
 			}
 			
 			// TODO: Type specific data
@@ -171,10 +170,10 @@ public class BodyList extends SQLiteObject {
 		public int unk_7_2 = 0;
 		
 		// These values are exactly the same as the values inside RigidBodyBounds
-		/** offset: 9 size:4 */ public float xMax = 0;
-		/** offset:13 size:4 */ public float xMin = 0;
-		/** offset:17 size:4 */ public float zMax = 0;
-		/** offset:21 size:4 */ public float zMin = 0;
+		/** offset: 9 size:4 */ public float yMax = 0;
+		/** offset:13 size:4 */ public float yMin = 0;
+		/** offset:17 size:4 */ public float xMax = 0;
+		/** offset:21 size:4 */ public float xMin = 0;
 		
 		// TODO: Next values
 		// Only if 'isStatic' == '2'
@@ -212,8 +211,8 @@ public class BodyList extends SQLiteObject {
 			// Bounding box
 			xMax = Util.getFloat(data,  9, true);
 			xMin = Util.getFloat(data, 13, true);
-			zMax = Util.getFloat(data, 17, true);
-			zMin = Util.getFloat(data, 21, true);
+			yMax = Util.getFloat(data, 17, true);
+			yMin = Util.getFloat(data, 21, true);
 			
 			// 2 bytes space
 			if(isStatic_0_2 == 2) {
@@ -251,7 +250,7 @@ public class BodyList extends SQLiteObject {
 				System.out.printf("HIJ: %8.5f, %8.5f, %8.5f\n", hh, ii, jj);
 				System.out.printf("KLM: %8.5f, %8.5f, %8.5f\n", kk, ll, mm);
 				
-				quat = new Quaternionf(aa, bb, -cc, dd);
+				quat = new Quaternionf(aa, bb, cc, dd);
 				matrix = quat.get(new Matrix4f());
 				//System.out.println("Quaternion: " + quat);
 				System.out.println("Matrix3x3: \n" + matrix.toString(NumberFormat.getNumberInstance()));
@@ -277,24 +276,29 @@ public class BodyList extends SQLiteObject {
 		}
 		
 		public Vector3f getMiddleLocal() {
-			Vector2f xSize = new Vector2f(-Float.MIN_VALUE, Float.MIN_VALUE);
-			Vector2f ySize = new Vector2f(-Float.MIN_VALUE, Float.MIN_VALUE);
-			Vector2f zSize = new Vector2f(-Float.MIN_VALUE, Float.MIN_VALUE);
+			Vector2f xSize = new Vector2f(Float.MAX_VALUE, -Float.MAX_VALUE);
+			Vector2f ySize = new Vector2f(Float.MAX_VALUE, -Float.MAX_VALUE);
+			Vector2f zSize = new Vector2f(Float.MAX_VALUE, -Float.MAX_VALUE);
 			
 			for(ChildShape shape : shapes) {
 				if(shape.shapeType_1_1 != 0x1f) continue;
 				
-				if(shape.xPos < xSize.x) xSize.x = shape.xPos;
-				if(shape.xPos + shape.xSize > xSize.y) xSize.y = shape.xPos + shape.xSize;
+				float xs = shape.xPos;
+				float xe = xs + shape.xSize;
+				float ys = shape.yPos;
+				float ye = ys + shape.ySize;
+				float zs = shape.zPos;
+				float ze = zs + shape.zSize;
 				
-				if(shape.yPos < ySize.x) ySize.x = shape.yPos;
-				if(shape.yPos + shape.ySize > ySize.y) ySize.y = shape.yPos + shape.ySize;
+				if(xs < xSize.x) xSize.x = xs;
+				if(ys < ySize.x) ySize.x = ys;
+				if(zs < zSize.x) zSize.x = zs;
 				
-				if(shape.zPos < zSize.x) zSize.x = shape.zPos;
-				if(shape.zPos + shape.zSize > zSize.y) zSize.y = shape.zPos + shape.zSize;
+				if(xe > xSize.y) xSize.y = xe;
+				if(ye > ySize.y) ySize.y = ye;
+				if(ze > zSize.y) zSize.y = ze;
 			}
 			
-			System.out.println(ySize);
 			return new Vector3f(
 				(xSize.x + xSize.y) / 2.0f,
 				(ySize.x + ySize.y) / 2.0f,
@@ -312,13 +316,13 @@ public class BodyList extends SQLiteObject {
 				if(shape.shapeType_1_1 != 0x1f) continue;
 				
 				// TODO: What about parts????
-				int sx = shape.xPos;
-				int sy = shape.yPos;
-				int sz = shape.zPos;
+				int sx = shape.yPos;
+				int sy = shape.zPos;
+				int sz = shape.xPos;
 				
-				int ssz = shape.xSize;
-				int ssy = shape.ySize;
-				int ssx = shape.zSize;
+				int ssz = shape.ySize;
+				int ssy = shape.zSize;
+				int ssx = shape.xSize;
 				
 				// Correct
 				float smx = sx + (ssx) / 2.0f;
@@ -343,17 +347,17 @@ public class BodyList extends SQLiteObject {
 	// Only one per RigidBody
 	public class RigidBodyBounds {
 		private final int id;
+		public final float yMin;
+		public final float yMax;
 		public final float xMin;
 		public final float xMax;
-		public final float zMin;
-		public final float zMax;
 		
 		private RigidBodyBounds(ResultSet rigidBodyBounds) throws SQLException {
 			id = rigidBodyBounds.getInt("id");
-			zMin = rigidBodyBounds.getFloat("minX");
-			zMax = rigidBodyBounds.getFloat("maxX");
-			xMin = rigidBodyBounds.getFloat("minY");
-			xMax = rigidBodyBounds.getFloat("maxY");
+			xMin = rigidBodyBounds.getFloat("minX");
+			xMax = rigidBodyBounds.getFloat("maxX");
+			yMin = rigidBodyBounds.getFloat("minY");
+			yMax = rigidBodyBounds.getFloat("maxY");
 		}
 		
 		public int getId() {
@@ -364,7 +368,7 @@ public class BodyList extends SQLiteObject {
 		public String toString() {
 			return new StringBuilder()
 				.append("RigidBodyBounds{ ")
-				.append(String.format("minX: %8.5f, minY: %8.5f, maxX: %8.5f, maxY: %8.5f", xMin, zMin, xMax, zMax))
+				.append(String.format("minX: %8.5f, minY: %8.5f, maxX: %8.5f, maxY: %8.5f", yMin, xMin, yMax, xMax))
 				.append(" }").toString();
 		}
 	}

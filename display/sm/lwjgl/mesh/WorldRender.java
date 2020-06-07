@@ -72,9 +72,9 @@ public class WorldRender {
 	}
 	
 	// TODO: This is only for debug
-	//private String fileName = "Survival/Amazing World.db";
+	private String fileName = "Survival/Amazing World.db";
 	//private String fileName = "TestingSQLite.db";
-	private String fileName = "SQLiteRotations.db";
+	//private String fileName = "SQLiteRotations.db";
 	private long last = -1;
 	private void checkWorldUpdate() {
 		File filePath = new File(World.$USER_DATA, "Save/" + fileName);
@@ -261,7 +261,7 @@ public class WorldRender {
 				WorldPartRender mesh = parts.getOrDefault(shape.uuid, null);
 				
 				if(mesh != null) {
-					//mesh.render(shape);
+					mesh.render(shape);
 				}
 			}
 		}
@@ -274,12 +274,10 @@ public class WorldRender {
 				if(blocks.containsKey(shape.uuid)) {
 					continue;
 				}
-				/*if(parts.containsKey(shape.uuid)) {
+				if(parts.containsKey(shape.uuid)) {
 					continue;
-				}*/
+				}
 				
-				//if(true) continue;
-				//render(shape);
 				renderCube(
 					shape.xPos + 0.5f,
 					shape.yPos + 0.5f,
@@ -289,31 +287,26 @@ public class WorldRender {
 					1,
 					1,
 					
-					
-					0x20ffffff//shape.color_37_4
+					0x20ffffff
 				);
 			}
 		}
 		
-		renderCube(
-			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
-			0x20ffffff
-		);
-		
-		boolean SHOW_AABB = true;
+		boolean SHOW_AABB = false;
 		if(SHOW_AABB) {
 			GL11.glDisable(GL_DEPTH_TEST);
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 			for(RigidBody body : bodies) {
-				float xs = body.xMax - body.xMin;
-				float zs = body.zMin - body.zMax;
+				float xs = body.yMax - body.yMin;
+				float ys = body.xMin - body.xMax;
 				renderCube(
-					body.xMin * 4 + 0.5f,
+					body.yMin * 4 + 0.5f,
+					body.xMax * 4 + 0.5f,
 					0 + 0.5f,
-					body.zMax * 4 + 0.5f,
 					
-					xs * 4, 0,
-					zs * 4,
+					xs * 4,
+					ys * 4,
+					0,
 					
 					0x20ffffff
 				);
@@ -323,8 +316,8 @@ public class WorldRender {
 			for(RigidBody body : bodies) {
 				RigidBodyBounds bounds = body.bounds;
 				if(body.isStatic_0_2 == 2) {
-					float zm = (bounds.xMax + bounds.xMin) * 2;
-					float xm = (bounds.zMax + bounds.zMin) * 2;
+					float xm = (bounds.xMax + bounds.xMin) * 2;
+					float ym = (bounds.yMax + bounds.yMin) * 2;
 					
 					Vector4f right = body.matrix.getColumn(1, new Vector4f()).mul(3);
 					Vector4f up = body.matrix.getColumn(2, new Vector4f()).mul(3);
@@ -334,16 +327,16 @@ public class WorldRender {
 					GL11.glPushMatrix();
 					GL11.glBegin(GL_LINES);
 						GL11.glColor3f(1, 0, 0);
-						GL11.glVertex3f(xm, 0.5f, zm);
-						GL11.glVertex3f(right.x + xm, right.z + 0.5f, right.y + zm);
+						GL11.glVertex3f(xm, ym, 0.5f);
+						GL11.glVertex3f(right.x + xm, right.y + ym, right.z + 0.5f);
 						
 						GL11.glColor3f(0, 1, 0);
-						GL11.glVertex3f(xm, 0.5f, zm);
-						GL11.glVertex3f(up.x + xm, up.z + 0.5f, up.y + zm);
+						GL11.glVertex3f(xm, ym, 0.5f);
+						GL11.glVertex3f(up.x + xm, up.y + ym, up.z + 0.5f);
 						
 						GL11.glColor3f(0, 0, 1);
-						GL11.glVertex3f(xm, 0.5f, zm);
-						GL11.glVertex3f(at.x + xm, at.z + 0.5f, at.y + zm);
+						GL11.glVertex3f(xm, ym, 0.5f);
+						GL11.glVertex3f(at.x + xm, at.y + ym, at.z + 0.5f);
 					GL11.glEnd();
 					GL11.glPopMatrix();
 				}
@@ -364,9 +357,15 @@ public class WorldRender {
 					);
 				}
 			}
-			
-			
 		}
+		
+
+		GL11.glEnable(GL_DEPTH_TEST);
+		// Center of world
+		renderCube(
+			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
+			0x20ffffff
+		);
 		
 		GL11.glPopMatrix();
 		GL11.glDisable(GL_DEPTH_TEST);
