@@ -14,6 +14,7 @@ import sm.objects.BodyList.ChildShape;
 import sm.world.types.BoxBounds;
 import sm.world.types.Part;
 import sm.world.types.PartBounds;
+import sm.world.types.PartRotation;
 import sm.world.types.Renderable.Lod;
 import sm.world.types.Renderable.MeshMap;
 
@@ -231,312 +232,25 @@ public class PartMesh {
 	}
 	
 	private void applyRotation(ChildShape shape, Matrix4f matrix) {
-		/*
-		// Y
-		{ "south": -Y, "east":  X },
-		{ "south": -X, "east": -Y },
-		{ "south":  Y, "east": -X },
-		{ "south":  X, "east":  Y },
-		// NegY
-		{ "south":  Y, "east":  X },
-		{ "south":  X, "east": -Y },
-		{ "south": -Y, "east": -X },
-		{ "south": -X, "east":  Y },
-		// Z
-		{ "south":  Z, "east":  X },
-		{ "south":  Z, "east": -Y },
-		{ "south":  Z, "east": -X },
-		{ "south":  Z, "east":  Y },
-		// NegZ
-		{ "south": -Z, "east":  X },
-		{ "south": -Z, "east": -Y },
-		{ "south": -Z, "east": -X },
-		{ "south": -Z, "east":  Y },
-		// X
-		{ "south": -Y, "east":  Z },
-		{ "south": -X, "east":  Z },
-		{ "south":  Y, "east":  Z },
-		{ "south":  X, "east":  Z },
-		// NegX
-		{ "south": -Y, "east": -Z },
-		{ "south": -X, "east": -Z },
-		{ "south":  Y, "east": -Z },
-		{ "south":  X, "east": -Z }
-		*/
+		PartBounds bounds = part.getBounds();
 		
-		String[] types = {
-		//        001  010  011
-			null,"-Z","-Y","-X",null,
-		//        101  110  111
-			      "X", "Y", "Z"
-		};
-		
-		int NZ = 0b001;
-		int NY = 0b010;
-		int NX = 0b011;
-		int PX = 0b101;
-		int PY = 0b110;
-		int PZ = 0b111;
-		
-		int rot = shape.rotation_41_1;
-		int south = (rot >> 4) & 0b111;
-		int east = rot & 0b111;
-		
-		float pi = (float)Math.PI;
-		float hp = pi / 2.0f;
-		
-		boolean debug = !shape.uuid.toString().equals("ea4237f4-851a-4751-a1bc-3f85b7488243");
-		if(debug) {
-			if(south == NY && east == PX) System.out.println("-----------------------------------");
-			System.out.printf("%2s, %2s: %8x\n", types[south], types[east], rot);
-		}
-		
-		// Y
-		if(south == NY && east == PX) {
-			//matrix.rotate(pi / 2.0f,  0, -1,  0).translate(0, 1, 0);
-			//matrix.rotate(        0,  1,  0,  0).translate(1, 0, 0);
-			/*matrix.translate(0, 1, 1);
-			if(part.getBounds() != null) {
-				PartBounds bounds = part.getBounds();
-				//System.out.println(bounds.getWidth());
-				
-				float xx = bounds.getWidth() - 1;
-				matrix.translate(0, 0, xx / 2.0f);
+		Matrix4f mul = PartRotation.getRotationMultiplier(shape.rotation_41_1);
+		matrix.mul(mul);
+		/*int rot = shape.rotation_41_1;
+		for(int i = 0; i < 24; i++) {
+			if(PartRotation.PartRotationDataValue[i] == shape.rotation_41_1) {
+				Matrix4f mul = PartRotation.PartRotationMultiplier[i];
+				matrix.mul(mul);
+				break;
 			}
-			matrix.rotate(-pi / 2.0f, 0, 1, 0);*/
-			//matrix.translate(1, 1, 0);
-		}
+		}*/
 		
-		if(south == NX && east == NY) {
-			//matrix.translate(1, 0, 0).rotate(hp, 1, 0, 0);
-			//matrix.rotate(hp, 0, 1, 0).translate(0, 1, 0);
-			matrix.translate(0, 1, 0);
-			matrix.rotate(pi, 0, 1, 0);
-			//matrix.translate(0, 1, 0);
-		}
-
-		if(south == PY && east == NX) {
-			matrix.translate(1, 1, 0);
-			matrix.rotate(pi / 2.0f, 0, 1, 0);
-			//matrix.translate(0, 1, 1);
-		}
-		
-		if(south == PX && east == PY) {
-			matrix.translate(1, 1, 1);
-			matrix.rotate(0, 0, 1, 0);
-		}
-		
-		
-		// NegY
-		if(south == PY && east == PX) {
-			matrix.translate(1, 0, 1);
-			matrix.rotate(pi, 1, 0, 0);
-			matrix.rotate(pi / 2.0f, 0, 1, 0);
-			//matrix.translate(1, 0, 1);
-		}
-		
-		if(south == PX && east == NY) {
-			matrix.translate(0, 0, 1);
-			matrix.rotate(pi, 1, 0, 0);
-			matrix.rotate(pi, 0, 1, 0);
-			//matrix.translate(0, 0, 1);
-		}
-		
-		if(south == NY && east == NX) {
-			matrix.translate(0, 0, 0);
-			matrix.rotate(pi, 1, 0, 0);
-			matrix.rotate(-pi / 2.0f, 0, 1, 0);
-			//matrix.translate(0, 0, 0);
-		}
-		
-		if(south == NX && east == PY) {
-			matrix.translate(1, 0, 0);
-			matrix.rotate(pi, 1, 0, 0);
-			matrix.rotate(0, 0, 1, 0);
-			//matrix.translate(1, 0, 0);
-		}
-
-		// Z
-		if(south == PZ && east == PX) {
-			matrix.translate(1, 1, 1);
-			if(part.getBounds() != null) {
-				PartBounds bounds = part.getBounds();
-				//System.out.println(bounds.getWidth());
-				
-				float xx = bounds.getDepth() - 1;
-				float bb = bounds.getWidth() - 1;
-				float cc = bounds.getHeight() - 1;
-				matrix.translate(cc / 2.0f, xx / 2.0f, bb / 2.0f);
-			}
-			matrix.rotate(-pi / 2.0f, 1, 0, 0);
-			matrix.rotate(-pi / 2.0f, 0, 0, 1);
-			//matrix.translate(1, 1, 1);
-		}
-		
-		if(south == PZ && east == NY) {
-			matrix.translate(0, 1, 1);
-			if(part.getBounds() != null) {
-				PartBounds bounds = part.getBounds();
-				//System.out.println(bounds.getWidth());
-				
-				float xx = bounds.getWidth() - 1;
-				float bb = bounds.getDepth() - 1;
-				float cc = bounds.getHeight() - 1;
-				matrix.translate(-xx / 2.0f, bb / 2.0f, cc / 2.0f);
-			}
-			matrix.rotate(-pi / 2.0f, 1, 0, 0);
-			matrix.rotate(pi, 0, 0, 1);
-			//matrix.translate(0, 1, 1);
-		}
-		
-		if(south == PZ && east == NX) {
-			matrix.translate(0, 1, 0);
-			if(part.getBounds() != null) {
-				PartBounds bounds = part.getBounds();
-				//System.out.println(bounds.getWidth());
-				
-				float xx = bounds.getWidth() - 1;
-				float bb = bounds.getDepth() - 1;
-				float cc = bounds.getHeight() - 1;
-				matrix.translate(-cc / 2.0f, bb / 2.0f, -xx / 2.0f);
-			}
-			
-			matrix.rotate(-pi / 2.0f, 1, 0, 0);
-			matrix.rotate(pi / 2.0f, 0, 0, 1);
-			//matrix.translate(0, 0, 1);
-		}
-		
-		if(south == PZ && east == PY) {
-			matrix.translate(1, 1, 0);
-			if(part.getBounds() != null) {
-				PartBounds bounds = part.getBounds();
-				//System.out.println(bounds.getWidth());
-				
-				float xx = bounds.getWidth() - 1;
-				float bb = bounds.getDepth() - 1;
-				float cc = bounds.getHeight() - 1;
-				matrix.translate(xx / 2.0f, bb / 2.0f, -cc / 2.0f);
-			}
-			matrix.rotate(-pi / 2.0f, 1, 0, 0);
-			matrix.rotate(0, 0, 0, 1);
-			//matrix.translate(1, 0, 1);
-		}
-		
-		// NegZ
-		if(south == NZ && east == PX) {
-			matrix.translate(0, 0, 1);
-			matrix.rotate(pi / 2.0f, 1, 0, 0);
-			matrix.rotate(pi / 2.0f, 0, 0, 1);
-			//matrix.translate(1, 0, 0);
-		}
-		
-		if(south == NZ && east == NY) {
-			matrix.translate(0, 0, 0);
-			matrix.rotate(pi / 2.0f, 1, 0, 0);
-			matrix.rotate(pi, 0, 0, 1);
-			//matrix.translate(0, 0, 0);
-		}
-		
-		if(south == NZ && east == NX) {
-			matrix.translate(1, 0, 0);
-			matrix.rotate(pi / 2.0f, 1, 0, 0);
-			matrix.rotate(-pi / 2.0f, 0, 0, 1);
-			//matrix.translate(0, 1, 0);
-		}
-		
-		if(south == NZ && east == PY) {
-			matrix.translate(1, 0, 1);
-			matrix.rotate(pi / 2.0f, 1, 0, 0);
-			matrix.rotate(0, 0, 0, 1);
-			//matrix.translate(1, 1, 0);
-		}
-		
-		
-		// X
-		if(south == NY && east == PZ) {
-			matrix.translate(0, 1, 0);
-			if(part.getBounds() != null) {
-				PartBounds bounds = part.getBounds();
-				//System.out.println(bounds.getWidth());
-				
-				float xx = bounds.getWidth() - 1;
-				float zz = bounds.getDepth() - 1;
-				matrix.translate(-zz / 2.0f, xx / 2.0f, 0);
-			}
-			
-			matrix.rotate(pi / 2.0f, 0, 0, 1);
-			matrix.rotate(-pi / 2.0f, 1, 0, 0);
-			//matrix.translate(1, 0, 0);
-		}
-		
-		if(south == NX && east == PZ) {
-			matrix.translate(1, 1, 0);
-			if(part.getBounds() != null) {
-				PartBounds bounds = part.getBounds();
-				//System.out.println(bounds.getWidth());
-				
-				float xx = bounds.getWidth() - 1;
-				float zz = bounds.getDepth() - 1;
-				float bb = bounds.getHeight() - 1;
-				matrix.translate(xx / 2.0f, bb / 2.0f, -zz / 2.0f);
-			}
-			
-			matrix.rotate(pi / 2.0f, 0, 0, 1);
-			matrix.rotate(pi, 1, 0, 0);
-			//matrix.translate(1, 1, 0);
-		}
-		
-		if(south == PY && east == PZ) {
-			matrix.translate(1, 1, 1);
-			if(part.getBounds() != null) {
-				PartBounds bounds = part.getBounds();
-				//System.out.println(bounds.getWidth());
-				
-				float xx = bounds.getWidth() - 1;
-				float zz = bounds.getDepth() - 1;
-				float bb = bounds.getHeight() - 1;
-				matrix.translate(zz / 2.0f, xx / 2.0f, bb / 2.0f);
-			}
-			matrix.rotate(pi / 2.0f, 0, 0, 1);
-			matrix.rotate(pi / 2.0f, 1, 0, 0);
-			//matrix.translate(1, 1, 1);
-		}
-		
-		if(south == PX && east == PZ) {
-			matrix.translate(0, 1, 1);
-			matrix.rotate(pi / 2.0f, 0, 0, 1);
-			matrix.rotate(0, 1, 0, 0);
-			//matrix.translate(1, 0, 1);
-		}
-		
-		
-		// NegX
-		if(south == NY && east == NZ) {
-			matrix.translate(0, 0, 1);
-			matrix.rotate(-pi / 2.0f, 0, 0, 1);
-			matrix.rotate(pi / 2.0f, 1, 0, 0);
-			//matrix.translate(0, 1, 0);
-		}
-		
-		if(south == NX && east == NZ) {
-			matrix.translate(0, 0, 0);
-			matrix.rotate(-pi / 2.0f, 0, 0, 1);
-			matrix.rotate(pi, 1, 0, 0);
-			//matrix.translate(0, 0, 0);
-		}
-		
-		if(south == PY && east == NZ) {
-			matrix.translate(1, 0, 0);
-			matrix.rotate(-pi / 2.0f, 0, 0, 1);
-			matrix.rotate(-pi / 2.0f, 1, 0, 0);
-			//matrix.translate(0, 0, 1);
-		}
-		
-		if(south == PX && east == NZ) {
-			matrix.translate(1, 0, 1);
-			matrix.rotate(-pi / 2.0f, 0, 0, 1);
-			matrix.rotate(0, 1, 0, 0);
-			//matrix.translate(0, 1, 1);
+		if(bounds != null) {
+			matrix.translate(
+				(bounds.getWidth() - 1) / 2.0f,
+				(bounds.getHeight() - 1) / 2.0f,
+				(bounds.getDepth() - 1) / 2.0f
+			);
 		}
 	}
 	
@@ -562,8 +276,6 @@ public class PartMesh {
 			}
 			shader.setUniform("color", r, g, b, a);
 		}
-		
-		// "d4784875-1ede-4d00-a432-f390f0d8fc73"
 		
 		// TODO: Implement Lod objects
 		

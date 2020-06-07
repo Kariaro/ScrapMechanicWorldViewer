@@ -56,59 +56,6 @@ public class WorldBlockRender {
 		
 		//System.out.println(Integer.toHexString(shape.TEST_bodyId));
 		RigidBody body = shape.body;
-		if(body.isStatic_0_2 == 2) {
-			/*
-			//System.out.println(x + ", " + y + ", " + z);
-			//System.out.println(Util.getShort(shape.TEST_data, 33, true));
-			//System.out.println(Integer.toHexString(shape.TEST_id));
-			//RigidBodyBoundsNode node = body.node;
-			
-			// System.out.println(body.xmm_9_4 + ", " + body.xmx_13_4);
-			
-			byte[] data = shape.TEST_data;
-			int a = 1;
-			StringBuilder sb = new StringBuilder();
-			for(byte b : data) {
-				sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
-			}
-			String nows = sb.toString();
-			
-			if(last == null) {
-				last = new StringBuilder(nows);
-				dif_bytes = new byte[nows.length()];
-				for(int i = 0; i < dif_bytes.length; i++) {
-					dif_bytes[i] = '.';
-				}
-			} else {
-				int size = Math.min(last.length(), nows.length());
-				if(dif_bytes.length < size) {
-					dif_bytes = new byte[size];
-				}
-				
-				for(int i = 0; i < size; i++) {
-					char aa = last.charAt(i);
-					char bb = nows.charAt(i);
-					
-					if(aa != bb) {
-						dif_bytes[i] = '#';
-					} else {
-						dif_bytes[i] = '.';
-					}
-				}
-				
-				
-				if(!nows.equals(last_str)) {
-					//System.out.println(nows);
-					//System.out.println(new String(dif_bytes));
-					
-					last_str = nows;
-					last.delete(0, last.length());
-					last.append(nows);
-				}
-				
-				//System.out.println();
-			}*/
-		}
 		
 		if(shape.body.isStatic_0_2 == 2) {
 			Vector4f right = shape.body.matrix.getColumn(1, new Vector4f());
@@ -128,23 +75,21 @@ public class WorldBlockRender {
 		
 		//System.out.println(shape.uuid);
 		if(body.isStatic_0_2 == 1) {
-			byte[] data = shape.TEST_data;
+			/*byte[] data = shape.TEST_data;
 			int a = 1;
 			StringBuilder sb = new StringBuilder();
 			for(byte b : data) {
 				sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
 			}
 			String nows = sb.toString();
-			
+			*/
 			float xx = x;
 			float yy = y;
 			float zz = z;
 			
-			//System.out.println(body.zMin);
-			
 			Vector3f local = body.getMiddleLocal();
 			float bxm = (body.xMax + body.xMin) * 2;
-			float bzm = (body.zMax + body.zMin) * 2;
+			float bym = (body.yMax + body.yMin) * 2;
 			
 			Matrix4f matrix = new Matrix4f();
 			matrix.translate(
