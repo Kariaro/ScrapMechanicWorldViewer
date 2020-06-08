@@ -64,6 +64,11 @@ public class Renderable {
 			}
 		}
 		
+		@JsonSetter(value = "subMeshMap")
+		private void setSubMesMap(Map<String, MeshMap> map) {
+			hiddenMap.putAll(map);
+		}
+		
 		@JsonAnySetter
 		public void setAnything(String string, Object obj) {
 			System.out.println("setAnything: " + string);

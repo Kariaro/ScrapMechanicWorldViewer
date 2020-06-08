@@ -101,19 +101,19 @@ public class Camera {
 	
 	public Matrix4f getViewMatrix(float fov, float width, float height) {
 		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.0001f, 100);
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 100000);
 		return projectionMatrix;
 	}
 	
 	public Matrix4f getProjectionViewMatrix(float fov, float width, float height) {
 		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.0001f, 100);
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 100000);
 		return projectionMatrix.mul(new Matrix4f().translate(-x, -y, -z));
 	}
 	
 	public Matrix4f getProjectionMatrix(float fov, float width, float height) {
 		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 10000);
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.1f, 100000);
 		return projectionMatrix
 				.rotate(MathUtils.toRadians(ry), 1, 0, 0)
 				.rotate(MathUtils.toRadians(rx), 0, 0, 1)

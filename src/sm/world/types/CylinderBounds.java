@@ -5,12 +5,12 @@ import org.joml.Vector3f;
 public class CylinderBounds implements PartBounds {
 	private final float diameter;
 	private final float depth;
-	private final int axis;
+	private final String axis;
 	
-	public CylinderBounds(float diameter, float depth, float z) {
+	public CylinderBounds(float diameter, float depth, String axis) {
 		this.diameter = diameter;
 		this.depth = depth;
-		this.axis = 0; // TODO: Rotate depending on the axis
+		this.axis = axis;
 	}
 	
 	public Vector3f getMiddle() {
@@ -18,14 +18,26 @@ public class CylinderBounds implements PartBounds {
 	}
 	
 	public float getHeight() {
+		switch(axis) {
+			case "Z": return diameter;
+			case "Y": return diameter;
+		}
 		return depth;
 	}
 	
 	public float getWidth() {
+		switch(axis) {
+			case "Z": return diameter;
+			case "Y": return depth;
+		}
 		return diameter;
 	}
 	
 	public float getDepth() {
+		switch(axis) {
+			case "Z": return depth;
+			case "Y": return diameter;
+		}
 		return diameter;
 	}
 }

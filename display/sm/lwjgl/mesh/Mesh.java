@@ -18,15 +18,13 @@ public class Mesh {
 	private final int vertexCount;
 	private Material material;
 	private float boundingRadius;
-	public final String name;
+	private String name;
 	
-	public Mesh(String name, float[] positions, float[] textCoords, float[] normals, int[] indices) {
-		this(name, positions, textCoords, normals, indices, createEmptyIntArray(MAX_WEIGHTS * positions.length / 3, 0), createEmptyFloatArray(MAX_WEIGHTS * positions.length / 3, 0));
+	public Mesh(float[] positions, float[] textCoords, float[] normals, int[] indices) {
+		this(positions, textCoords, normals, indices, createEmptyIntArray(MAX_WEIGHTS * positions.length / 3, 0), createEmptyFloatArray(MAX_WEIGHTS * positions.length / 3, 0));
 	}
 	
-	public Mesh(String name, float[] positions, float[] textCoords, float[] normals, int[] indices, int[] jointIndices, float[] weights) {
-		this.name = name;
-		
+	public Mesh(float[] positions, float[] textCoords, float[] normals, int[] indices, int[] jointIndices, float[] weights) {
 		FloatBuffer posBuffer = null;
 		FloatBuffer textCoordsBuffer = null;
 		FloatBuffer vecNormalsBuffer = null;
@@ -139,7 +137,12 @@ public class Mesh {
 	}
 	
 	public void setMaterial(Material material) {
+		this.name = material.name;
 		this.material = material;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public final int getVaoId() {

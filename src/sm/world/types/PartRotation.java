@@ -58,30 +58,30 @@ public final class PartRotation {
 	};
 	
 	public static final int[] PartRotationDataValue = {
-		0b100101,
-		0b110010,
-		0b1100011,
-		0b1010110,
-		0b1100101,
-		0b1010010,
-		0b100011,
-		0b110110,
-		0b1110101,
-		0b1110010,
-		0b1110011,
-		0b1110110,
-		0b10101,
-		0b10010,
-		0b10011,
-		0b10110,
-		0b100111,
-		0b110111,
-		0b1100111,
-		0b1010111,
-		0b100001,
-		0b110001,
-		0b1100001,
-		0b1010001,
+		0b010_0101,
+		0b011_0010,
+		0b110_0011,
+		0b101_0110,
+		0b110_0101,
+		0b101_0010,
+		0b010_0011,
+		0b011_0110,
+		0b111_0101,
+		0b111_0010,
+		0b111_0011,
+		0b111_0110,
+		0b001_0101,
+		0b001_0010,
+		0b001_0011,
+		0b001_0110,
+		0b010_0111,
+		0b011_0111,
+		0b110_0111,
+		0b101_0111,
+		0b010_0001,
+		0b011_0001,
+		0b110_0001,
+		0b101_0001,
 	};
 	
 	private static final float[][] PartRotationArray = {
@@ -92,9 +92,21 @@ public final class PartRotation {
 	
 	public static final Matrix4f[] PartRotationMultiplier;
 	
+	// TODO: Cache these for each part!
 	public static Vector3f getPartOffset(Part part, ChildShape shape) {
-		Matrix4f mul = getRotationMultiplier(shape.rotation_41_1);
-		return null;
+		Matrix4f mul = getRotationMultiplier(shape.partRotation);
+		PartBounds bounds = part.getBounds();
+		if(bounds != null) {
+			Matrix4f mat = mul.translate(
+				(bounds.getWidth() - 1) / 2.0f,
+				(bounds.getHeight() - 1) / 2.0f,
+				(bounds.getDepth() - 1) / 2.0f
+			, new Matrix4f());
+			
+			return mat.getColumn(3, new Vector3f());
+		}
+
+		return mul.getColumn(3, new Vector3f());
 	}
 	
 	public static Matrix4f getRotationMultiplier(int rotation) {

@@ -3,6 +3,17 @@ package sm.util;
 import java.util.UUID;
 
 public class Util {
+	public static String getString(byte[] data, int offset, int length, boolean bigEndian) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(new String(data, offset, length));
+		
+		if(bigEndian) {
+			return sb.toString();
+		}
+		
+		return sb.reverse().toString();
+	}
+	
 	public static short getShort(byte[] bytes, int offset, boolean bigEndian) {
 		if(bigEndian) {
 			return (short)(((bytes[0 + offset] & 0xff) << 8) |
@@ -67,5 +78,4 @@ public class Util {
 			return new UUID(high, low);
 		}
 	}
-	
 }
