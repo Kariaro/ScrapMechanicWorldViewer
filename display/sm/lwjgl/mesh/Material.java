@@ -8,15 +8,18 @@ public class Material {
 	public final Vector4f diffuse;
 	public final Vector4f specular;
 	public final float intensity;
+	public final String name;
 	
 	public Material() {
-		this(DEFAULT_COLOUR,
+		this(null,
+			 DEFAULT_COLOUR,
 			 DEFAULT_COLOUR,
 			 DEFAULT_COLOUR,
 			 0.0f);
 	}
 	
-	public Material(Vector4f ambient, Vector4f diffuse, Vector4f specular, float intensity) {
+	public Material(String name, Vector4f ambient, Vector4f diffuse, Vector4f specular, float intensity) {
+		this.name = name;
 		this.ambient = ambient;
 		this.diffuse = diffuse;
 		this.specular = specular;

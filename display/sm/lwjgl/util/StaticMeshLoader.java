@@ -29,6 +29,8 @@ public class StaticMeshLoader {
 	}
 	
 	public static Mesh[] load(String resourcePath, int flags) throws Exception {
+		System.out.println(resourcePath);
+		
 		AIScene aiScene = aiImportFile(resourcePath, flags);
 		if(aiScene == null) {
 			throw new Exception("Error loading model");
@@ -49,7 +51,6 @@ public class StaticMeshLoader {
 		
 		for(int i = 0; i < numMeshes; i++) {
 			AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
-			//System.out.println("Name: " + aiMesh.mName().dataString());
 			Mesh mesh = processMesh(aiMesh, materials);
 			meshes[i] = mesh;
 		}
@@ -81,7 +82,10 @@ public class StaticMeshLoader {
 			specular = new Vector4f(colour.r(), colour.g(), colour.b(), colour.a());
 		}
 		
-		Material material = new Material(ambient, diffuse, specular, 1.0f);
+		AIString aiString = AIString.create();
+		Assimp.aiGetMaterialString(aiMaterial, "?mat.name", aiTextureType_NONE, 0, aiString);
+		
+		Material material = new Material(aiString.dataString(), ambient, diffuse, specular, 1.0f);
 		materials.add(material);
 	}
 	
@@ -97,7 +101,6 @@ public class StaticMeshLoader {
 		processIndices(aiMesh, indices);
 		
 		Mesh mesh = new Mesh(
-			aiMesh.mName().dataString(),
 			listToArray(vertices),
 			listToArray(textures),
 			listToArray(normals),

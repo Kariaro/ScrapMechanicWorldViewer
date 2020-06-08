@@ -11,12 +11,13 @@ import sm.asset.ScrapMechanicAssets;
 import sm.lwjgl.shader.PartShader;
 import sm.lwjgl.util.StaticMeshLoader;
 import sm.objects.BodyList.ChildShape;
-import sm.world.types.BoxBounds;
+import sm.objects.BodyList.RigidBody;
 import sm.world.types.Part;
 import sm.world.types.PartBounds;
 import sm.world.types.PartRotation;
 import sm.world.types.Renderable.Lod;
 import sm.world.types.Renderable.MeshMap;
+import sm.world.types.ShapeUtils.Bounds3D;
 
 public class PartMesh {
 	private final double minViewDistance;
@@ -26,7 +27,7 @@ public class PartMesh {
 	
 	private final List<Texture>[] textures;
 	private final Mesh[] meshes;
-	private final Mesh[][] animations;
+	//private final Mesh[][] animations;
 	private final Lod lod;
 	
 	@SuppressWarnings("unchecked")
@@ -42,7 +43,7 @@ public class PartMesh {
 		meshes = StaticMeshLoader.load(path);
 		
 		if(lod.animationList != null) {
-			animations = null;
+			//animations = null;
 			/*animations = new Mesh[1][];
 			Animation anim = lod.animationList.get(0);
 			System.out.println("Loading animation: " + anim.name);
@@ -51,7 +52,7 @@ public class PartMesh {
 			animations[0] = StaticMeshLoader.load(animPath);
 			*/
 		} else {
-			animations = null;
+			//animations = null;
 		}
 		
 		textures = new List[meshes.length];
@@ -59,7 +60,6 @@ public class PartMesh {
 		//System.out.println("Meshes: " + meshes.length);
 		Map<String, MeshMap> maps = lod.subMeshMap;
 		for(String name : maps.keySet()) {
-			// TODO: Check for '-1'
 			int index = getMeshIndex(name);
 			
 			List<Texture> list = new ArrayList<>();
@@ -72,8 +72,12 @@ public class PartMesh {
 				System.out.println("    Material: " + meshMap.material);
 				
 			}
+			
+			// TODO: Fallback option?
+			if(index < 0) index = 0;
 			textures[index] = list;
 		}
+		System.out.println("--------------------");
 	}
 	
 	private boolean loadTextures(MeshMap map, List<Texture> list) throws Exception {
@@ -194,9 +198,11 @@ public class PartMesh {
 		
 		// If there is textures and nothing was added. Just load the Dif texture
 		if(index == 0 && map.textureList.size() > 0) {
-			String texturePath = map.textureList.get(0);
-			texturePath = ScrapMechanicAssets.resolvePath(texturePath);
-			list.add(Texture.loadTexture(texturePath, 0, GL20.GL_LINEAR));
+			for(int i = 0; i < map.textureList.size(); i++) {
+				String texturePath = map.textureList.get(i);
+				texturePath = ScrapMechanicAssets.resolvePath(texturePath);
+				list.add(Texture.loadTexture(texturePath, i, GL20.GL_LINEAR));
+			}
 			return false;
 		}
 		
@@ -210,7 +216,7 @@ public class PartMesh {
 			return meshes[index];
 		} else {
 			for(Mesh mesh : meshes) {
-				if(mesh.name.equals(name)) return mesh;
+				if(name.equals(mesh.getName())) return mesh;
 			}
 			return null;
 		}
@@ -225,26 +231,17 @@ public class PartMesh {
 			for(int i = 0; i < meshes.length; i++) {
 				Mesh mesh = meshes[i];
 				
-				if(mesh.name.equals(name)) return i;
+				if(name.equals(mesh.getName())) return i;
 			}
 		}
 		return -1;
 	}
 	
 	private void applyRotation(ChildShape shape, Matrix4f matrix) {
+		Matrix4f mul = PartRotation.getRotationMultiplier(shape.partRotation);
+		if(mul != null) matrix.mul(mul);
+		
 		PartBounds bounds = part.getBounds();
-		
-		Matrix4f mul = PartRotation.getRotationMultiplier(shape.rotation_41_1);
-		matrix.mul(mul);
-		/*int rot = shape.rotation_41_1;
-		for(int i = 0; i < 24; i++) {
-			if(PartRotation.PartRotationDataValue[i] == shape.rotation_41_1) {
-				Matrix4f mul = PartRotation.PartRotationMultiplier[i];
-				matrix.mul(mul);
-				break;
-			}
-		}*/
-		
 		if(bounds != null) {
 			matrix.translate(
 				(bounds.getWidth() - 1) / 2.0f,
@@ -254,16 +251,38 @@ public class PartMesh {
 		}
 	}
 	
-	// TODO: Bounding boxes load from json
-	public boolean render(ChildShape shape) {
-		// TODO: Bind texture
+	public boolean render(ChildShape shape, Bounds3D bounds) {
 		float x = shape.xPos - 0.5f;
 		float y = shape.yPos - 0.5f;
 		float z = shape.zPos - 0.5f;
 		
 		Matrix4f matrix = new Matrix4f().translate(x, y, z);
+		RigidBody body = shape.body;
+		/*if(body.isStatic_0_2 == 1) {
+			float xm = (bounds.xMin + bounds.xMax) / 2.0f;
+			float ym = (bounds.yMin + bounds.yMax) / 2.0f;
+			float zm = 0;//(bounds.zMin + bounds.zMax) / 2.0f;
+			
+			matrix.translate(-xm, -ym, -zm);
+			matrix.translate(
+				(body.yMin + body.yMax) * 2,
+				(body.xMin + body.xMax) * 2,
+				0
+			);
+		} else {
+			float xm = (bounds.xMin + bounds.xMax) / 2.0f;
+			float ym = (bounds.yMin + bounds.yMax) / 2.0f;
+			float zm = (bounds.zMin + bounds.zMax) / 2.0f;
+			
+			matrix.translate(-xm, -ym, -zm);
+			matrix.translate(
+				(body.yMin + body.yMax) * 2,
+				(body.xMin + body.xMax) * 2,
+				0
+			);
+		}*/
+
 		applyRotation(shape, matrix);
-		
 		shader.setUniform("transformationMatrix", matrix);
 		{
 			int rgba = shape.colorRGBA;
@@ -278,7 +297,7 @@ public class PartMesh {
 		}
 		
 		// TODO: Implement Lod objects
-		
+		/*
 		if(animations != null) {
 			Mesh[] msh = animations[0];
 			for(int i = 0; i < msh.length; i++) {
@@ -293,17 +312,19 @@ public class PartMesh {
 				}
 			}
 		} else {
-			for(int i = 0; i < meshes.length; i++) {
-				List<Texture> texs = textures[i];
-				if(texs != null) {
-					for(Texture t : texs) t.bind();
-				}
-				
-				meshes[i].render();
-				
-				if(texs != null) {
-					for(Texture t : texs) t.unbind();
-				}
+			
+		}
+		*/
+		for(int i = 0; i < textures.length; i++) {
+			List<Texture> texs = textures[i];
+			if(texs != null) {
+				for(Texture t : texs) t.bind();
+			}
+			
+			meshes[i].render();
+			
+			if(texs != null) {
+				for(Texture t : texs) t.unbind();
 			}
 		}
 		
