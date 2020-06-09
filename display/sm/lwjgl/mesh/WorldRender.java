@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.joml.Matrix4f;
@@ -70,7 +71,7 @@ public class WorldRender {
 		}
 	}
 	
-	// TODO: This is only for debug
+	// TODO: This is a little cheat to reload files in realtime.
 	//public static final String fileName = "Survival/Amazing World.db";
 	public static final String fileName = "TestingSQLite.db";
 	//public static final String fileName = "SQLiteRotations.db";
@@ -119,22 +120,10 @@ public class WorldRender {
 	private void init() throws Exception {
 		blockShader = new BlockShader();
 		partShader = new PartShader();
-		
-		/*for(Block block : ScrapMechanicAssets.getAllBlocks()) {
-			//System.out.println("Init: " + block);
-			blocks.put(block.uuid, new WorldBlockRender(block, blockShader));
-		}
-		
-		for(Part part : ScrapMechanicAssets.getAllParts()) {
-			System.out.println("Init: " + part);
-			parts.put(part.uuid, new WorldPartRender(part, partShader));
-		}*/
 	}
 	
 	private WorldBlockRender getBlockRender(UUID uuid) {
-		if(blocks.containsKey(uuid)) {
-			return blocks.get(uuid);
-		}
+		if(blocks.containsKey(uuid)) return blocks.get(uuid);
 		
 		Block block = ScrapMechanicAssets.getBlock(uuid);
 		if(block == null) return null;
@@ -145,14 +134,12 @@ public class WorldRender {
 	}
 	
 	private WorldPartRender getPartRender(UUID uuid) {
-		if(parts.containsKey(uuid)) {
-			return parts.get(uuid);
-		}
+		if(parts.containsKey(uuid)) return parts.get(uuid);
 		
 		Part part = ScrapMechanicAssets.getPart(uuid);
 		if(part == null) return null;
-
-		System.out.println("Init: " + part);
+		
+		LOGGER.log(Level.INFO, "Init: {0}", part);
 		WorldPartRender render = new WorldPartRender(part, partShader);
 		parts.put(part.uuid, render);
 		return render;
@@ -293,21 +280,15 @@ public class WorldRender {
 		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
 		for(RigidBody body : bodies) {
 			for(ChildShape shape : body.shapes) {
-				if(blocks.containsKey(shape.uuid)) {
-					continue;
-				}
-				if(parts.containsKey(shape.uuid)) {
-					continue;
-				}
+				if(blocks.containsKey(shape.uuid)) continue;
+				if(parts.containsKey(shape.uuid)) continue;
 				
 				renderCube(
 					shape.xPos + 0.5f,
 					shape.yPos + 0.5f,
 					shape.zPos + 0.5f,
 					
-					1,
-					1,
-					1,
+					1, 1, 1,
 					
 					0x20ffffff
 				);
@@ -365,7 +346,7 @@ public class WorldRender {
 				}
 			}
 			
-			/*GL11.glEnable(GL11.GL_BLEND);
+			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glEnable(GL11.GL_ALPHA);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			for(RigidBody body : bodies) {
@@ -384,7 +365,7 @@ public class WorldRender {
 				);
 			}
 			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glDisable(GL11.GL_ALPHA);*/
+			GL11.glDisable(GL11.GL_ALPHA);
 			
 			for(RigidBody body : bodies) {
 				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
@@ -403,6 +384,7 @@ public class WorldRender {
 		
 
 		GL11.glEnable(GL_DEPTH_TEST);
+		
 		// Center of world
 		renderCube(
 			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
