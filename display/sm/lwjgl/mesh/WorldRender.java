@@ -12,11 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 
@@ -29,10 +28,11 @@ import sm.lwjgl.shader.PartShader;
 import sm.objects.BodyList.ChildShape;
 import sm.objects.BodyList.RigidBody;
 import sm.objects.BodyList.RigidBodyBounds;
-import sm.util.Util;
 import sm.world.World;
 import sm.world.types.Block;
 import sm.world.types.Part;
+import sm.world.types.ShapeUtils;
+import sm.world.types.ShapeUtils.Bounds3D;
 
 public class WorldRender {
 	private static final Logger LOGGER = Logger.getLogger(WorldRender.class.getName());
@@ -71,10 +71,10 @@ public class WorldRender {
 		}
 	}
 	
-	// TODO: This is only for debug
-	//private String fileName = "Survival/Amazing World.db";
-	//private String fileName = "TestingSQLite.db";
-	private String fileName = "SQLiteRotations.db";
+	// TODO: This is a little cheat to reload files in realtime.
+	//public static final String fileName = "Survival/Amazing World.db";
+	public static final String fileName = "TestingSQLite.db";
+	//public static final String fileName = "SQLiteRotations.db";
 	private long last = -1;
 	private void checkWorldUpdate() {
 		File filePath = new File(World.$USER_DATA, "Save/" + fileName);
@@ -120,16 +120,29 @@ public class WorldRender {
 	private void init() throws Exception {
 		blockShader = new BlockShader();
 		partShader = new PartShader();
+	}
+	
+	private WorldBlockRender getBlockRender(UUID uuid) {
+		if(blocks.containsKey(uuid)) return blocks.get(uuid);
 		
-		for(Block block : ScrapMechanicAssets.getAllBlocks()) {
-			//System.out.println("Init: " + block);
-			blocks.put(block.uuid, new WorldBlockRender(block, blockShader));
-		}
+		Block block = ScrapMechanicAssets.getBlock(uuid);
+		if(block == null) return null;
 		
-		for(Part part : ScrapMechanicAssets.getAllParts()) {
-			System.out.println("Init: " + part);
-			parts.put(part.uuid, new WorldPartRender(part, partShader));
-		}
+		WorldBlockRender render = new WorldBlockRender(block, blockShader);
+		blocks.put(block.uuid, render);
+		return render;
+	}
+	
+	private WorldPartRender getPartRender(UUID uuid) {
+		if(parts.containsKey(uuid)) return parts.get(uuid);
+		
+		Part part = ScrapMechanicAssets.getPart(uuid);
+		if(part == null) return null;
+		
+		LOGGER.log(Level.INFO, "Init: {0}", part);
+		WorldPartRender render = new WorldPartRender(part, partShader);
+		parts.put(part.uuid, render);
+		return render;
 	}
 	
 	public int getFps() {
@@ -221,14 +234,7 @@ public class WorldRender {
 		
 		GL11.glEnable(GL_DEPTH_TEST);
 		GL11.glEnable(GL_CULL_FACE);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		//GL11.glEnable(GL11.GL_BLEND);
-		//GL11.glEnable(GL11.GL_ALPHA);
-		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		//shader.bind();
-		//shader.setUniform("projectionView", projectionView);
-		//shader.setUniform("transformationMatrix", new Matrix4f());
-		//shader.unbind();
+		GL11.glEnable(GL_TEXTURE_2D);
 		
 		checkWorldUpdate();
 		
@@ -236,14 +242,16 @@ public class WorldRender {
 		blockShader.setUniform("projectionView", projectionTran);
 		blockShader.setUniform("transformationMatrix", new Matrix4f());
 		blockShader.setUniform("cameraDirection", camera.getViewDirection());
-		blockShader.setUniform("colors", 1, 1, 1, 1);
-		
+		blockShader.setUniform("color", 1, 1, 1, 1);
 		for(RigidBody body : bodies) {
+			// TODO: This should be cached inside the body!
+			Bounds3D bounds = ShapeUtils.getBoundingBox(body);
+			
 			for(ChildShape shape : body.shapes) {
-				WorldBlockRender mesh = blocks.getOrDefault(shape.uuid, null);
+				WorldBlockRender mesh = getBlockRender(shape.uuid);
 				
 				if(mesh != null) {
-					mesh.render(shape);
+					mesh.render(shape, bounds);
 				}
 			}
 		}
@@ -254,14 +262,15 @@ public class WorldRender {
 		partShader.bind();
 		partShader.setUniform("projectionView", projectionTran);
 		partShader.setUniform("transformationMatrix", new Matrix4f());
-		
-		//blockShader.setUniform("colors", 1, 1, 1, 1);
 		for(RigidBody body : bodies) {
+			// TODO: This should be cached inside the body!
+			Bounds3D bounds = ShapeUtils.getBoundingBox(body);
+			
 			for(ChildShape shape : body.shapes) {
-				WorldPartRender mesh = parts.getOrDefault(shape.uuid, null);
+				WorldPartRender mesh = getPartRender(shape.uuid);
 				
 				if(mesh != null) {
-					//mesh.render(shape);
+					mesh.render(shape, bounds);
 				}
 			}
 		}
@@ -271,49 +280,38 @@ public class WorldRender {
 		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
 		for(RigidBody body : bodies) {
 			for(ChildShape shape : body.shapes) {
-				if(blocks.containsKey(shape.uuid)) {
-					continue;
-				}
-				/*if(parts.containsKey(shape.uuid)) {
-					continue;
-				}*/
+				if(blocks.containsKey(shape.uuid)) continue;
+				if(parts.containsKey(shape.uuid)) continue;
 				
-				//if(true) continue;
-				//render(shape);
 				renderCube(
 					shape.xPos + 0.5f,
 					shape.yPos + 0.5f,
 					shape.zPos + 0.5f,
 					
-					1,
-					1,
-					1,
+					1, 1, 1,
 					
-					
-					0x20ffffff//shape.color_37_4
+					0x20ffffff
 				);
 			}
 		}
-		
-		renderCube(
-			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
-			0x20ffffff
-		);
 		
 		boolean SHOW_AABB = true;
 		if(SHOW_AABB) {
 			GL11.glDisable(GL_DEPTH_TEST);
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 			for(RigidBody body : bodies) {
-				float xs = body.xMax - body.xMin;
-				float zs = body.zMin - body.zMax;
+				float ys = body.yMax - body.yMin;
+				float xs = body.xMin - body.xMax;
+
+				if(body.bodyId != 1557) continue;
 				renderCube(
-					body.xMin * 4 + 0.5f,
+					body.yMin * 4 + 0.5f,
+					body.xMax * 4 + 0.5f,
 					0 + 0.5f,
-					body.zMax * 4 + 0.5f,
 					
-					xs * 4, 0,
-					zs * 4,
+					ys * 4,
+					xs * 4,
+					0,
 					
 					0x20ffffff
 				);
@@ -323,50 +321,75 @@ public class WorldRender {
 			for(RigidBody body : bodies) {
 				RigidBodyBounds bounds = body.bounds;
 				if(body.isStatic_0_2 == 2) {
-					float zm = (bounds.xMax + bounds.xMin) * 2;
-					float xm = (bounds.zMax + bounds.zMin) * 2;
+					float xm = (bounds.xMax + bounds.xMin) * 2;
+					float ym = (bounds.yMax + bounds.yMin) * 2;
 					
-					Vector4f right = body.matrix.getColumn(1, new Vector4f()).mul(3);
+					Vector4f right = body.matrix.getColumn(0, new Vector4f()).mul(3);
+					Vector4f at = body.matrix.getColumn(1, new Vector4f()).mul(3);
 					Vector4f up = body.matrix.getColumn(2, new Vector4f()).mul(3);
-					Vector4f at = body.matrix.getColumn(0, new Vector4f()).mul(3);
 					
-					//System.out.println(at.toString(NumberFormat.getNumberInstance()));
 					GL11.glPushMatrix();
 					GL11.glBegin(GL_LINES);
 						GL11.glColor3f(1, 0, 0);
-						GL11.glVertex3f(xm, 0.5f, zm);
-						GL11.glVertex3f(right.x + xm, right.z + 0.5f, right.y + zm);
+						GL11.glVertex3f(xm, ym, 0.5f);
+						GL11.glVertex3f(right.x + xm, right.y + ym, right.z + 0.5f);
 						
 						GL11.glColor3f(0, 1, 0);
-						GL11.glVertex3f(xm, 0.5f, zm);
-						GL11.glVertex3f(up.x + xm, up.z + 0.5f, up.y + zm);
+						GL11.glVertex3f(xm, ym, 0.5f);
+						GL11.glVertex3f(up.x + xm, up.y + ym, up.z + 0.5f);
 						
 						GL11.glColor3f(0, 0, 1);
-						GL11.glVertex3f(xm, 0.5f, zm);
-						GL11.glVertex3f(at.x + xm, at.z + 0.5f, at.y + zm);
+						GL11.glVertex3f(xm, ym, 0.5f);
+						GL11.glVertex3f(at.x + xm, at.y + ym, at.z + 0.5f);
 					GL11.glEnd();
 					GL11.glPopMatrix();
 				}
 			}
 			
+			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glEnable(GL11.GL_ALPHA);
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			for(RigidBody body : bodies) {
-				if(body.isStatic_0_2 == 1) {
-					Vector3f middle = body.getMiddleLocal();
+				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
+				
+				renderCube(
+					bounds.xMin + 0.5f,
+					bounds.yMin + 0.5f,
+					bounds.zMin + 0.5f,
 					
-					renderCube(
-						middle.x,
-						middle.y,
-						middle.z,
-						
-						1, 1, 1,
-						
-						0x20ff0000
-					);
-				}
+					bounds.xMax - bounds.xMin,
+					bounds.yMax - bounds.yMin,
+					bounds.zMax - bounds.zMin,
+					
+					0x7fff0000
+				);
 			}
+			GL11.glDisable(GL11.GL_BLEND);
+			GL11.glDisable(GL11.GL_ALPHA);
 			
-			
+			for(RigidBody body : bodies) {
+				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
+				//if(body.bodyId != 1531) continue;
+				renderCube(
+					(bounds.xMin + bounds.xMax) / 2.0f,
+					(bounds.yMin + bounds.yMax) / 2.0f,
+					(bounds.zMin + bounds.zMax) / 2.0f,
+					
+					1, 1, 1,
+					
+					0xff0000ff
+				);
+			}
 		}
+		
+
+		GL11.glEnable(GL_DEPTH_TEST);
+		
+		// Center of world
+		renderCube(
+			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
+			0x20ffffff
+		);
 		
 		GL11.glPopMatrix();
 		GL11.glDisable(GL_DEPTH_TEST);

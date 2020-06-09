@@ -17,15 +17,15 @@ uniform int tiling;
 void main() {
 	// Calculate the uv depending the the world position
 	vec3 pos = pass_Pos.xyz + localTransform;
-	vec2 uv = pos.xz;
+	vec2 uv = vec2(0, 0);//pos.xz;
 	
 	// Checks if if the texture is applied on the x, y or z axis
 	// TODO: What if the block is shifted 0.5 units??
 	float test_a = pos.x - floor(pos.x);
 	float test_b = pos.y - floor(pos.y);
 	float test_c = pos.z - floor(pos.z);
-	if(test_a == 0) uv = pos.zy;
-	if(test_b == 0) uv = pos.zx;
+	if(test_a == 0) uv = pos.yz;
+	if(test_b == 0) uv = pos.xz;
 	if(test_c == 0) uv = pos.xy;
 	
 	// TODO: Flip y when loading the texture!
