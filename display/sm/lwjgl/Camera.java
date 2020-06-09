@@ -22,12 +22,9 @@ public class Camera {
 	
 	public Camera(long window) {
 		this.window = window;
-		//x = -1;
-		//y =  4;
-		//z = -5;
 	}
 	
-	// TODO: Rework :P
+	// TODO: Get this data from the glfw callback and not the global mouse position :P
 	private Vector2f mouse = new Vector2f(0, 0);
 	private Vector2f delta = new Vector2f(0, 0);
 	private void updateMouse() {
@@ -57,8 +54,9 @@ public class Camera {
 			ry -= delta.y / 2.0f;
 		}
 		
-		if(ry < -90) ry = -90;
-		if(ry >  90) ry =  90;
+		if(ry < -180) ry = -180;
+		if(ry >    0) ry = 0;
+		
 		if(rx <   0) rx += 360;
 		if(rx > 360) rx -= 360;
 		
@@ -79,61 +77,59 @@ public class Camera {
 		
 		
 		int xd = 0;
-		int yd = 0;
 		int zd = 0;
+		int yd = 0;
 		
-		if(forwards) zd ++;
-		if(backwards) zd --;
+		if(forwards) yd --;
+		if(backwards) yd ++;
 		if(right) xd --;
 		if(left) xd ++;
-		if(up) yd ++;
-		if(down) yd --;
+		if(up) zd ++;
+		if(down) zd --;
 		
-		float xx = xd * MathUtils.cosDeg(rx) + zd * MathUtils.sinDeg(rx);
-		float zz = xd * MathUtils.sinDeg(rx) - zd * MathUtils.cosDeg(rx);
-		float yy = yd;
+		float xx = xd * MathUtils.cosDeg(-rx) + yd * MathUtils.sinDeg(-rx);
+		float yy = xd * MathUtils.sinDeg(-rx) - yd * MathUtils.cosDeg(-rx);
+		float zz = zd;
 		
 		x += xx * speed;
 		y += yy * speed;
 		z += zz * speed;
-		
-		// x = y = z = 0;
 	}
 	
 	public Matrix4f getViewMatrix(float fov, float width, float height) {
 		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.0001f, 100);
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 100000);
 		return projectionMatrix;
 	}
 	
 	public Matrix4f getProjectionViewMatrix(float fov, float width, float height) {
 		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.0001f, 100);
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 100000);
 		return projectionMatrix.mul(new Matrix4f().translate(-x, -y, -z));
 	}
 	
 	public Matrix4f getProjectionMatrix(float fov, float width, float height) {
 		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 10000);
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.1f, 100000);
 		return projectionMatrix
 				.rotate(MathUtils.toRadians(ry), 1, 0, 0)
-				.rotate(MathUtils.toRadians(rx), 0, 1, 0)
-				.rotate(MathUtils.toRadians(rz), 0, 0, 1)
+				.rotate(MathUtils.toRadians(rx), 0, 0, 1)
+				.rotate(MathUtils.toRadians(rz), 0, 1, 0)
 				.translate(-x, -y, -z);
 	}
 	
 	public Vector3f getViewDirection() {
 		Vector3f vector = new Vector3f(0, 0, 1)
 				.rotateAxis(MathUtils.toRadians(ry), 1, 0, 0)
-				.rotateAxis(MathUtils.toRadians(rx), 0, 1, 0)
-				.rotateAxis(MathUtils.toRadians(rz), 0, 0, 1);
+				.rotateAxis(MathUtils.toRadians(rx), 0, 0, 1)
+				.rotateAxis(MathUtils.toRadians(rz), 0, 1, 0);
 		return vector;
 	}
 	
 	public void setTransform() {
+		GL11.glRotatef(rx, 0, 0, 1);
 		GL11.glRotatef(ry, 1, 0, 0);
-		GL11.glRotatef(rx, 0, 1, 0);
-		GL11.glRotatef(rz, 0, 0, 1);
+		GL11.glRotatef(rz, 0, 1, 0);
 		GL11.glTranslatef(-x, -y, -z);
 	}
 }

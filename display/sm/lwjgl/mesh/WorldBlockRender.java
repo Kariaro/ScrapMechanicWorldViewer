@@ -10,6 +10,7 @@ import sm.lwjgl.shader.BlockShader;
 import sm.objects.BodyList.ChildShape;
 import sm.objects.BodyList.RigidBody;
 import sm.world.types.Block;
+import sm.world.types.ShapeUtils.Bounds3D;
 
 public class WorldBlockRender {
 	private static BlockMesh mesh;
@@ -49,111 +50,81 @@ public class WorldBlockRender {
 	public static String last_str;
 	public static byte[] dif_bytes;
 	
-	public void render(ChildShape shape) {
+	public void render(ChildShape shape, Bounds3D bounds) {
 		float x = shape.xPos;
 		float y = shape.yPos;
 		float z = shape.zPos;
 		
-		//System.out.println(Integer.toHexString(shape.TEST_bodyId));
 		RigidBody body = shape.body;
-		if(body.isStatic_0_2 == 2) {
-			/*
-			//System.out.println(x + ", " + y + ", " + z);
-			//System.out.println(Util.getShort(shape.TEST_data, 33, true));
-			//System.out.println(Integer.toHexString(shape.TEST_id));
-			//RigidBodyBoundsNode node = body.node;
-			
-			// System.out.println(body.xmm_9_4 + ", " + body.xmx_13_4);
-			
-			byte[] data = shape.TEST_data;
-			int a = 1;
-			StringBuilder sb = new StringBuilder();
-			for(byte b : data) {
-				sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
-			}
-			String nows = sb.toString();
-			
-			if(last == null) {
-				last = new StringBuilder(nows);
-				dif_bytes = new byte[nows.length()];
-				for(int i = 0; i < dif_bytes.length; i++) {
-					dif_bytes[i] = '.';
-				}
-			} else {
-				int size = Math.min(last.length(), nows.length());
-				if(dif_bytes.length < size) {
-					dif_bytes = new byte[size];
-				}
-				
-				for(int i = 0; i < size; i++) {
-					char aa = last.charAt(i);
-					char bb = nows.charAt(i);
-					
-					if(aa != bb) {
-						dif_bytes[i] = '#';
-					} else {
-						dif_bytes[i] = '.';
-					}
-				}
-				
-				
-				if(!nows.equals(last_str)) {
-					//System.out.println(nows);
-					//System.out.println(new String(dif_bytes));
-					
-					last_str = nows;
-					last.delete(0, last.length());
-					last.append(nows);
-				}
-				
-				//System.out.println();
-			}*/
-		}
 		
+		//System.out.println(shape.bodyId);
 		if(shape.body.isStatic_0_2 == 2) {
-			Vector4f right = shape.body.matrix.getColumn(1, new Vector4f());
-			Vector4f up = shape.body.matrix.getColumn(2, new Vector4f());
-			Vector4f at = shape.body.matrix.getColumn(0, new Vector4f());
+			float xm = (bounds.xMin + bounds.xMax) / 2.0f;
+			float ym = (bounds.yMin + bounds.yMax) / 2.0f;
+			float zm = (bounds.zMin + bounds.zMax) / 2.0f;
 			
-			
-			float pi = (float)Math.PI;
+			//float axm = (body.xMin + body.xMax) / 2.0f;
+			//float aym = (body.yMin + body.yMax) / 2.0f;
 			Matrix4f matrix = new Matrix4f();
-			//matrix.rotate(-pi / 2.0f, new Vector3f(-1, 0, 0));
-			//matrix.rotate(shape.body.quat);
+			/*matrix.translate(-xm, -ym, -zm);
+			
 			matrix.translate(x, y, z);
+			matrix.rotateLocal(body.quat);
+			matrix.translateLocal(
+				(body.yMin + body.yMax) * 2,
+				(body.xMin + body.xMax) * 2,
+				0
+			);*/
+			
+			//matrix.translate(-xm, -ym, -zm);
+			matrix.translateLocal(x, y, z);
+			//matrix.translateLocal(-xm, -ym, -zm);
+			//matrix.rotateAroundLocal(body.quat, xm, ym, zm);
+			/*matrix.translate(
+				body.yPos,
+				body.xPos,
+				body.zPos
+			);*/
+			/*System.out.printf("%6.3f, %6.3f, %6.3f, %6.3f\n",
+				body.xMin, body.xMax,
+				body.yMin, body.yMax
+			);*/
+			//matrix.rotateLocal(body.quat);
+			//matrix.rotateAround(body.quat, (body.yMin + body.yMax) * 2, (body.xMin + body.xMax) * 2, 0);
+			
+			/*{
+				byte[] data = body.TEST_data;
+				int a = 1;
+				StringBuilder sb = new StringBuilder();
+				for(int i = 0; i < data.length; i++) {
+					byte b = data[i];
+					sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
+				}
+				String nows = sb.toString();
+				
+				//System.out.println(nows);
+			}*/
+			
+			//matrix.rotate(body.quat);
 			shader.setUniform("transformationMatrix", matrix);
 		} else {
 			shader.setUniform("transformationMatrix", new Matrix4f().translate(x, y, z));
 		}
 		
-		//System.out.println(shape.uuid);
-		if(body.isStatic_0_2 == 1) {
-			byte[] data = shape.TEST_data;
-			int a = 1;
-			StringBuilder sb = new StringBuilder();
-			for(byte b : data) {
-				sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
-			}
-			String nows = sb.toString();
+		/* else {
+			float xm = (bounds.xMin + bounds.xMax) / 2.0f;
+			float ym = (bounds.yMin + bounds.yMax) / 2.0f;
+			float zm = 0;//(bounds.zMin + bounds.zMax) / 2.0f;
 			
-			float xx = x;
-			float yy = y;
-			float zz = z;
-			
-			//System.out.println(body.zMin);
-			
-			Vector3f local = body.getMiddleLocal();
-			float bxm = (body.xMax + body.xMin) * 2;
-			float bzm = (body.zMax + body.zMin) * 2;
-			
-			Matrix4f matrix = new Matrix4f();
+			Matrix4f matrix = new Matrix4f().translate(x, y, z);
+			matrix.translate(-xm, -ym, -zm);
 			matrix.translate(
-				xx,// - local.x + bxm,
-				yy,// - local.y,
-				zz// - local.z + bzm
+				(body.yMin + body.yMax) * 2,
+				(body.xMin + body.xMax) * 2,
+				0
 			);
 			shader.setUniform("transformationMatrix", matrix);
-		}
+		}*/
 		
 		shader.setUniform("localTransform", x, y, z);
 		shader.setUniform("tiling", block.tiling);
@@ -181,6 +152,8 @@ public class WorldBlockRender {
 		dif.bind();
 		asg.bind();
 		nor.bind();
+		
+		// TODO: Transparency
 		//GL11.glEnable(GL11.GL_BLEND);
 		//GL11.glEnable(GL11.GL_ALPHA_TEST);
 		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

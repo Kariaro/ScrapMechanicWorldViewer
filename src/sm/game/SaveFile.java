@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import sm.objects.BodyList;
 import sm.objects.Game;
+import sm.objects.ScriptData;
 import sm.sqlite.Sqlite;
 
 /**
@@ -16,12 +17,15 @@ public class SaveFile implements AutoCloseable {
 	private final Sqlite sqlite;
 	private final Game game;
 	private final BodyList bodyList;
+	private final ScriptData scriptData;
 	
 	private SaveFile(File file) throws SQLException {
 		this.sqlite = new Sqlite(file);
 		
 		game = new Game(sqlite);
-		bodyList= new BodyList(sqlite);
+		bodyList = new BodyList(sqlite);
+		scriptData = new ScriptData(sqlite);
+		scriptData.test();
 	}
 	
 	public Game getGame() {

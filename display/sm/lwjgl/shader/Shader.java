@@ -23,19 +23,6 @@ public class Shader {
 	protected int vertexShaderId;
 	protected int fragmentShaderId;
 	
-	/*
-	public Shader(String vertexPath, String fragmentPath) throws Exception {
-		programId = GL20.glCreateProgram();
-		if(programId == 0) {
-			throw new Exception("Could not create Shader");
-		}
-		
-		createVertexShader(vertexPath);
-		createFragmentShader(fragmentPath);
-		link();
-	}
-	*/
-	
 	public void createVertexShader(String shaderPath) throws Exception {
 		vertexShaderId = createShader(shaderPath, GL20.GL_VERTEX_SHADER);
 	}

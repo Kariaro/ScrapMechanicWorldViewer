@@ -208,7 +208,11 @@ public final class ScrapMechanicAssets {
 			
 			String uuidStr = part.uuid.toString();
 			if(uuidStr.equals("ea4237f4-851a-4751-a1bc-3f85b7488243")
-			|| uuidStr.equals("d4784875-1ede-4d00-a432-f390f0d8fc73")) {
+			|| uuidStr.equals("d4784875-1ede-4d00-a432-f390f0d8fc73")
+			|| uuidStr.equals("f8da6b41-03d7-4bc1-ba94-011a351b1569")
+			|| uuidStr.equals("9a9185d7-9709-4113-8bb0-d0e22fb08e42")
+			|| uuidStr.equals("80550b05-f9eb-433c-9773-2af3beb1479d")
+			|| uuidStr.equals("8f7fd0e7-c46e-4944-a414-7ce2437bb30f")) {
 			}
 			parts.put(part.uuid, part);
 		}

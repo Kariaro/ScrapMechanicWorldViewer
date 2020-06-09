@@ -20,6 +20,7 @@ import org.lwjgl.opengl.GL11;
 
 import sm.lwjgl.mesh.Texture;
 
+// TODO: The text should be rendered in a shader and not with the gl functions!
 public class Text {
 	private static final String CHARACTERS =
 		"abcdefghijklmnopqrstuvwxyzåäö" +

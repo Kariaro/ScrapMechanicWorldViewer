@@ -32,9 +32,9 @@ public class Gui {
 		GL11.glEnable(GL11.GL_ALPHA);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
-		// TODO: Gui ...
+		// TODO: This should be rendered by a shader
 		GL11.glColor3f(1, 1, 1);
-		text.drawText("Testing", 0, 0, 24);
+		text.drawText("World: '" + WorldRender.fileName + "'", 0, 0, 24);
 		text.drawText("Fps: " + parent.getFps(), 0, 24, 24);
 		Camera cam = parent.camera;
 		text.drawText(String.format("Pos: %8.5f, %8.5f, %8.5f", cam.x / 4.0f, cam.y / 4.0f, cam.z / 4.0f), 0, 48, 24);

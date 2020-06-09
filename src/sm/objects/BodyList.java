@@ -11,10 +11,10 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import sm.sqlite.Sqlite;
 import sm.util.Util;
+import sm.world.types.ShapeUtils;
 
 public class BodyList extends SQLiteObject {
 	public BodyList(Sqlite sqlite) {
@@ -75,88 +75,6 @@ public class BodyList extends SQLiteObject {
 		}
 	}
 	
-	// Multiple per body
-	public class ChildShape {
-		public int unk_0_1 = 0;
-		/**
-		 * <pre>
-		 * 0x1f: block
-		 * 0x20: part
-		 * </pre>
-		 */
-		public int shapeType_1_1 = 0; // type_id ??? // TODO: Create Enum
-		public int unk_2_1 = 0;
-		
-		public int id_3_4 = 0;     // This is just the ChildShape.id
-		public int bodyId_7_4 = 0; // This is just the ChildShape.bodyId
-		
-		/** offset:11 size:16 */ public UUID uuid = null;
-		public int uniqueId_27_4 = 0;
-		
-		/** offset:31 size:2 */ public int zPos = 0;
-		/** offset:33 size:2 */ public int xPos = 0;
-		/** offset:35 size:2 */ public int yPos = 0;
-		
-		/** offset:37 size:4 */ public int colorRGBA = 0;
-		
-		// Only if 'shapeType' == '0x20'
-		public int rotation_41_1 = 0;
-		
-		// Only for 'shapeType' == '0x1f'
-		/** offset:41 size:2 */ public int zSize = 0; // z size
-		/** offset:43 size:2 */ public int xSize = 0; // x size
-		/** offset:45 size:2 */ public int ySize = 0; // y size
-		
-		
-		protected ChildShape(RigidBody body, ResultSet childShape) throws SQLException {
-			this(body, childShape.getInt("id"), childShape.getInt("bodyId"), childShape.getBytes("data"));
-		}
-		
-		public int TEST_id;
-		public int TEST_bodyId;
-		public byte[] TEST_data;
-		
-		public RigidBody body;
-		protected ChildShape(RigidBody body, int id, int bodyId, byte[] data) {
-			this.body = body;
-			
-			TEST_id = id;
-			TEST_bodyId = bodyId;
-			TEST_data = data;
-			
-			unk_0_1 = data[0];
-			shapeType_1_1 = data[1];
-			unk_2_1 = data[2];
-			id_3_4 = Util.getInt(data, 3, true);
-			bodyId_7_4 = Util.getInt(data, 7, true);
-			
-			uuid = Util.getUUID(data, 11, false);
-			uniqueId_27_4 = Util.getInt(data, 27, true);
-			
-			zPos = Util.getShort(data, 31, true);
-			xPos = Util.getShort(data, 33, true);
-			yPos = Util.getShort(data, 35, true);
-			
-			colorRGBA = Util.getInt(data, 37, false);
-			rotation_41_1 = Byte.toUnsignedInt(data[41]);
-			
-			
-			System.out.printf("rot: %8s\n", Integer.toBinaryString(rotation_41_1));
-			if(shapeType_1_1 == 0x1f && data.length >= 47) {
-				zSize = Util.getShort(data, 41, true);
-				xSize = Util.getShort(data, 43, true);
-				ySize = Util.getShort(data, 45, true);
-			}
-			
-			// TODO: Type specific data
-		}
-		
-		@Override
-		public String toString() {
-			return uuid.toString();
-		}
-	}
-	
 	// Only one per body
 	public class RigidBody {
 		public int bodyId;
@@ -167,24 +85,52 @@ public class BodyList extends SQLiteObject {
 		public int isStatic_0_2 = 0; // 1 is static, 2 is dynamic
 		public int unk_2_1 = 0;
 		
-		public int bodyId_3_4 = 0;
+		/** offset:3 size:4 */ public int bodyId_3_4 = 0;
 		public int unk_7_2 = 0;
+
+		
+		// These values only shows up when 'isStatic' == '1'
+		// 19 == onLift???
+		// -1 == none???
+		/** offset:56 size:4 */ public int staticFlags = 0;
 		
 		// These values are exactly the same as the values inside RigidBodyBounds
-		/** offset: 9 size:4 */ public float xMax = 0;
-		/** offset:13 size:4 */ public float xMin = 0;
-		/** offset:17 size:4 */ public float zMax = 0;
-		/** offset:21 size:4 */ public float zMin = 0;
+		/** offset: 9 size:4 */ public float yMax = 0;
+		/** offset:13 size:4 */ public float yMin = 0;
+		/** offset:17 size:4 */ public float xMax = 0;
+		/** offset:21 size:4 */ public float xMin = 0;
+		
+		// These values only shows up when 'isStatic' == '2'
+		/** offset:27 size:16 */public Quaternionf quat;
+		
+		/** offset:43 size:4 */ public float xWorld = 0;
+		/** offset:47 size:4 */ public float yWorld = 0;
+		/** offset:51 size:4 */ public float zWorld = 0;
+		/** offset:55 size:4 */ public float xVelocity = 0;
+		/** offset:59 size:4 */ public float yVelocity = 0;
+		/** offset:63 size:4 */ public float zVelocity = 0;
+		/** offset:67 size:4 */ public float xAngularVelocity = 0;
+		/** offset:71 size:4 */ public float yAngularVelocity = 0;
+		/** offset:75 size:4 */ public float zAngularVelocity = 0;
+		
+		// 1	erasable
+		// 2	buildable
+		// 4	paintable
+		// 8	connectable
+		// 16	liftable
+		// 32	usable
+		// 64	destructable
+		// 128	convertibleToDynamic
+		/** offset:79 size:1 */ public int flags = 0;
 		
 		// TODO: Next values
 		// Only if 'isStatic' == '2'
-		public Quaternionf quat;
 		public Matrix4f matrix;
 		
 		public RigidBodyBounds bounds;
 		//public RigidBodyBoundsNode node;
 		public List<ChildShape> shapes;
-
+		
 		public byte[] TEST_data;
 		
 		protected RigidBody(ResultSet rigidBody) throws SQLException {
@@ -197,6 +143,10 @@ public class BodyList extends SQLiteObject {
 			bounds = new RigidBodyBounds(sqlite.execute("SELECT * FROM RigidBodyBounds WHERE id = " + bodyId));
 			//System.out.println(bounds);
 			
+			if(bodyId == 1566) {
+				System.out.println("------------------------------");
+				System.out.println(Integer.toHexString(bodyId));
+			}
 			ResultSet childSet = sqlite.execute("SELECT * FROM ChildShape WHERE bodyId = " + bodyId);
 			while(childSet.next()) shapes.add(new ChildShape(this, childSet));
 			
@@ -212,8 +162,12 @@ public class BodyList extends SQLiteObject {
 			// Bounding box
 			xMax = Util.getFloat(data,  9, true);
 			xMin = Util.getFloat(data, 13, true);
-			zMax = Util.getFloat(data, 17, true);
-			zMin = Util.getFloat(data, 21, true);
+			yMax = Util.getFloat(data, 17, true);
+			yMin = Util.getFloat(data, 21, true);
+			
+			if(isStatic_0_2 == 1) {
+				staticFlags = Util.getInt(data, 56, true);
+			}
 			
 			// 2 bytes space
 			if(isStatic_0_2 == 2) {
@@ -222,138 +176,170 @@ public class BodyList extends SQLiteObject {
 				float cc = Util.getFloat(data, 35, true);
 				float dd = Util.getFloat(data, 39, true);
 				
-				float ee = Util.getFloat(data, 43, true);
-				float ff = Util.getFloat(data, 47, true);
-				float gg = Util.getFloat(data, 51, true);
+				xWorld = Util.getFloat(data, 43, true);
+				yWorld = Util.getFloat(data, 47, true);
+				zWorld = Util.getFloat(data, 51, true);
+				float ee = xWorld,
+					  ff = yWorld,
+					  gg = zWorld;
 				
-				float hh = Util.getFloat(data, 55, true);
-				float ii = Util.getFloat(data, 59, true);
-				float jj = Util.getFloat(data, 63, true);
+				xVelocity = Util.getFloat(data, 55, true);
+				yVelocity = Util.getFloat(data, 59, true);
+				zVelocity = Util.getFloat(data, 63, true);
+				float hh = xVelocity,
+					  ii = yVelocity,
+					  jj = zVelocity;
 				
-				float kk = Util.getFloat(data, 67, true);
-				float ll = Util.getFloat(data, 71, true);
-				float mm = Util.getFloat(data, 75, true);
-				// 40609a36
-				// 3fc08ff0
-				// bf7e4257
+
+				xAngularVelocity = Util.getFloat(data, 67, true);
+				yAngularVelocity = Util.getFloat(data, 71, true);
+				zAngularVelocity = Util.getFloat(data, 75, true);
+				float kk = xAngularVelocity,
+					  ll = yAngularVelocity,
+					  mm = zAngularVelocity;
 				
-				// bcd74b74
-				// 3c9bdcfb
-				// bd1017b8
+				flags = Byte.toUnsignedInt(data[79]);
 				
-				// bdbf2b3b
-				// bd285d82
-				// b8e3d010
-				//00
-				//System.out.println("AB: " + aa + ", " + bb);
-				//System.out.println("CD: " + cc + ", " + dd);
-				System.out.printf("EFG: %8.5f, %8.5f, %8.5f\n", ee, ff, gg);
-				System.out.printf("HIJ: %8.5f, %8.5f, %8.5f\n", hh, ii, jj);
-				System.out.printf("KLM: %8.5f, %8.5f, %8.5f\n", kk, ll, mm);
 				
-				quat = new Quaternionf(aa, bb, -cc, dd);
+				quat = new Quaternionf(aa, bb, cc, dd);
 				matrix = quat.get(new Matrix4f());
-				//System.out.println("Quaternion: " + quat);
-				System.out.println("Matrix3x3: \n" + matrix.toString(NumberFormat.getNumberInstance()));
 				
-				int a = 1;
-				StringBuilder sb = new StringBuilder();
-				for(int i = 43; i < data.length; i++) {
-					byte b = data[i];
-					sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
-				}
-				String nows = sb.toString();
-				
-				if(!nows.equals(last)) {
+				if(bodyId == 1566) { // 1531
+					//System.out.println();
+					//System.out.printf("Quaternion:      %8.5f, %8.5f, %8.5f, %8.5f\n", aa, bb, cc, dd);
+					//System.out.printf("WorldPosition:   %8.5f, %8.5f, %8.5f\n", ee, ff, gg);
+					//System.out.printf("Velocity:        %8.5f, %8.5f, %8.5f\n", hh, ii, jj);
+					//System.out.printf("AngularVelocity: %8.5f, %8.5f, %8.5f\n", kk, ll, mm);
+					//System.out.printf("WorldB: %8.5f, %8.5f, %8.5f, %8.5f\n", xMin, xMax, yMin, yMax);
+					//System.out.printf("Bounds: %s\n", ShapeUtils.getBoundingBox(this));
 					
-					System.out.println(nows);
-					last = nows;
+					//System.out.println(flags);
+					
+					int a = 1;
+					StringBuilder sb = new StringBuilder();
+					for(int i = 0; i < data.length; i++) {
+						byte b = data[i];
+						sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
+					}
+					String nows = sb.toString();
+					
+					if(!nows.equals(last)) {
+						
+						//System.out.println(nows);
+						//last = nows;
+					} else {
+
+						//System.out.println(nows);
+					}
 				}
 			}
-			
-			// System.out.println("XX: " + xmm_9_4 + ",  " + xmx_13_4);
-			// System.out.println("ZZ: " + zmm_17_4 + ", " + zmx_21_4);
-			// System.out.println();
 		}
 		
-		public Vector3f getMiddleLocal() {
-			Vector2f xSize = new Vector2f(-Float.MIN_VALUE, Float.MIN_VALUE);
-			Vector2f ySize = new Vector2f(-Float.MIN_VALUE, Float.MIN_VALUE);
-			Vector2f zSize = new Vector2f(-Float.MIN_VALUE, Float.MIN_VALUE);
-			
-			for(ChildShape shape : shapes) {
-				if(shape.shapeType_1_1 != 0x1f) continue;
-				
-				if(shape.xPos < xSize.x) xSize.x = shape.xPos;
-				if(shape.xPos + shape.xSize > xSize.y) xSize.y = shape.xPos + shape.xSize;
-				
-				if(shape.yPos < ySize.x) ySize.x = shape.yPos;
-				if(shape.yPos + shape.ySize > ySize.y) ySize.y = shape.yPos + shape.ySize;
-				
-				if(shape.zPos < zSize.x) zSize.x = shape.zPos;
-				if(shape.zPos + shape.zSize > zSize.y) zSize.y = shape.zPos + shape.zSize;
-			}
-			
-			System.out.println(ySize);
-			return new Vector3f(
-				(xSize.x + xSize.y) / 2.0f,
-				(ySize.x + ySize.y) / 2.0f,
-				(zSize.x + zSize.y) / 2.0f
-			);
+		public boolean isErasable() { return (flags & 1) > 0; }
+		public boolean isBuildable() { return (flags & 2) > 0; }
+		public boolean isPaintable() { return (flags & 4) > 0; }
+		public boolean isConnectable() { return (flags & 8) > 0; }
+		public boolean isLiftable() { return (flags & 16) > 0; }
+		public boolean isUsable() { return (flags & 32) > 0; }
+		public boolean isDestructable() { return (flags & 64) > 0; }
+		public boolean isConvertibleToDynamic() { return (flags & 128) > 0; }
+	}
+	
+
+	// Multiple per body
+	public class ChildShape {
+		//public int unk_0_1 = 0;
+		/**
+		 * <pre>
+		 * 0x1f: block
+		 * 0x20: part
+		 * </pre>
+		 */
+		/** offset:1 size:1 */ public int shapeType = 0; // type_id ??? // TODO: Create Enum
+		//public int unk_2_1 = 0;
+		
+		/** offset:3 size:4 */ public int shapeId = 0;
+		/** offset:7 size:4 */ public int bodyId = 0;
+		
+		/** offset:11 size:16 */ public UUID uuid = null;
+		///** offset:27 size:4 */ public int uniqueId_27_4 = 0;
+		
+		/** offset:31 size:2 */ public int xPos = 0;
+		/** offset:33 size:2 */ public int yPos = 0;
+		/** offset:35 size:2 */ public int zPos = 0;
+		
+		/** offset:37 size:4 */ public int colorRGBA = 0;
+		
+		// Only if 'shapeType' == '0x20'
+		/** offset:41 size:1 */ public int partRotation = 0;
+		
+		// Only if 'shapeType' == '0x1f'
+		/** offset:41 size:2 */ public int xSize = 0;
+		/** offset:43 size:2 */ public int ySize = 0;
+		/** offset:45 size:2 */ public int zSize = 0;
+		
+		
+		protected ChildShape(RigidBody body, ResultSet childShape) throws SQLException {
+			this(body, childShape.getInt("id"), childShape.getInt("bodyId"), childShape.getBytes("data"));
 		}
 		
-		public Vector3f getMiddle() {
-			float x = 0;
-			float y = 0;
-			float z = 0;
+		public int TEST_id;
+		public int TEST_bodyId;
+		public byte[] TEST_data;
+		
+		public RigidBody body;
+		protected ChildShape(RigidBody body, int shapeId, int bodyId, byte[] data) {
+			this.body = body;
 			
+			TEST_id = shapeId;
+			TEST_bodyId = bodyId;
+			TEST_data = data;
 			
-			for(ChildShape shape : shapes) {
-				if(shape.shapeType_1_1 != 0x1f) continue;
-				
-				// TODO: What about parts????
-				int sx = shape.xPos;
-				int sy = shape.yPos;
-				int sz = shape.zPos;
-				
-				int ssz = shape.xSize;
-				int ssy = shape.ySize;
-				int ssx = shape.zSize;
-				
-				// Correct
-				float smx = sx + (ssx) / 2.0f;
-				float smy = sy + (ssy) / 2.0f;
-				float smz = sz + (ssz) / 2.0f;
-				
-				x += smx;
-				y += smy;
-				z += smz;
+			//unk_0_1 = data[0];
+			shapeType = Byte.toUnsignedInt(data[1]);
+			//unk_2_1 = data[2];
+			
+			this.shapeId = Util.getInt(data, 3, true);
+			this.bodyId = Util.getInt(data, 7, true);
+			
+			uuid = Util.getUUID(data, 11, false);
+			// BodyId uniqueId_27_4 = Util.getInt(data, 27, true);
+			
+			xPos = Util.getShort(data, 31, true);
+			yPos = Util.getShort(data, 33, true);
+			zPos = Util.getShort(data, 35, true);
+			
+			colorRGBA = Util.getInt(data, 37, false);
+			
+			if(shapeType == 0x1f) {
+				xSize = Util.getShort(data, 41, true);
+				ySize = Util.getShort(data, 43, true);
+				zSize = Util.getShort(data, 45, true);
+			} else {
+				partRotation = Byte.toUnsignedInt(data[41]);
 			}
-			
-			if(shapes.size() > 0) {
-				x /= (float)shapes.size();
-				y /= (float)shapes.size();
-				z /= (float)shapes.size();
-			}
-			
-			return new Vector3f(x, y, z);
+		}
+		
+		@Override
+		public String toString() {
+			return uuid.toString();
 		}
 	}
 	
 	// Only one per RigidBody
 	public class RigidBodyBounds {
 		private final int id;
+		public final float yMin;
+		public final float yMax;
 		public final float xMin;
 		public final float xMax;
-		public final float zMin;
-		public final float zMax;
 		
 		private RigidBodyBounds(ResultSet rigidBodyBounds) throws SQLException {
 			id = rigidBodyBounds.getInt("id");
-			zMin = rigidBodyBounds.getFloat("minX");
-			zMax = rigidBodyBounds.getFloat("maxX");
-			xMin = rigidBodyBounds.getFloat("minY");
-			xMax = rigidBodyBounds.getFloat("maxY");
+			xMin = rigidBodyBounds.getFloat("minX");
+			xMax = rigidBodyBounds.getFloat("maxX");
+			yMin = rigidBodyBounds.getFloat("minY");
+			yMax = rigidBodyBounds.getFloat("maxY");
 		}
 		
 		public int getId() {
@@ -364,7 +350,7 @@ public class BodyList extends SQLiteObject {
 		public String toString() {
 			return new StringBuilder()
 				.append("RigidBodyBounds{ ")
-				.append(String.format("minX: %8.5f, minY: %8.5f, maxX: %8.5f, maxY: %8.5f", xMin, zMin, xMax, zMax))
+				.append(String.format("minX: %8.5f, minY: %8.5f, maxX: %8.5f, maxY: %8.5f", yMin, xMin, yMax, xMax))
 				.append(" }").toString();
 		}
 	}
