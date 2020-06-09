@@ -44,9 +44,9 @@ public class Main {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		LwjglWorldViewer viewer = new LwjglWorldViewer();
-		viewer.start();
-		//new Main();
+		//LwjglWorldViewer viewer = new LwjglWorldViewer();
+		//viewer.start();
+		new Main();
 	}
 	
 	public Main() {

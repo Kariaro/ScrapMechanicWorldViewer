@@ -22,12 +22,9 @@ public class Camera {
 	
 	public Camera(long window) {
 		this.window = window;
-		//x = -1;
-		//y =  4;
-		//z = -5;
 	}
 	
-	// TODO: Rework :P
+	// TODO: Get this data from the glfw callback and not the global mouse position :P
 	private Vector2f mouse = new Vector2f(0, 0);
 	private Vector2f delta = new Vector2f(0, 0);
 	private void updateMouse() {

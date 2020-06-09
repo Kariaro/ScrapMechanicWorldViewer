@@ -42,6 +42,7 @@ public class PartMesh {
 		String path = ScrapMechanicAssets.resolvePath(lod.mesh);
 		meshes = StaticMeshLoader.load(path);
 		
+		// TODO: Animations
 		if(lod.animationList != null) {
 			//animations = null;
 			/*animations = new Mesh[1][];
@@ -85,7 +86,7 @@ public class PartMesh {
 		int index = 0;
 		int max = 0;
 		
-		// TODO: This should be better???
+		// TODO: Code this a little better. Use more functions!
 		while(!material.isEmpty() && (max++ < 100)) {
 			if(material.startsWith("UVAnim")) {
 				material = material.substring(6);

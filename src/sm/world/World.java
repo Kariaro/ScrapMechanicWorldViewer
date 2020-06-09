@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import sm.asset.ScrapMechanicAssets;
 import sm.game.SaveFile;
 import sm.objects.Game;
+import valve.Steam;
 
 /**
  * This class will load SQLite database worlds from ScrapMechanic
@@ -15,9 +16,9 @@ import sm.objects.Game;
  * @author HardCoded
  */
 public class World {
-	// FIXME: This path should be put or read in some property file! (Steam lookup???)
-	public static final String $SURVIVAL_DATA = "D:/Steam/steamapps/common/Scrap Mechanic/Survival";
-	public static final String $GAME_DATA = "D:/Steam/steamapps/common/Scrap Mechanic/Data";
+	public static final String $CHALLENGE_DATA;
+	public static final String $SURVIVAL_DATA;
+	public static final String $GAME_DATA;
 	
 	// TODO: This is used by this software and not by ScrapMechanic.
 	public static final String $USER_DATA;
@@ -25,6 +26,14 @@ public class World {
 	private static final Logger LOGGER = Logger.getLogger(World.class.getName());
 	
 	static {
+		// TODO: User specified path!
+		File gamePath = Steam.findGamePath("Scrap Mechanic");
+		System.out.println("Path: " + gamePath);
+		
+		$CHALLENGE_DATA = new File(gamePath, "ChallengeData").getAbsolutePath();
+		$SURVIVAL_DATA = new File(gamePath, "Survival").getAbsolutePath();
+		$GAME_DATA = new File(gamePath, "Data").getAbsolutePath();
+		
 		String appdata_path = System.getenv("APPDATA");
 		File sm_userpath = new File(appdata_path, "Axolot Games/Scrap Mechanic/User");
 		

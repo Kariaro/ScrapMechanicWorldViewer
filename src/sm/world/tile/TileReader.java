@@ -5,7 +5,7 @@ import java.util.UUID;
 import sm.util.FileUtils;
 import sm.util.Util;
 
-public class TileReader {
+class TileReader {
 	public static final void main(String[] args) {
 		String path = getPath("7b6c4786-c915-4d50-92cb-27846aeb37e8/TESTING_TILE_FLAT.tile");
 		//path = getPath("cae99b97-ed1e-4f37-814d-c979654db218/TESTING_TILE_FLAT_MEDIUM.tile");
