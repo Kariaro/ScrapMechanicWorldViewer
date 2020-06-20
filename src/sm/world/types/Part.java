@@ -45,9 +45,12 @@ public class Part {
 		if(name.equals("box") || name.equals("hull")) {
 			bounds = new BoxBounds((int)map.get("x"), (int)map.get("y"), (int)map.get("z"));
 		} else if(name.equals("cylinder")) {
-			// TODO: Axis
-			bounds = new CylinderBounds((int)map.get("diameter"), (int)map.get("depth"), map.get("axis").toString());
 			
+			if(map.containsKey("margin")) {
+				bounds = new CylinderBounds((int)map.get("diameter"), (int)map.get("depth"), (float)(double)map.get("margin"), map.get("axis").toString());
+			} else {
+				bounds = new CylinderBounds((int)map.get("diameter"), (int)map.get("depth"), 0, map.get("axis").toString());
+			}
 		}
 		
 		//System.out.println("Name: " + name);

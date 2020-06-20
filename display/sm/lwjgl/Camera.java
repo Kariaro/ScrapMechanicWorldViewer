@@ -74,7 +74,9 @@ public class Camera {
 		}
 		
 		float speed = 0.1f * (float)Math.pow(5, speedMod - 1);
-		
+		if(Input.keys[GLFW_KEY_RIGHT_CONTROL]) {
+			speed *= 10;
+		}
 		
 		int xd = 0;
 		int zd = 0;
@@ -94,6 +96,10 @@ public class Camera {
 		x += xx * speed;
 		y += yy * speed;
 		z += zz * speed;
+	}
+	
+	public Vector3f getPosition() {
+		return new Vector3f(x, y, z);
 	}
 	
 	public Matrix4f getViewMatrix(float fov, float width, float height) {

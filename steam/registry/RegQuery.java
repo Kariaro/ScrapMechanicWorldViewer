@@ -1,5 +1,7 @@
 package registry;
 
+import java.io.IOException;
+
 import sm.util.FileUtils;
 
 public class RegQuery {
@@ -17,10 +19,11 @@ public class RegQuery {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		
 		return null;
 	}
 	
-	private static String executeRegistry(String path, String key) throws Exception {
+	private static String executeRegistry(String path, String key) throws IOException, InterruptedException {
 		Process process = Runtime.getRuntime().exec(QUERY + path + " /v " + key);
 		byte[] bytes = FileUtils.readStreamBytes(process.getInputStream());
 		process.waitFor();

@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL20;
 
-import sm.asset.ScrapMechanicAssets;
+import sm.asset.ScrapMechanic;
 import sm.lwjgl.shader.BlockShader;
 import sm.objects.BodyList.ChildShape;
 import sm.objects.BodyList.RigidBody;
@@ -34,9 +34,9 @@ public class WorldBlockRender {
 				block_nor = Texture.NONE;
 		
 		try {
-			block_dif = Texture.loadTexture(ScrapMechanicAssets.resolvePath(block.dif), 0, GL20.GL_LINEAR);
-			block_asg = Texture.loadTexture(ScrapMechanicAssets.resolvePath(block.asg), 1, GL20.GL_LINEAR);
-			block_nor = Texture.loadTexture(ScrapMechanicAssets.resolvePath(block.nor), 2, GL20.GL_LINEAR);
+			block_dif = Texture.loadTexture(ScrapMechanic.resolvePath(block.dif), 0, GL20.GL_LINEAR);
+			block_asg = Texture.loadTexture(ScrapMechanic.resolvePath(block.asg), 1, GL20.GL_LINEAR);
+			block_nor = Texture.loadTexture(ScrapMechanic.resolvePath(block.nor), 2, GL20.GL_LINEAR);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -57,74 +57,37 @@ public class WorldBlockRender {
 		
 		RigidBody body = shape.body;
 		
-		//System.out.println(shape.bodyId);
 		if(shape.body.isStatic_0_2 == 2) {
-			float xm = (bounds.xMin + bounds.xMax) / 2.0f;
-			float ym = (bounds.yMin + bounds.yMax) / 2.0f;
-			float zm = (bounds.zMin + bounds.zMax) / 2.0f;
-			
-			//float axm = (body.xMin + body.xMax) / 2.0f;
-			//float aym = (body.yMin + body.yMax) / 2.0f;
 			Matrix4f matrix = new Matrix4f();
-			/*matrix.translate(-xm, -ym, -zm);
-			
-			matrix.translate(x, y, z);
-			matrix.rotateLocal(body.quat);
 			matrix.translateLocal(
-				(body.yMin + body.yMax) * 2,
-				(body.xMin + body.xMax) * 2,
-				0
-			);*/
+				x + body.xWorld * 4,
+				y + body.yWorld * 4,
+				z + body.zWorld * 4
+			);
+			matrix.rotateAroundLocal(body.quat,
+				body.xWorld * 4,
+				body.yWorld * 4,
+				body.zWorld * 4
+			);
 			
-			//matrix.translate(-xm, -ym, -zm);
-			matrix.translateLocal(x, y, z);
-			//matrix.translateLocal(-xm, -ym, -zm);
-			//matrix.rotateAroundLocal(body.quat, xm, ym, zm);
-			/*matrix.translate(
-				body.yPos,
-				body.xPos,
-				body.zPos
-			);*/
-			/*System.out.printf("%6.3f, %6.3f, %6.3f, %6.3f\n",
-				body.xMin, body.xMax,
-				body.yMin, body.yMax
-			);*/
-			//matrix.rotateLocal(body.quat);
-			//matrix.rotateAround(body.quat, (body.yMin + body.yMax) * 2, (body.xMin + body.xMax) * 2, 0);
-			
-			/*{
-				byte[] data = body.TEST_data;
-				int a = 1;
-				StringBuilder sb = new StringBuilder();
-				for(int i = 0; i < data.length; i++) {
-					byte b = data[i];
-					sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
-				}
-				String nows = sb.toString();
-				
-				//System.out.println(nows);
-			}*/
-			
-			//matrix.rotate(body.quat);
 			shader.setUniform("transformationMatrix", matrix);
 		} else {
-			shader.setUniform("transformationMatrix", new Matrix4f().translate(x, y, z));
-		}
-		
-		/* else {
-			float xm = (bounds.xMin + bounds.xMax) / 2.0f;
-			float ym = (bounds.yMin + bounds.yMax) / 2.0f;
-			float zm = 0;//(bounds.zMin + bounds.zMax) / 2.0f;
-			
-			Matrix4f matrix = new Matrix4f().translate(x, y, z);
-			matrix.translate(-xm, -ym, -zm);
-			matrix.translate(
-				(body.yMin + body.yMax) * 2,
-				(body.xMin + body.xMax) * 2,
-				0
+			Matrix4f matrix = new Matrix4f();
+			matrix.translateLocal(
+				x + body.xWorld * 4,
+				y + body.yWorld * 4,
+				z + body.zWorld * 4
 			);
+			
+			if(body.staticFlags < -1) {
+				matrix.rotateAroundLocal(body.quat,
+					body.xWorld * 4,
+					body.yWorld * 4,
+					body.zWorld * 4
+				);
+			}
 			shader.setUniform("transformationMatrix", matrix);
-		}*/
+		}
 		
 		shader.setUniform("localTransform", x, y, z);
 		shader.setUniform("tiling", block.tiling);
@@ -154,14 +117,7 @@ public class WorldBlockRender {
 		nor.bind();
 		
 		// TODO: Transparency
-		//GL11.glEnable(GL11.GL_BLEND);
-		//GL11.glEnable(GL11.GL_ALPHA_TEST);
-		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		
 		mesh.render();
-		
-		//GL11.glDisable(GL11.GL_ALPHA_TEST);
-		//GL11.glDisable(GL11.GL_BLEND);
 		
 		dif.unbind();
 		asg.unbind();

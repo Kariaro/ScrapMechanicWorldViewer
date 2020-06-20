@@ -1,20 +1,20 @@
 package sm.objects;
 
+import java.sql.Blob;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.NumberFormat;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
+import org.sqlite.jdbc4.JDBC4Connection;
 
 import sm.sqlite.Sqlite;
 import sm.util.Util;
-import sm.world.types.ShapeUtils;
 
 public class BodyList extends SQLiteObject {
 	public BodyList(Sqlite sqlite) {
@@ -28,12 +28,6 @@ public class BodyList extends SQLiteObject {
 			while(set.next()) {
 				list.add(new RigidBody(set));
 			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			//tryStuffGeneridData();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -143,10 +137,6 @@ public class BodyList extends SQLiteObject {
 			bounds = new RigidBodyBounds(sqlite.execute("SELECT * FROM RigidBodyBounds WHERE id = " + bodyId));
 			//System.out.println(bounds);
 			
-			if(bodyId == 1566) {
-				System.out.println("------------------------------");
-				System.out.println(Integer.toHexString(bodyId));
-			}
 			ResultSet childSet = sqlite.execute("SELECT * FROM ChildShape WHERE bodyId = " + bodyId);
 			while(childSet.next()) shapes.add(new ChildShape(this, childSet));
 			
@@ -165,51 +155,62 @@ public class BodyList extends SQLiteObject {
 			yMax = Util.getFloat(data, 17, true);
 			yMin = Util.getFloat(data, 21, true);
 			
+			float aa = Util.getFloat(data, 27, true);
+			float bb = Util.getFloat(data, 31, true);
+			float cc = Util.getFloat(data, 35, true);
+			float dd = Util.getFloat(data, 39, true);
+			quat = new Quaternionf(aa, bb, cc, dd);
+			matrix = quat.get(new Matrix4f());
+			
+			xWorld = Util.getFloat(data, 43, true);
+			yWorld = Util.getFloat(data, 47, true);
+			zWorld = Util.getFloat(data, 51, true);
+			
 			if(isStatic_0_2 == 1) {
-				staticFlags = Util.getInt(data, 56, true);
+				// This value has with how the object is stuck....
+				staticFlags = Util.getInt(data, 55, true);
+				//System.out.println("55: " + staticFlags);
+				
+				staticFlags = data[59];
 			}
 			
+			//System.out.println(isStatic_0_2 + ", " + data.length + ", " + staticFlags);
 			// 2 bytes space
+			
+			/*try {
+				JDBC4Connection conn = sqlite.getConnection();
+				if(isStatic_0_2 == 2) data[79] = 0;
+				data[59] = 0;
+				
+				data[55] = 1;
+				data[56] = 0;
+				data[57] = 0;
+				data[58] = 0;
+				
+				PreparedStatement statement = conn.prepareStatement("UPDATE RigidBody SET data = ? WHERE id = " + bodyId);
+				statement.setBytes(1, data);
+				statement.execute();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}*/
+			
 			if(isStatic_0_2 == 2) {
-				float aa = Util.getFloat(data, 27, true);
-				float bb = Util.getFloat(data, 31, true);
-				float cc = Util.getFloat(data, 35, true);
-				float dd = Util.getFloat(data, 39, true);
-				
-				xWorld = Util.getFloat(data, 43, true);
-				yWorld = Util.getFloat(data, 47, true);
-				zWorld = Util.getFloat(data, 51, true);
-				float ee = xWorld,
-					  ff = yWorld,
-					  gg = zWorld;
-				
 				xVelocity = Util.getFloat(data, 55, true);
 				yVelocity = Util.getFloat(data, 59, true);
 				zVelocity = Util.getFloat(data, 63, true);
-				float hh = xVelocity,
-					  ii = yVelocity,
-					  jj = zVelocity;
 				
-
 				xAngularVelocity = Util.getFloat(data, 67, true);
 				yAngularVelocity = Util.getFloat(data, 71, true);
 				zAngularVelocity = Util.getFloat(data, 75, true);
-				float kk = xAngularVelocity,
-					  ll = yAngularVelocity,
-					  mm = zAngularVelocity;
 				
 				flags = Byte.toUnsignedInt(data[79]);
-				
-				
-				quat = new Quaternionf(aa, bb, cc, dd);
-				matrix = quat.get(new Matrix4f());
 				
 				if(bodyId == 1566) { // 1531
 					//System.out.println();
 					//System.out.printf("Quaternion:      %8.5f, %8.5f, %8.5f, %8.5f\n", aa, bb, cc, dd);
-					//System.out.printf("WorldPosition:   %8.5f, %8.5f, %8.5f\n", ee, ff, gg);
-					//System.out.printf("Velocity:        %8.5f, %8.5f, %8.5f\n", hh, ii, jj);
-					//System.out.printf("AngularVelocity: %8.5f, %8.5f, %8.5f\n", kk, ll, mm);
+					//System.out.printf("WorldPosition:   %8.5f, %8.5f, %8.5f\n", xWorld, yWorld, zWorld);
+					//System.out.printf("Velocity:        %8.5f, %8.5f, %8.5f\n", xVelocity, yVelocity, zVelocity);
+					//System.out.printf("AngularVelocity: %8.5f, %8.5f, %8.5f\n", xAngularVelocity, yAngularVelocity, zAngularVelocity);
 					//System.out.printf("WorldB: %8.5f, %8.5f, %8.5f, %8.5f\n", xMin, xMax, yMin, yMax);
 					//System.out.printf("Bounds: %s\n", ShapeUtils.getBoundingBox(this));
 					

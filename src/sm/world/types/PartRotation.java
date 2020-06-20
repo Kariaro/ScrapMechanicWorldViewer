@@ -96,7 +96,7 @@ public final class PartRotation {
 	public static Vector3f getPartOffset(Part part, ChildShape shape) {
 		Matrix4f mul = getRotationMultiplier(shape.partRotation);
 		PartBounds bounds = part.getBounds();
-		if(bounds != null) {
+		if(bounds != null) {//instanceof BoxBounds) {
 			Matrix4f mat = mul.translate(
 				(bounds.getWidth() - 1) / 2.0f,
 				(bounds.getHeight() - 1) / 2.0f,
@@ -109,6 +109,7 @@ public final class PartRotation {
 		return mul.getColumn(3, new Vector3f());
 	}
 	
+	@Deprecated
 	public static Matrix4f getRotationMultiplier(int rotation) {
 		for(int i = 0; i < 24; i++) {
 			if(PartRotationDataValue[i] == rotation) {

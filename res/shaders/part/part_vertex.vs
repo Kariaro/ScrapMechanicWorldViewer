@@ -19,12 +19,10 @@ uniform mat4 projectionView;
 void main() {
 	gl_Position = projectionView * transformationMatrix * in_Position;
 	
-	pass_Cam = normalize(vec3(projectionView[0][2], projectionView[1][2], projectionView[2][2]));
+	mat4 test = projectionView * transformationMatrix;
+	pass_Cam = normalize(vec3(-test[0][2], -test[1][2], -test[2][2]));
 	
 	dif_uv = in_Uv;
-	asg_uv = vec2(0);
-	nor_uv = vec2(0);
-	ao_uv = vec2(0);
 	
 	pass_Normal = in_Normal;
 }

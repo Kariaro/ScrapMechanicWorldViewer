@@ -17,19 +17,58 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import sm.main.Main;
 import sm.util.FileUtils;
 import sm.util.StringUtils;
-import sm.world.World;
 import sm.world.types.Block;
 import sm.world.types.Part;
+import valve.Steam;
 
-public final class ScrapMechanicAssets {
-	private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+public final class ScrapMechanic {
+	private static final Logger LOGGER = Logger.getLogger(ScrapMechanic.class.getName());
 	
-	private static final ScrapMechanicAssets ASSET;
+	private static final ScrapMechanic ASSET;
+	public static final String $CHALLENGE_DATA;
+	public static final String $SURVIVAL_DATA;
+	public static final String $GAME_DATA;
+
+	// TODO: This is used by this software and not by ScrapMechanic.
+	public static final String $USER_DATA;
+	
 	static {
-		ASSET = new ScrapMechanicAssets();
+		ASSET = new ScrapMechanic();
+		
+		// TODO: User specified path!
+		File gamePath = Steam.findGamePath("Scrap Mechanic");
+		System.out.println("Path: " + gamePath);
+		
+		$CHALLENGE_DATA = new File(gamePath, "ChallengeData").getAbsolutePath();
+		$SURVIVAL_DATA = new File(gamePath, "Survival").getAbsolutePath();
+		$GAME_DATA = new File(gamePath, "Data").getAbsolutePath();
+		
+		String appdata_path = System.getenv("APPDATA");
+		File sm_userpath = new File(appdata_path, "Axolot Games/Scrap Mechanic/User");
+		
+		// TODO: Depending on your steam profile you have different user directories!
+		File[] sm_users = sm_userpath.listFiles();
+		
+		if(sm_users.length < 1) {
+			// TODO: What should we do here?
+			throw new RuntimeException("No steam profile found");
+		}
+		
+		// Selected the first steam profile.
+		$USER_DATA = sm_users[0].getAbsolutePath();
+		
+		try {
+			LOGGER.log(Level.INFO, "Loading assets");
+			
+			ScrapMechanic.setBasePath(gamePath.getAbsolutePath());
+			ScrapMechanic.loadAllAssets();
+		} catch(FileNotFoundException e) {
+			e.printStackTrace();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -37,7 +76,7 @@ public final class ScrapMechanicAssets {
 	private File gameDataPath;
 	private File challengeDataPath;
 	private File survivalDataPath;
-	private File modsDataPath;
+	//private File modsDataPath;
 	
 	// TODO: Everything should have unique UUIDs so change this to only one Map!
 	// TODO: Tools ??? Models ???
@@ -45,7 +84,7 @@ public final class ScrapMechanicAssets {
 	private final Map<UUID, Block> blocks;
 	private final Map<UUID, Part> parts;
 	
-	private ScrapMechanicAssets() {
+	private ScrapMechanic() {
 		blocks = new HashMap<>();
 		parts = new HashMap<>();
 	}
@@ -87,7 +126,7 @@ public final class ScrapMechanicAssets {
 		}
 		
 		if(path.startsWith("$MOD_DATA")) {
-			File dir = new File(World.$USER_DATA, "Mods/SQLiteTesting/");
+			File dir = new File($USER_DATA, "Mods/SQLiteTesting/");
 			
 			String resolve = path.substring(9);
 			return new File(dir, resolve).getAbsolutePath();
@@ -126,7 +165,7 @@ public final class ScrapMechanicAssets {
 	}
 	
 	private void loadDebugSets() throws Exception {
-		File dir = new File(World.$USER_DATA, "Mods/SQLiteTesting/Objects/Database/ShapeSets");
+		File dir = new File($USER_DATA, "Mods/SQLiteTesting/Objects/Database/ShapeSets");
 		
 		for(File file : dir.listFiles()) {
 			if(!file.getName().endsWith(".json")) continue;
@@ -173,9 +212,6 @@ public final class ScrapMechanicAssets {
 			
 			String path = resolvePath(value);
 			String json = StringUtils.removeComments(FileUtils.readFile(path));
-			
-			//System.out.println("Reading: " + path);
-			//System.out.println(json);
 			
 			JsonFactory factory = new JsonFactory();
 			JsonParser parser = factory.createParser(json);

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import sm.asset.ScrapMechanicAssets;
+import sm.asset.ScrapMechanic;
 import sm.util.FileUtils;
 
 public class Renderable {
@@ -26,7 +26,7 @@ public class Renderable {
 	}
 	
 	Renderable(String path) throws IOException {
-		String json = FileUtils.readFile(ScrapMechanicAssets.resolvePath(path));
+		String json = FileUtils.readFile(ScrapMechanic.resolvePath(path));
 		// Remove all comments
 		json = json.replaceAll("//.*?[\r\n]+", "\r\n");
 		
