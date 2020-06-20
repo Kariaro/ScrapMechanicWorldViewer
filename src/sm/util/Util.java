@@ -78,4 +78,36 @@ public class Util {
 			return new UUID(high, low);
 		}
 	}
+	
+	public static void writeShort(byte[] bytes, int offset, int value, boolean bigEndian) {
+		if(bigEndian) {
+			bytes[offset] = (byte)(value & 0xff);
+			bytes[offset + 1] = (byte)((value >> 8) & 0xff);
+		} else {
+			bytes[offset] = (byte)((value >> 8) & 0xff);
+			bytes[offset + 1] = (byte)(value & 0xff);
+		}
+	}
+	
+	public static void writeInt(byte[] bytes, int offset, int value, boolean bigEndian) {
+		if(bigEndian) {
+			writeShort(bytes, offset, value & 0xffff, bigEndian);
+			writeShort(bytes, offset + 2, (value >> 16) & 0xffff, bigEndian);
+		} else {
+			writeShort(bytes, offset, (value >> 16) & 0xffff, bigEndian);
+			writeShort(bytes, offset + 2, value & 0xffff, bigEndian);
+		}
+	}
+	
+	public static void writeBytes(byte[] src, int srcOffset, byte[] dst, int dstOffset, int length, boolean bigEndian) {
+		if(bigEndian) {
+			for(int i = 0; i < length; i++) {
+				dst[dstOffset + i] = src[srcOffset + i];
+			}
+		} else {
+			for(int i = 0; i < length; i++) {
+				dst[dstOffset + i] = src[srcOffset + length - i - 1];
+			}
+		}
+	}
 }

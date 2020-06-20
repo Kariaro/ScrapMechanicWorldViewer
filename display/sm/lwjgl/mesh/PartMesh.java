@@ -7,7 +7,7 @@ import java.util.Map;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL20;
 
-import sm.asset.ScrapMechanicAssets;
+import sm.asset.ScrapMechanic;
 import sm.lwjgl.shader.PartShader;
 import sm.lwjgl.util.StaticMeshLoader;
 import sm.objects.BodyList.ChildShape;
@@ -20,12 +20,13 @@ import sm.world.types.Renderable.MeshMap;
 import sm.world.types.ShapeUtils.Bounds3D;
 
 public class PartMesh {
-	private final double minViewDistance;
-	private final int minViewSize;
+	public final double minViewDistance;
+	public final int minViewSize;
 	private final PartShader shader;
 	private final Part part;
 	
 	private final List<Texture>[] textures;
+	private final MeshMat[] mats;
 	private final Mesh[] meshes;
 	//private final Mesh[][] animations;
 	private final Lod lod;
@@ -39,7 +40,7 @@ public class PartMesh {
 		this.part = part;
 		this.shader = shader;
 		
-		String path = ScrapMechanicAssets.resolvePath(lod.mesh);
+		String path = ScrapMechanic.resolvePath(lod.mesh);
 		meshes = StaticMeshLoader.load(path);
 		
 		// TODO: Animations
@@ -57,6 +58,7 @@ public class PartMesh {
 		}
 		
 		textures = new List[meshes.length];
+		mats = new MeshMat[meshes.length];
 		
 		//System.out.println("Meshes: " + meshes.length);
 		Map<String, MeshMap> maps = lod.subMeshMap;
@@ -64,8 +66,8 @@ public class PartMesh {
 			int index = getMeshIndex(name);
 			
 			List<Texture> list = new ArrayList<>();
-			boolean loadedFully = loadTextures(maps.get(name), list);
-			if(!loadedFully) {
+			MeshMat meshMat = loadTextures(maps.get(name), list);
+			if(meshMat == null) {
 				System.out.println("PartMesh has no texture!!!");
 				System.out.printf("    SubMesh \"%s\" -> %s\n", name, list);
 				MeshMap meshMap = maps.get(name);
@@ -76,60 +78,64 @@ public class PartMesh {
 			
 			// TODO: Fallback option?
 			if(index < 0) index = 0;
+			mats[index] = meshMat;
 			textures[index] = list;
 		}
 		System.out.println("--------------------");
 	}
 	
-	private boolean loadTextures(MeshMap map, List<Texture> list) throws Exception {
+	private MeshMat loadTextures(MeshMap map, List<Texture> list) throws Exception {
 		String material = map.material;
 		int index = 0;
 		int max = 0;
+		MeshMat meshMat = new MeshMat();
 		
 		// TODO: Code this a little better. Use more functions!
 		while(!material.isEmpty() && (max++ < 100)) {
-			if(material.startsWith("UVAnim")) {
-				material = material.substring(6);
+			if(material.startsWith("Anim")) {
+				material = material.substring(4);
+				// TODO: Animation
 				continue;
 			}
 			
-			if(material.startsWith("PoseAnim")) {
-				material = material.substring(8);
+			if(material.startsWith("UV")) {
+				material = material.substring(2);
 				continue;
 			}
 			
-			if(material.startsWith("2PoseAnim")) {
-				material = material.substring(9);
+			if(material.startsWith("Pose")) {
+				material = material.substring(4);
 				continue;
 			}
 			
-			if(material.startsWith("PoseUVAnim")) {
-				material = material.substring(10);
+			if(material.startsWith("2Pose")) {
+				material = material.substring(5);
 				continue;
 			}
 			
-			if(material.startsWith("SkelAnim")) {
-				material = material.substring(8);
+			if(material.startsWith("Skel")) {
+				material = material.substring(4);
 				continue;
 			}
 			
 			if(material.startsWith("Glass")) {
 				material = material.substring(5);
+				meshMat.alpha = true;
 				// TODO: Transparent
 				
 				if(index == 0) {
 					String texturePath;
 					
 					texturePath = map.textureList.get(index++);
-					texturePath = ScrapMechanicAssets.resolvePath(texturePath);
+					texturePath = ScrapMechanic.resolvePath(texturePath);
 					list.add(Texture.loadTexture(texturePath, 0, GL20.GL_LINEAR));
 					
 					texturePath = map.textureList.get(index++);
-					texturePath = ScrapMechanicAssets.resolvePath(texturePath);
+					texturePath = ScrapMechanic.resolvePath(texturePath);
 					list.add(Texture.loadTexture(texturePath, 1, GL20.GL_LINEAR));
 					
 					texturePath = map.textureList.get(index++);
-					texturePath = ScrapMechanicAssets.resolvePath(texturePath);
+					texturePath = ScrapMechanic.resolvePath(texturePath);
 					list.add(Texture.loadTexture(texturePath, 2, GL20.GL_LINEAR));
 				}
 				
@@ -138,6 +144,8 @@ public class PartMesh {
 			
 			if(material.startsWith("Alpha")) {
 				material = material.substring(5);
+				meshMat.alpha = true;
+				
 				// TODO: Implement
 				continue;
 			}
@@ -154,16 +162,29 @@ public class PartMesh {
 				continue;
 			}
 			
+			if(material.startsWith("LightFlare")) {
+				material = material.substring(10);
+				// TODO: ?????
+				continue;
+			}
+			
 			if(material.startsWith("Flip")) {
 				material = material.substring(4);
-				// TODO: No backface culling
+				meshMat.flip = true;
+				continue;
+			}
+			
+			if(material.startsWith("Leaves")) {
+				material = material.substring(6);
+				meshMat.alpha = true;
+				meshMat.flip = true;
 				continue;
 			}
 			
 			if(material.startsWith("Dif")) {
 				material = material.substring(3);
 				String texturePath = map.textureList.get(index++);
-				texturePath = ScrapMechanicAssets.resolvePath(texturePath);
+				texturePath = ScrapMechanic.resolvePath(texturePath);
 				list.add(Texture.loadTexture(texturePath, 0, GL20.GL_LINEAR));
 				continue;
 			}
@@ -171,7 +192,7 @@ public class PartMesh {
 			if(material.startsWith("Asg")) {
 				material = material.substring(3);
 				String texturePath = map.textureList.get(index++);
-				texturePath = ScrapMechanicAssets.resolvePath(texturePath);
+				texturePath = ScrapMechanic.resolvePath(texturePath);
 				list.add(Texture.loadTexture(texturePath, 1, GL20.GL_LINEAR));
 				continue;
 			}
@@ -179,7 +200,7 @@ public class PartMesh {
 			if(material.startsWith("Nor")) {
 				material = material.substring(3);
 				String texturePath = map.textureList.get(index++);
-				texturePath = ScrapMechanicAssets.resolvePath(texturePath);
+				texturePath = ScrapMechanic.resolvePath(texturePath);
 				list.add(Texture.loadTexture(texturePath, 2, GL20.GL_LINEAR));
 				continue;
 			}
@@ -187,7 +208,7 @@ public class PartMesh {
 			if(material.startsWith("Ao")) {
 				material = material.substring(2);
 				String texturePath = map.textureList.get(index++);
-				texturePath = ScrapMechanicAssets.resolvePath(texturePath);
+				texturePath = ScrapMechanic.resolvePath(texturePath);
 				list.add(Texture.loadTexture(texturePath, 3, GL20.GL_LINEAR));
 				continue;
 			}
@@ -201,13 +222,12 @@ public class PartMesh {
 		if(index == 0 && map.textureList.size() > 0) {
 			for(int i = 0; i < map.textureList.size(); i++) {
 				String texturePath = map.textureList.get(i);
-				texturePath = ScrapMechanicAssets.resolvePath(texturePath);
+				texturePath = ScrapMechanic.resolvePath(texturePath);
 				list.add(Texture.loadTexture(texturePath, i, GL20.GL_LINEAR));
 			}
-			return false;
 		}
 		
-		return true;
+		return meshMat;
 	}
 	
 	private Mesh getMesh(String name) {
@@ -257,32 +277,35 @@ public class PartMesh {
 		float y = shape.yPos - 0.5f;
 		float z = shape.zPos - 0.5f;
 		
-		Matrix4f matrix = new Matrix4f().translate(x, y, z);
+		Matrix4f matrix = new Matrix4f();
 		RigidBody body = shape.body;
-		/*if(body.isStatic_0_2 == 1) {
-			float xm = (bounds.xMin + bounds.xMax) / 2.0f;
-			float ym = (bounds.yMin + bounds.yMax) / 2.0f;
-			float zm = 0;//(bounds.zMin + bounds.zMax) / 2.0f;
-			
-			matrix.translate(-xm, -ym, -zm);
-			matrix.translate(
-				(body.yMin + body.yMax) * 2,
-				(body.xMin + body.xMax) * 2,
-				0
+		if(body.isStatic_0_2 == 2) {
+			matrix.translateLocal(
+				x + body.xWorld * 4,
+				y + body.yWorld * 4,
+				z + body.zWorld * 4
+			);
+			matrix.rotateAroundLocal(body.quat,
+				body.xWorld * 4,
+				body.yWorld * 4,
+				body.zWorld * 4
 			);
 		} else {
-			float xm = (bounds.xMin + bounds.xMax) / 2.0f;
-			float ym = (bounds.yMin + bounds.yMax) / 2.0f;
-			float zm = (bounds.zMin + bounds.zMax) / 2.0f;
-			
-			matrix.translate(-xm, -ym, -zm);
-			matrix.translate(
-				(body.yMin + body.yMax) * 2,
-				(body.xMin + body.xMax) * 2,
-				0
+			matrix.translateLocal(
+				x + body.xWorld * 4,
+				y + body.yWorld * 4,
+				z + body.zWorld * 4
 			);
-		}*/
-
+			
+			if(body.staticFlags < -1) {
+				matrix.rotateAroundLocal(body.quat,
+					body.xWorld * 4,
+					body.yWorld * 4,
+					body.zWorld * 4
+				);
+			}
+		}
+		
 		applyRotation(shape, matrix);
 		shader.setUniform("transformationMatrix", matrix);
 		{
@@ -316,13 +339,19 @@ public class PartMesh {
 			
 		}
 		*/
+		
 		for(int i = 0; i < textures.length; i++) {
 			List<Texture> texs = textures[i];
+			MeshMat mat = mats[i];
 			if(texs != null) {
 				for(Texture t : texs) t.bind();
 			}
 			
+			if(mat != null) mat.bind(shader);
+			
 			meshes[i].render();
+			
+			if(mat != null) mat.unbind(shader);
 			
 			if(texs != null) {
 				for(Texture t : texs) t.unbind();

@@ -2,15 +2,18 @@ package sm.world.types;
 
 import org.joml.Vector3f;
 
+// TODO: This class does not handle the margin value correctly!
 public class CylinderBounds implements PartBounds {
 	private final float diameter;
 	private final float depth;
 	private final String axis;
+	private final float margin;
 	
-	public CylinderBounds(float diameter, float depth, String axis) {
+	public CylinderBounds(float diameter, float depth, float margin, String axis) {
 		this.diameter = diameter;
 		this.depth = depth;
 		this.axis = axis;
+		this.margin = margin;
 	}
 	
 	public Vector3f getMiddle() {
@@ -19,25 +22,47 @@ public class CylinderBounds implements PartBounds {
 	
 	public float getHeight() {
 		switch(axis) {
-			case "Z": return diameter;
-			case "Y": return diameter;
+			case "X": return diameter;
+			case "Y": return depth;
+			case "Z": return diameter; // good
 		}
-		return depth;
+		
+		return -1;
 	}
 	
 	public float getWidth() {
 		switch(axis) {
-			case "Z": return diameter;
-			case "Y": return depth;
+			case "X": return depth;
+			case "Y": return diameter;
+			case "Z": return diameter; // good
 		}
-		return diameter;
+		
+		return -1;
 	}
 	
 	public float getDepth() {
 		switch(axis) {
-			case "Z": return depth;
+			case "X": return diameter;
 			case "Y": return diameter;
+			case "Z": return depth; // good
 		}
+		
+		return -1;
+	}
+	
+	public float getCylinderDiameter() {
 		return diameter;
+	}
+	
+	public float getCylinderDepth() {
+		return depth;
+	}
+	
+	public float getCylinderMargin() {
+		return margin;
+	}
+	
+	public String getCylinderAxis() {
+		return axis;
 	}
 }

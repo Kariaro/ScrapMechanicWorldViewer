@@ -5,7 +5,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import sm.asset.ScrapMechanicAssets;
+import sm.asset.ScrapMechanic;
 import sm.objects.BodyList.ChildShape;
 import sm.objects.BodyList.RigidBody;
 
@@ -33,7 +33,7 @@ public class ShapeUtils {
 			}
 			
 			// TODO: Get bounding box of all parts. This should be cached
-			Part part = ScrapMechanicAssets.getPart(shape.uuid);
+			Part part = ScrapMechanic.getPart(shape.uuid);
 			if(part != null) {
 				float x = shape.xPos;
 				float y = shape.yPos;
@@ -94,6 +94,14 @@ public class ShapeUtils {
 			this.yMax = yMax;
 			this.zMin = zMin;
 			this.zMax = zMax;
+		}
+		
+		public Vector3f getMiddle() {
+			return new Vector3f(
+				(xMin - xMax) / 2.0f,
+				(yMin - yMax) / 2.0f,
+				(zMin - zMax) / 2.0f
+			);
 		}
 		
 		@Override

@@ -14,7 +14,7 @@ public class ScriptData extends SQLiteObject {
 	public void test() throws SQLException {
 		ResultSet set = sqlite.execute("SELECT * FROM ScriptData WHERE channel = 1");
 		
-		System.out.println(set.getFetchSize());
+		if(set.getFetchSize() < 1) return;
 		byte[] data = set.getBytes("data");
 		
 		int a = 1;

@@ -17,6 +17,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.stb.STBImage;
 
 public class Texture {
 	public static final Texture NONE = new Texture();
@@ -46,7 +47,8 @@ public class Texture {
 		if(file.getName().toLowerCase().endsWith(".tga")) {
 			int[] w = new int[1];
 			int[] h = new int[1];
-			buf = org.lwjgl.stb.STBImage.stbi_load(path, w, h, new int[] { 0 }, 4);
+			int[] channels = new int[1];
+			buf = STBImage.stbi_load(path, h, w, channels, 4);
 			height = w[0];
 			width = h[0];
 			bi = null;

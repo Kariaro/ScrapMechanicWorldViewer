@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class FileUtils {
 	public static byte[] readStreamBytes(InputStream stream) {
@@ -43,4 +46,8 @@ public class FileUtils {
 	public static String readFile(String path) { return new String(readFileBytes(new File(path))); }
 	public static String readFile(File path, String name) { return new String(readFileBytes(new File(path, name))); }
 	public static String readStream(InputStream stream) { return new String(readStreamBytes(stream)); }
+	
+	public static void copy(File source, File target, CopyOption... options) throws IOException {
+		Files.copy(source.toPath(), target.toPath(), options);
+	}
 }

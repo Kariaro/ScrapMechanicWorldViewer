@@ -8,6 +8,7 @@
 	</classpathentry>
 	<classpathentry kind="src" path="display"/>
 	<classpathentry kind="src" path="steam"/>
+	<classpathentry kind="src" path="bytes"/>
 	<classpathentry kind="lib" path="res"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<attributes>
