@@ -44,7 +44,14 @@
 	  <artifactId>jackson-databind</artifactId>
 	  <version>2.11.0</version>
 	</dependency>
-		
+	
+	<!-- My own tile reader library -->
+	<dependency>
+	  <groupId>sm.hardcoded.tilereader</groupId>
+	  <artifactId>sm-tilereader</artifactId>
+	  <version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	
 	<!--<dependency>
       <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>

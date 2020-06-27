@@ -17,8 +17,8 @@ public class ScriptData extends SQLiteObject {
 		if(set.getFetchSize() < 1) return;
 		byte[] data = set.getBytes("data");
 		
-		int a = 1;
 		StringBuilder sb = new StringBuilder();
+		int a = 1;
 		for(byte b : data) {
 			sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
 		}
