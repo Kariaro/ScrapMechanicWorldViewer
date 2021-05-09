@@ -4,11 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.hardcoded.lua.LuaDeserializer;
+import com.hardcoded.memory.Memory;
 import com.hardcoded.sm.sqlite.SQLiteObject;
 import com.hardcoded.sm.sqlite.SQLite;
 import com.hardcoded.util.Util;
-
-import sm.memory.Memory;
 
 /**
  * @author HardCoded

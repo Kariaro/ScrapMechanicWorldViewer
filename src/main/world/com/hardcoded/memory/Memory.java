@@ -1,4 +1,4 @@
-package sm.memory;
+package com.hardcoded.memory;
 
 /**
  * @author HardCoded

@@ -61,7 +61,6 @@ class ScrapMechanicLoader {
 	
 	private void loadShapeSets(File shapesets, Set<String> loaded) throws Exception {
 		if(!shapesets.exists()) return;
-		
 		LOGGER.debug("Reading path: %s", shapesets);
 		
 		String shapes = FileUtils.readFile(shapesets);
@@ -88,31 +87,12 @@ class ScrapMechanicLoader {
 			LOGGER.debug("Reading path: %s", path);
 			JsonFactory factory = new JsonFactory();
 			loadObject(factory.createParser(json));
-			/*
-			JsonFactory factory = new JsonFactory();
-			JsonParser parser = factory.createParser(json);
-			parser.nextValue();
-			String typeName = parser.nextFieldName();
-			parser.nextValue();
-			
-			switch(typeName) {
-				case "partList":
-					loadParts(parser);
-					break;
-				case "blockList":
-					loadBlocks(parser);
-					break;
-				default:
-					LOGGER.warn("Unsupported type '%s'", typeName);
-			}
-			*/
 		}
 	}
 	
 	@SuppressWarnings("rawtypes")
 	private void loadAssetSets(File assetsets, Set<String> loaded) throws Exception {
 		if(!assetsets.exists()) return;
-		
 		LOGGER.debug("Reading path: %s", assetsets);
 		
 		String shapes = FileUtils.readFile(assetsets);
@@ -145,22 +125,6 @@ class ScrapMechanicLoader {
 			LOGGER.debug("Reading path: %s", path);
 			JsonFactory factory = new JsonFactory();
 			loadObject(factory.createParser(json));
-			/*
-			parser.nextValue();
-			String typeName = parser.nextFieldName();
-			parser.nextValue();
-			
-			switch(typeName) {
-				case "partList":
-					loadParts(parser);
-					break;
-				case "blockList":
-					loadBlocks(parser);
-					break;
-				default:
-					LOGGER.warn("Unsupported type '%s'", typeName);
-			}
-			*/
 		}
 	}
 	

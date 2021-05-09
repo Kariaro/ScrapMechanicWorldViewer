@@ -137,16 +137,6 @@ public final class ScrapMechanicAssetHandler {
 	}
 	
 	private void load() throws Exception {
-//		Set<String> loaded = new HashSet<String>();
-		
-//		loadAllShapeSets(loaded);
-//		loadAllClutter();
-//		loadAllAssetSets(loaded);
-		
-		// Try load assets while the renderer is drawing
-		// this could reduce load times.
-//		loadDebugSets();
-		
 		loader.load();
 	}
 	

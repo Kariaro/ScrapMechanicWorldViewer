@@ -8,8 +8,6 @@ import java.util.Set;
 import com.hardcoded.logger.Log;
 import com.hardcoded.logger.Log.Level;
 
-import registry.RegQuery;
-
 /**
  * A simple implementation for finding games inside steam.
  * 
