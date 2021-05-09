@@ -47,8 +47,8 @@
 	
 	<!-- My own tile reader library -->
 	<dependency>
-	  <groupId>sm.hardcoded.tilereader</groupId>
-	  <artifactId>sm-tilereader</artifactId>
+	  <groupId>sm.hardcoded.reader</groupId>
+	  <artifactId>sm-reader</artifactId>
 	  <version>0.0.1-SNAPSHOT</version>
 	</dependency>
 	
