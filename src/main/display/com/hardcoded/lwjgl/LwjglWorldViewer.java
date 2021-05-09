@@ -23,7 +23,7 @@ public class LwjglWorldViewer implements Runnable {
 	private int fps;
 	
 	private Thread runningThread;
-	public synchronized void start() { // TODO: Throw start error?
+	public synchronized void start() {
 		if(running || (runningThread != null && runningThread.isAlive())) return;
 		running = true;
 		runningThread = new Thread(this, "Main Thread");
@@ -37,6 +37,7 @@ public class LwjglWorldViewer implements Runnable {
 		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
+		
 		runningThread = null;
 	}
 	

@@ -3,8 +3,7 @@ package com.hardcoded.lua;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import sm.memory.Memory;
+import com.hardcoded.memory.Memory;
 
 public class LuaDeserializer {
 	public static final int VERSION = 1;

@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="src/main/world"/>
 	<classpathentry kind="src" path="src/main/display"/>
 	<classpathentry kind="src" path="src/main/steam"/>
-	<classpathentry kind="src" path="src/main/bytes"/>
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="lib" path="res"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
