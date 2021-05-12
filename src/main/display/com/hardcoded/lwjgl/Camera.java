@@ -74,9 +74,9 @@ public class Camera {
 		}
 		
 		float speed = 0.1f * (float)Math.pow(5, speedMod - 1);
-		if(Input.keys[GLFW_KEY_RIGHT_CONTROL]) {
-			speed *= 10;
-		}
+//		if(Input.keys[GLFW_KEY_F]) {
+//			speed *= 100;
+//		}
 		
 		int xd = 0;
 		int zd = 0;

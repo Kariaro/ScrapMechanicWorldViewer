@@ -112,6 +112,11 @@ public final class ScrapMechanicAssetHandler {
 	}
 	
 	public static String resolvePath(String path) {
+		if(path == null) {
+			LOGGER.warn("ScrapMechanicAssetHandler.resolvePath was called with a null value");
+			return "";
+		}
+		
 		if(path.startsWith("$GAME_DATA")) {
 			return path.replace("$GAME_DATA", INSTANCE.gameDataPath.getAbsolutePath());
 		}
