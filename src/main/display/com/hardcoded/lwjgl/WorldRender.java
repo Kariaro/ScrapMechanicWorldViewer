@@ -4,32 +4,30 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
+import com.hardcoded.error.TileException;
 import com.hardcoded.game.World;
 import com.hardcoded.logger.Log;
 import com.hardcoded.lwjgl.gui.Gui;
-import com.hardcoded.lwjgl.mesh.TileMesh;
-import com.hardcoded.lwjgl.render.WorldAssetRender;
-import com.hardcoded.lwjgl.render.WorldBlockRender;
-import com.hardcoded.lwjgl.render.WorldPartRender;
+import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
-import com.hardcoded.math.Quat;
 import com.hardcoded.math.Vec3;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
-import com.hardcoded.tile.Asset;
+import com.hardcoded.sm.objects.TileData;
 import com.hardcoded.tile.Tile;
 import com.hardcoded.tile.TileReader;
 import com.hardcoded.tile.impl.TilePart;
+import com.hardcoded.tile.object.Asset;
 import com.hardcoded.world.types.*;
 import com.hardcoded.world.types.ShapeUtils.Bounds3D;
 
@@ -54,6 +52,8 @@ public class WorldRender {
 	private Map<UUID, WorldAssetRender> assets;
 	private Map<UUID, WorldBlockRender> blocks;
 	private Map<UUID, WorldPartRender> parts;
+	private Map<String, TileParts> tile_data;
+	private Map<Long, WorldTileRender> tiles;
 	
 	public WorldRender(LwjglWorldViewer parent, long window, int width, int height) {
 		this.parent = parent;
@@ -61,6 +61,9 @@ public class WorldRender {
 		assets = new HashMap<>();
 		blocks = new HashMap<>();
 		parts = new HashMap<>();
+		
+		tiles = new HashMap<>();
+		tile_data = new HashMap<>();
 		
 		camera = new Camera(window);
 		gui = new Gui(this);
@@ -75,7 +78,7 @@ public class WorldRender {
 		}
 	}
 	
-	private TileMesh tm;
+	//private TileMesh tm;
 	public static int updates = 0;
 	public static long lastTimed = 0;
 	
@@ -156,15 +159,15 @@ public class WorldRender {
 //		return null;
 //	}
 	
-	private static String getGameTile(String name) {
-		File tile_path = new File("D:/Steam/steamapps/common/Scrap Mechanic/Data/Terrain/Tiles/CreativeTiles/");
-		
-		for(File file : tile_path.listFiles()) {
-			if(file.getName().equals(name + ".tile")) return file.getAbsolutePath();
-		}
-		
-		return null;
-	}
+//	private static String getGameTile(String name) {
+//		File tile_path = new File("D:/Steam/steamapps/common/Scrap Mechanic/Data/Terrain/Tiles/ClassicCreativeTiles/");
+//		
+//		for(File file : tile_path.listFiles()) {
+//			if(file.getName().equals(name + ".tile")) return file.getAbsolutePath();
+//		}
+//		
+//		return null;
+//	}
 	
 	private Tile loaded_tile;
 	private void init() throws Exception {
@@ -173,20 +176,19 @@ public class WorldRender {
 		partShader = new PartShader();
 		tileShader = new TileShader();
 		
-		String path = "GROUND512_01";
+		//String path = "GROUND512_01";
 		//path = getTile("tile_0");
-		path = getGameTile("GROUND512_01");
+		//path = getGameTile("GROUND512_01");
 		//path = getGameTile("HILLS512_01");
 		//path = "res/testing/TestHideout.tile";
 		//tm = new TileMesh(TileReader.read("D:/Steam/steamapps/common/Scrap Mechanic/Data/Terrain/Tiles/" + name + ".tile"));
 		
-		this.loaded_tile = TileReader.loadTile(path);
-		tm = new TileMesh(loaded_tile);
+		//this.loaded_tile = TileReader.loadTile(path);
+		//tm = new TileMesh(loaded_tile);
 	}
 	
 	private int item_load;
-	
-	private WorldBlockRender getBlockRender(UUID uuid) {
+	public WorldBlockRender getBlockRender(UUID uuid) {
 		if(blocks.containsKey(uuid)) return blocks.get(uuid);
 		
 		SMBlock block = ScrapMechanicAssetHandler.getBlock(uuid);
@@ -198,7 +200,7 @@ public class WorldRender {
 		return render;
 	}
 	
-	private WorldPartRender getPartRender(UUID uuid) {
+	public WorldPartRender getPartRender(UUID uuid) {
 		if(parts.containsKey(uuid)) return parts.get(uuid);
 		
 		SMPart part = ScrapMechanicAssetHandler.getPart(uuid);
@@ -211,7 +213,7 @@ public class WorldRender {
 		return render;
 	}
 	
-	private WorldAssetRender getAssetRender(UUID uuid) {
+	public WorldAssetRender getAssetRender(UUID uuid) {
 		if(assets.containsKey(uuid)) return assets.get(uuid);
 		
 		SMAsset asset = ScrapMechanicAssetHandler.getAsset(uuid);
@@ -221,6 +223,44 @@ public class WorldRender {
 		LOGGER.info("Init: %s", asset);
 		WorldAssetRender render = new WorldAssetRender(asset, assetShader);
 		assets.put(asset.uuid, render);
+		return render;
+	}
+	
+	public WorldTileRender getTileRender(int x, int y) {
+		long index = ((long)(x) & 0xffffffffL) | (((long)y) << 32L);
+		if(tiles.containsKey(index)) return tiles.get(index);
+
+		String path = TileData.getTilePath(x, y);
+		if(path == null) return null;
+		
+		if(item_load-- < 0) return null;
+		
+		int ox = TileData.getTileOffsetX(x, y);
+		int oy = TileData.getTileOffsetY(x, y);
+		int tr = TileData.getTileRotation(x, y);
+		//long o_index = ((long)(ox) & 0xffffffffL) | (((long)oy) << 32L);
+		
+		TileParts parts = null;
+		
+		if(tile_data.containsKey(path)) {
+			parts = tile_data.get(path);
+		} else {
+			try {
+				Tile tile = TileReader.loadTile(path);
+				parts = new TileParts(tile);
+				tile_data.put(path, parts);
+			} catch(TileException e) {
+				LOGGER.throwing(e);
+			} catch(IOException e) {
+				LOGGER.throwing(e);
+			}
+		}
+		
+		
+		Tile tile = parts.getTile(ox, oy);
+		LOGGER.info("Init: '%s'", path);
+		WorldTileRender render = new WorldTileRender(this, tr, x, y, path, tile, tileShader, assetShader);
+		tiles.put(index, render);
 		return render;
 	}
 	
@@ -309,7 +349,7 @@ public class WorldRender {
 		item_load = 1;
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		Matrix4f projectionView = camera.getProjectionViewMatrix(60, width, height);
-		Matrix4f projectionTran = camera.getProjectionMatrix(60, width, height);
+		Matrix4f projectionTran = camera.getProjectionMatrix(70, width, height);
 		Matrix4f viewMatrix = camera.getViewMatrix(60, width, height);
 		
 		GL11.glEnable(GL_DEPTH_TEST);
@@ -317,12 +357,6 @@ public class WorldRender {
 		GL11.glEnable(GL_TEXTURE_2D);
 		
 		checkWorldUpdate();
-		
-		tileShader.bind();
-		tileShader.setUniform("projectionView", projectionTran);
-		tileShader.setUniform("transformationMatrix", new Matrix4f());
-		tm.render();
-		tileShader.unbind();
 		
 		blockShader.bind();
 		blockShader.setUniform("projectionView", projectionTran);
@@ -363,43 +397,41 @@ public class WorldRender {
 		}
 		partShader.unbind();
 		
-		assetShader.bind();
-		assetShader.setUniform("projectionView", projectionTran);
-		assetShader.setUniform("transformationMatrix", new Matrix4f());
-		assetShader.setUniform("color", 1, 1, 1, 1);
-		if(loaded_tile != null) {
-			for(int y = 0; y < loaded_tile.getHeight(); y++) {
-				for(int x = 0; x < loaded_tile.getWidth(); x++) {
-					TilePart part = loaded_tile.getPart(x, y);
-					Vector3f part_offset = new Vector3f(x * 64, y * 64, 0);
-					
-					for(int i = 0; i < 4; i++) {
-						List<Asset> list = part.assets[i];
-						
-						for(Asset asset : list) {
-							UUID uuid = asset.getUUID();
-							Vec3 pos = asset.getPosition();
-							Quat rot = asset.getRotation();
-							Vec3 scl = asset.getSize();
-							
-							WorldAssetRender mesh = getAssetRender(uuid);
-							if(mesh != null) {
-								mesh.render(
-									new Vector3f(pos.x, pos.y, pos.z).add(part_offset),
-									new Quaternionf(rot.x, rot.y, rot.z, rot.w),
-									new Vector3f(scl.x, scl.y, scl.z),
-									camera
-								);
-							}
-						}
-					}
-				}
-			}
-		}
-		assetShader.unbind();
+		
 		
 		GL11.glPushMatrix();
 		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
+		
+//		{
+//			if(loaded_tile != null) {
+//				for(int y = 0; y < loaded_tile.getHeight(); y++) {
+//					for(int x = 0; x < loaded_tile.getWidth(); x++) {
+//						TilePart part = loaded_tile.getPart(x, y);
+//						Vector3f part_offset = new Vector3f(x * 64, y * 64, 0);
+//						
+//						for(int i = 0; i < 4; i++) {
+//							List<Asset> list = part.assets[i];
+//							
+//							for(Asset asset : list) {
+//								Vec3 pos = asset.getPosition();
+//								Vec3 scl = asset.getSize();
+//								
+//								renderCube(
+//									pos.x + part_offset.x,
+//									pos.y + part_offset.y,
+//									pos.z + part_offset.z,
+//									scl.x,
+//									scl.y,
+//									scl.z,
+//									
+//									0x20ffffff
+//								);
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
 		/*for(RigidBody body : bodies) {
 			//System.out.println(body.bodyId);
 			for(ChildShape shape : body.shapes) {
@@ -559,6 +591,28 @@ public class WorldRender {
 					
 					0x7f7f7f7f
 				);
+			}
+		}
+		
+		{
+			// correct = (-2270, -2567, 10)
+			// current = (-1676, -1500, 1)
+			
+			int ox = 0;
+			int oy = 0;
+			int ss = 5;
+			
+			Vector3f cam_pos = camera.getPosition();
+			int xx = (int)((cam_pos.x / 4) / 64) - ox;
+			int yy = (int)((cam_pos.y / 4) / 64) - oy;
+			
+			for(int y = yy - ss; y <= yy + ss; y++) {
+				for(int x = xx - ss; x <= xx + ss; x++) {
+					WorldTileRender render = getTileRender(x, y);
+					if(render != null) {
+						render.render(ox, oy, projectionTran, camera);
+					}
+				}
 			}
 		}
 		

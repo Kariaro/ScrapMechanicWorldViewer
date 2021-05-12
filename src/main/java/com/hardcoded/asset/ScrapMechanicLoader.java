@@ -196,33 +196,4 @@ class ScrapMechanicLoader {
 			handler.clutters.put(clutter.uuid, clutter);
 		}
 	}
-	
-//	@Deprecated(forRemoval = true)
-//	private void loadDebugSets() throws Exception {
-//		File dir = new File($USER_DATA, "Mods/SQLiteTesting/Objects/Database/ShapeSets");
-//		
-//		for(File file : dir.listFiles()) {
-//			if(!file.getName().endsWith(".json")) continue;
-//			
-//			String json = StringUtils.removeComments(FileUtils.readFile(file));
-//			
-//			LOGGER.debug("Reading path: %s", file);
-//			JsonFactory factory = new JsonFactory();
-//			JsonParser parser = factory.createParser(json);
-//			parser.nextValue();
-//			String typeName = parser.nextFieldName();
-//			parser.nextValue();
-//			
-//			switch(typeName) {
-//				case "partList":
-//					loadParts(parser);
-//					break;
-//				case "blockList":
-//					loadBlocks(parser);
-//					break;
-//				default:
-//					LOGGER.warn("Unsupported type '%s'", typeName);
-//			}
-//		}
-//	}
 }
