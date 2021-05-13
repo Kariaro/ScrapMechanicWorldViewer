@@ -13,6 +13,7 @@ import com.hardcoded.lwjgl.shader.AssetShader;
 import com.hardcoded.lwjgl.shader.TileShader;
 import com.hardcoded.math.Quat;
 import com.hardcoded.math.Vec3;
+import com.hardcoded.sm.objects.TileData;
 import com.hardcoded.tile.Tile;
 import com.hardcoded.tile.impl.TilePart;
 import com.hardcoded.tile.object.Asset;
@@ -36,16 +37,18 @@ public class WorldTileRender {
 	
 	private int x;
 	private int y;
-	private int r;
+	private int rot;
+	private float elv;
 	
-	public WorldTileRender(WorldRender render, int r, int x, int y, String path, Tile tile, TileShader tileShader, AssetShader assetShader) {
+	public WorldTileRender(WorldRender render, int x, int y, String path, Tile tile, TileShader tileShader, AssetShader assetShader) {
 		this.render = render;
 		this.path = path;
 		this.tile = tile;
 		this.x = x;
 		this.y = y;
-		this.r = r;
-		
+		this.elv = TileData.getTileElevation(x, y);
+		this.rot = TileData.getTileRotation(x, y);
+
 		this.tm = new TileMesh(tile);
 		this.tileShader = tileShader;
 		this.assetShader = assetShader;
@@ -59,11 +62,12 @@ public class WorldTileRender {
 		
 		int tx = (ofx + this.x) * 64 * 4;
 		int ty = (ofy + this.y) * 64 * 4;
+		
 		Matrix4f rott = new Matrix4f();
-		rott.translateLocal(-128, -128, 0).rotateLocalZ(r * (float)(Math.PI / 2.0)).translateLocal(128, 128, 0);
+		rott.translateLocal(-128, -128, 0).rotateLocalZ(rot * (float)(Math.PI / 2.0)).translateLocal(128, 128, 0);
 		
 		Matrix4f transform = new Matrix4f(rott);
-		transform.translateLocal(tx, ty, 0);
+		transform.translateLocal(tx, ty, elv);
 		transform.scale(4);
 		
 		tileShader.bind();
@@ -80,7 +84,7 @@ public class WorldTileRender {
 		for(int y = 0; y < tile.getHeight(); y++) {
 			for(int x = 0; x < tile.getWidth(); x++) {
 				TilePart part = tile.getPart(x, y);
-				Vector3f part_offset = new Vector3f(x * 64 + tx, y * 64 + ty, 0);
+				Vector3f part_offset = new Vector3f(x * 64 + tx, y * 64 + ty, elv);
 				
 				for(int i = 0; i < 4; i++) {
 					List<Asset> list = part.assets[i];
@@ -94,7 +98,7 @@ public class WorldTileRender {
 						WorldAssetRender mesh = render.getAssetRender(uuid);
 						if(mesh != null) {
 							Vector3f a = new Vector3f(pos.x * 4, pos.y * 4, pos.z * 4);
-							a.add(-128, -128, 0).rotateZ(r * (float)(Math.PI / 2.0)).add(128, 128, 0);
+							a.add(-128, -128, 0).rotateZ(this.rot * (float)(Math.PI / 2.0)).add(128, 128, 0);
 							Vector3f vec_pos = a.add(part_offset);
 							
 							mesh.render(

@@ -53,6 +53,16 @@ public class Data {
 		return 0;
 	}
 	
+	public float getFloat(Object key) {
+		Object obj = toMap().get(key);
+		
+		if(obj instanceof Number) {
+			return ((Number)obj).floatValue();
+		}
+		
+		return 0.0f;
+	}
+	
 	public String toStr() {
 		return obj == null ? null:obj.toString();
 	}

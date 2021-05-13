@@ -49,13 +49,11 @@ public class ScriptData extends SQLiteObject {
 	}
 	
 	public void test2() throws SQLException {
-		//if(true) return;
-		
+		loadTileData();
+
 		ResultSet set = sqlite.execute("SELECT data FROM ScriptData WHERE flags = 7");
 		set = sqlite.execute("SELECT data FROM ScriptData WHERE worldId = 65534");
 		set = sqlite.execute("SELECT data FROM ScriptData WHERE id = 49 AND channel = 48 AND worldId = 1 AND flags = 3");
-		set = sqlite.execute("SELECT data FROM ScriptData WHERE channel = 1");
-		//set = sqlite.execute("SELECT data FROM ScriptData WHERE channel = 47");
 		
 		byte[] data = set.getBytes(1);
 		Memory mem = new Memory(data);
@@ -76,46 +74,39 @@ public class ScriptData extends SQLiteObject {
 		System.out.println("size_8_4: " + size_8_4);
 		System.out.println();
 		
+		//System.exit(0);
+	}
+	
+	private void loadTileData() throws SQLException {
+		ResultSet set = sqlite.execute("SELECT data FROM ScriptData WHERE channel = 1");
+		
+		byte[] data = set.getBytes(1);
+		Memory mem = new Memory(data);
+		
+//		int id_0_4 = Util.getInt(data, 0, true);
+//		int worldId_4_2 = Short.toUnsignedInt(Util.getShort(data, 4, true));
+//		int channel_6_1 = Byte.toUnsignedInt(data[6]);
+//		int flags_7_1 = Byte.toUnsignedInt(data[7]);
+		int size_8_4 = Util.getInt(data, 8, true);
+		mem.move(12); // Skip header
+		
+//		System.out.println("id_0_4: " + id_0_4);
+//		System.out.println("worldId_4_2: " + worldId_4_2);
+//		System.out.println("channel_6_1: " + channel_6_1);
+//		System.out.println("flags_7_1: " + flags_7_1);
+//		System.out.println("size_8_4: " + size_8_4);
+//		System.out.println();
+		
 		Data obj = new Data(LuaDeserializer.Deserialize(mem, size_8_4));
-		//System.out.println(obj);
 		
 		{
-			Data bounds = obj.get("bounds");
-			int xMin = bounds.get("xMin").getInt();
-			int xMax = bounds.get("xMax").getInt();
-			int yMin = bounds.get("yMin").getInt();
-			int yMax = bounds.get("yMax").getInt();
-			Data tileIds = obj.get("tileId");
-			
-			TileData.setWorldTileIds(obj, tileIds, xMin, xMax, yMin, yMax);
-//			System.out.printf("bounds: { xMin = %d, yMin = %d, xMax = %d, yMax = %d }\n", xMin, yMin, xMax, yMax);
-//			
-//			for(int y = yMin; y <= yMax; y++) {
-//				Data row = tileIds.get(y);
-//				System.out.println("row: " + row.toMap());
-//				for(int x = xMin; x <= xMax; x++) {
-//					int id = row.getInt(x);
-//					System.out.printf("x=%3d, y=%3d: id=%d\n", x, y, id);
-//				}
-//			}
+			TileData.setWorldTileIds(obj);
 			
 			System.out.println("{");
 			for(Object key : obj.keySet()) {
 				System.out.printf("    key=(%s)\n", key);
-				
-				if("tileId".equals(key)) {
-					Data value = obj.get(key);
-					
-					System.out.println("    {");
-					for(Object key2 : value.keySet()) {
-						System.out.printf("        key=(%s)\n", key2);
-					}
-					System.out.println("    }");
-				}
 			}
 			System.out.println("}");
 		}
-		
-		//System.exit(0);
 	}
 }

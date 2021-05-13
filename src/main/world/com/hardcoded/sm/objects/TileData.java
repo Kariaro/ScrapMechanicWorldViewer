@@ -967,10 +967,16 @@ public class TileData {
 	
 	public static int xMin, xMax, yMin, yMax;
 	private static Data tileIds;
-	private static Data all;
-	protected static void setWorldTileIds(Data all, Data tileIds, int xMin, int xMax, int yMin, int yMax) {
-		TileData.tileIds = tileIds;
-		TileData.all = all;
+	private static Data data;
+	protected static void setWorldTileIds(Data data) {
+		TileData.tileIds = data.get("tileId");
+		TileData.data = data;
+		
+		Data bounds = data.get("bounds");
+		int xMin = bounds.get("xMin").getInt();
+		int xMax = bounds.get("xMax").getInt();
+		int yMin = bounds.get("yMin").getInt();
+		int yMax = bounds.get("yMax").getInt();
 		TileData.xMin = xMin;
 		TileData.xMax = xMax;
 		TileData.yMin = yMin;
@@ -988,17 +994,21 @@ public class TileData {
 	
 	public static int getTileOffsetX(int x, int y) {
 		if(!hasTile(x, y)) return 0;
-		return all.get("tileOffsetX").get(y).getInt(x);
+		return data.get("tileOffsetX").get(y).getInt(x);
 	}
 	
 	public static int getTileOffsetY(int x, int y) {
 		if(!hasTile(x, y)) return 0;
-		return all.get("tileOffsetY").get(y).getInt(x);
+		return data.get("tileOffsetY").get(y).getInt(x);
 	}
 	
 	public static int getTileRotation(int x, int y) {
 		if(!hasTile(x, y)) return 0;
-		return all.get("rotation").get(y).getInt(x);
+		return data.get("rotation").get(y).getInt(x);
+	}
+	public static float getTileElevation(int x, int y) {
+		if(!hasTile(x, y)) return 0;
+		return data.get("elevation").get(y).getFloat(x);
 	}
 	
 	public static String getTilePath(int x, int y) {
