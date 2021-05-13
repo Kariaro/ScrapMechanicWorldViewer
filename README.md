@@ -1,4 +1,4 @@
-# ScrapMechanicWorldViwer
+# ScrapMechanicWorldViewer
 This tool was made to view ScrapMechanic world files.
 
 This tool uses LWJGL 3.
