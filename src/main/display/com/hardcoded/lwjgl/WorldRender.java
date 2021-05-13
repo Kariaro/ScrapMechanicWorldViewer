@@ -237,7 +237,6 @@ public class WorldRender {
 		
 		int ox = TileData.getTileOffsetX(x, y);
 		int oy = TileData.getTileOffsetY(x, y);
-		int tr = TileData.getTileRotation(x, y);
 		//long o_index = ((long)(ox) & 0xffffffffL) | (((long)oy) << 32L);
 		
 		TileParts parts = null;
@@ -259,7 +258,7 @@ public class WorldRender {
 		
 		Tile tile = parts.getTile(ox, oy);
 		LOGGER.info("Init: '%s'", path);
-		WorldTileRender render = new WorldTileRender(this, tr, x, y, path, tile, tileShader, assetShader);
+		WorldTileRender render = new WorldTileRender(this, x, y, path, tile, tileShader, assetShader);
 		tiles.put(index, render);
 		return render;
 	}
@@ -600,7 +599,7 @@ public class WorldRender {
 			
 			int ox = 0;
 			int oy = 0;
-			int ss = 5;
+			int ss = 3;
 			
 			Vector3f cam_pos = camera.getPosition();
 			int xx = (int)((cam_pos.x / 4) / 64) - ox;
