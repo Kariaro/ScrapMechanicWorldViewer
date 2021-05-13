@@ -1,4 +1,4 @@
-package com.hardcoded.lwjgl.mesh;
+package com.hardcoded.lwjgl.data;
 
 import static org.lwjgl.opengl.GL11.*;
 

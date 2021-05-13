@@ -1,4 +1,4 @@
-package com.hardcoded.world.types;
+package com.hardcoded.db.types;
 
 import java.util.Map;
 import java.util.UUID;
@@ -6,6 +6,9 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hardcoded.util.ValueUtils;
+import com.hardcoded.world.utils.BoxBounds;
+import com.hardcoded.world.utils.CylinderBounds;
+import com.hardcoded.world.utils.PartBounds;
 
 /**
  * An implementation of a part asset.

@@ -46,6 +46,25 @@ public class ValueUtils {
 	
 	
 	/**
+	 * Returns the double value for the specified {@code obj}.
+	 * If the objects wasn't a number the return value will be {@code 0.0d}.
+	 * @param obj the object to convert
+	 * @return the double value or {@code 0.0d} if the specified {@code obj} wasn't a number
+	 */
+	public static double toDouble(Object obj) {
+		return toDouble(obj, 0.0d);
+	}
+	
+	public static double toDouble(Object obj, double def) {
+		if(obj instanceof Number) {
+			return ((Number)obj).doubleValue();
+		}
+		
+		return def;
+	}
+	
+	
+	/**
 	 * Returns the string value for the specified {@code obj}.
 	 * @param obj the object to convert
 	 * @return the string value or {@code ""} or the specified {@code obj} was {@code null}

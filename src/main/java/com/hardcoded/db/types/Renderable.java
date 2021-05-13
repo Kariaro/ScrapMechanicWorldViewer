@@ -1,4 +1,4 @@
-package com.hardcoded.world.types;
+package com.hardcoded.db.types;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -87,6 +87,7 @@ public class Renderable {
 	
 	public static class MeshMap {
 		public List<String> textureList;
+		public Map<String, Object> custom;
 		public String material;
 	}
 	

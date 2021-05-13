@@ -6,12 +6,13 @@ import java.util.List;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import com.hardcoded.db.types.Renderable;
+import com.hardcoded.db.types.SMAsset;
+import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.lwjgl.Camera;
 import com.hardcoded.lwjgl.mesh.AssetMesh;
 import com.hardcoded.lwjgl.shader.AssetShader;
-import com.hardcoded.world.types.Renderable;
-import com.hardcoded.world.types.Renderable.Lod;
-import com.hardcoded.world.types.SMAsset;
+import com.hardcoded.tile.object.Asset;
 
 /**
  * An asset renderer.
@@ -22,27 +23,33 @@ import com.hardcoded.world.types.SMAsset;
 public class WorldAssetRender {
 	private final List<AssetMesh> meshes;
 	
-	public WorldAssetRender(SMAsset part, AssetShader shader) {
+	public WorldAssetRender(SMAsset asset, AssetShader shader) {
 		meshes = new ArrayList<>();
 		
 		try {
-			Renderable rend = part.renderable;
+			Renderable rend = asset.renderable;
 			for(Lod lod : rend.lodList) {
-				meshes.add(new AssetMesh(lod, shader, part));
+				meshes.add(new AssetMesh(lod, shader, asset));
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void render(Vector3f pos, Quaternionf quat, Vector3f scale, Camera camera) {
+	public void render(Vector3f pos, Asset asset, Quaternionf quat, Vector3f scale, Camera camera) {
 //		for(int i = 0; i < meshes.size(); i++) {
 //			AssetMesh mesh = meshes.get(i);
 //			mesh.render(pos, quat, scale);
 //			break;
 //		}
+//		if(!meshes.isEmpty()) {
+//			AssetMesh last = meshes.get(meshes.size() - 1);
+//			last.render(pos, quat, scale);
+//			return;
+//		}
+		
 		for(AssetMesh mesh : meshes) {
-			mesh.render(pos, quat, scale);
+			mesh.render(asset, pos, quat, scale);
 			break;
 		}
 	}

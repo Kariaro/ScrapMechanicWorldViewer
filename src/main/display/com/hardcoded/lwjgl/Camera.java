@@ -93,10 +93,23 @@ public class Camera {
 		float yy = xd * MathUtils.sinDeg(-rx) - yd * MathUtils.cosDeg(-rx);
 		float zz = zd;
 		
+		float time_delta = 0.01f;
+		if(last_time == 0) {
+			last_time = System.nanoTime();
+		} else {
+			long now = System.nanoTime();
+			time_delta = (now - last_time) / 10000000.0f;
+			last_time = now;
+		}
+		
+		speed *= time_delta;
+		
 		x += xx * speed;
 		y += yy * speed;
 		z += zz * speed;
 	}
+	
+	private long last_time;
 	
 	public Vector3f getPosition() {
 		return new Vector3f(x, y, z);
@@ -116,7 +129,7 @@ public class Camera {
 	
 	public Matrix4f getProjectionMatrix(float fov, float width, float height) {
 		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.1f, 100000);
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.5f, 10000000);
 		return projectionMatrix
 				.rotate(MathUtils.toRadians(ry), 1, 0, 0)
 				.rotate(MathUtils.toRadians(rx), 0, 0, 1)

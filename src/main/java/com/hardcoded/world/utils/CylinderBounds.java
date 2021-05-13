@@ -1,4 +1,4 @@
-package com.hardcoded.world.types;
+package com.hardcoded.world.utils;
 
 import org.joml.Vector3f;
 

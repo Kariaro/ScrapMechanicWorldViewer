@@ -102,11 +102,11 @@ public class ScriptData extends SQLiteObject {
 		{
 			TileData.setWorldTileIds(obj);
 			
-			System.out.println("{");
-			for(Object key : obj.keySet()) {
-				System.out.printf("    key=(%s)\n", key);
-			}
-			System.out.println("}");
+//			System.out.println("{");
+//			for(Object key : obj.keySet()) {
+//				System.out.printf("    key=(%s)\n", key);
+//			}
+//			System.out.println("}");
 		}
 	}
 }

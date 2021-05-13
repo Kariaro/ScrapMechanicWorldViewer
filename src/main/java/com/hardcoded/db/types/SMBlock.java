@@ -1,4 +1,4 @@
-package com.hardcoded.world.types;
+package com.hardcoded.db.types;
 
 import java.util.UUID;
 

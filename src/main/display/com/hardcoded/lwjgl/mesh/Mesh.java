@@ -11,12 +11,14 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.system.MemoryUtil;
 
+import com.hardcoded.lwjgl.util.LoadedMaterial;
+
 public class Mesh {
 	public static final int MAX_WEIGHTS = 4;
 	protected final int vaoId;
 	protected final List<Integer> vboIdList;
 	private final int vertexCount;
-	private Material material;
+	private LoadedMaterial material;
 	private float boundingRadius;
 	private String name;
 	
@@ -132,11 +134,11 @@ public class Mesh {
 		}
 	}*/
 	
-	public Material getMaterial() {
+	public LoadedMaterial getMaterial() {
 		return material;
 	}
 	
-	public void setMaterial(Material material) {
+	public void setMaterial(LoadedMaterial material) {
 		this.name = material.name;
 		this.material = material;
 	}

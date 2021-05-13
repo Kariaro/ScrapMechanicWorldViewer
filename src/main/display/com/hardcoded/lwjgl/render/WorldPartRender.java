@@ -6,14 +6,14 @@ import java.util.List;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import com.hardcoded.db.types.Renderable;
+import com.hardcoded.db.types.SMPart;
+import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.lwjgl.Camera;
 import com.hardcoded.lwjgl.mesh.PartMesh;
 import com.hardcoded.lwjgl.shader.PartShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
-import com.hardcoded.world.types.SMPart;
-import com.hardcoded.world.types.Renderable;
-import com.hardcoded.world.types.Renderable.Lod;
-import com.hardcoded.world.types.ShapeUtils.Bounds3D;
+import com.hardcoded.world.utils.ShapeUtils.Bounds3D;
 
 /**
  * A part renderer.
@@ -50,6 +50,12 @@ public class WorldPartRender {
 	
 	public void render(Vector3f pos, Quaternionf quat, Vector3f scale, Camera camera) {
 		//Vector3f pos = camera.getPosition();
+		
+		if(!meshes.isEmpty()) {
+			PartMesh last = meshes.get(meshes.size() - 1);
+			last.render(pos, quat, scale);
+			return;
+		}
 		
 		for(PartMesh mesh : meshes) {
 			//float dist = pos.distance(shape.xPos, shape.yPos, 0) * 2;

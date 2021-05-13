@@ -1006,9 +1006,15 @@ public class TileData {
 		if(!hasTile(x, y)) return 0;
 		return data.get("rotation").get(y).getInt(x);
 	}
+	
 	public static float getTileElevation(int x, int y) {
 		if(!hasTile(x, y)) return 0;
 		return data.get("elevation").get(y).getFloat(x);
+	}
+	
+	public static float getTileCliffLevel(int x, int y) {
+		if(!hasTile(x, y)) return 0;
+		return data.get("cliffLevel").get(y).getFloat(x);
 	}
 	
 	public static String getTilePath(int x, int y) {
