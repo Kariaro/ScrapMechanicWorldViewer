@@ -61,13 +61,13 @@ public class WorldTileRender {
 			return;
 		}
 		
-		int tx = (ofx + this.x) * 64 * 4;
-		int ty = (ofy + this.y) * 64 * 4;
+		int tx = (ofx + this.x) * 64;
+		int ty = (ofy + this.y) * 64;
 		
 		Matrix4f rott = new Matrix4f();
 		//int rot = 0;
 		float rot_offset = rot * (float)(Math.PI / 2.0);
-		rott.translateLocal(-128, -128, 0).rotateLocalZ(rot_offset).translateLocal(128, 128, 0);
+		rott.translateLocal(-32, -32, 0).rotateLocalZ(rot_offset).translateLocal(32, 32, 0);
 
 		float c_sw = TileData.getTileCliffLevel(x    , y    );
 		float c_se = TileData.getTileCliffLevel(x + 1, y    );
@@ -77,10 +77,9 @@ public class WorldTileRender {
 		
 		//float elevation_l = TileData.getTileElevation(x, y);
 		
-		float tz = cliff_level * 4;
+		float tz = cliff_level;
 		Matrix4f transform = new Matrix4f(rott);
 		transform.translateLocal(tx, ty, tz);
-		transform.scale(4);
 		
 		tileShader.bind();
 		tileShader.setUniform("projectionView", projectionTran);
@@ -106,15 +105,15 @@ public class WorldTileRender {
 				
 				WorldAssetRender mesh = render.getAssetRender(uuid);
 				if(mesh != null) {
-					Vector3f a = new Vector3f(apos.x * 4, apos.y * 4, apos.z * 4);
-					a.add(-128, -128, 0).rotateZ(rot_offset).add(128, 128, 0);
+					Vector3f a = new Vector3f(apos.x, apos.y, apos.z);
+					a.add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0);
 					Vector3f vec_pos = a.add(part_offset);
 					
 					mesh.render(
 						vec_pos,
 						asset,
 						new Quaternionf().rotateZ(rot_offset).mul(new Quaternionf(arot.x, arot.y, arot.z, arot.w)),
-						new Vector3f(ascl.x * 4, ascl.y * 4, ascl.z * 4),
+						new Vector3f(ascl.x, ascl.y, ascl.z),
 						camera
 					);
 				}

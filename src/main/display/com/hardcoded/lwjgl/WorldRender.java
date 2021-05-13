@@ -67,9 +67,9 @@ public class WorldRender {
 		gui = new Gui(this);
 		setViewport(width, height);
 		
-		camera.x = -7000;
-		camera.y = -6640;
-		camera.z = 160;
+		camera.x = -1750;
+		camera.y = -1660;
+		camera.z = 40;
 		
 		try {
 			//checkWorldUpdate();
@@ -346,9 +346,9 @@ public class WorldRender {
 	public void render() {
 		item_load = 1;
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		Matrix4f projectionView = camera.getProjectionViewMatrix(60, width, height);
+		//Matrix4f projectionView = camera.getProjectionViewMatrix(60, width, height);
 		Matrix4f projectionTran = camera.getProjectionMatrix(70, width, height);
-		Matrix4f viewMatrix = camera.getViewMatrix(60, width, height);
+		//Matrix4f viewMatrix = camera.getViewMatrix(60, width, height);
 		
 		GL11.glEnable(GL_DEPTH_TEST);
 		GL11.glEnable(GL_CULL_FACE);
@@ -400,8 +400,8 @@ public class WorldRender {
 			int ss = 1;
 			
 			Vector3f cam_pos = camera.getPosition();
-			int xx = (int)((cam_pos.x / 4) / 64) - ox;
-			int yy = (int)((cam_pos.y / 4) / 64) - oy;
+			int xx = (int)(cam_pos.x / 64) - ox;
+			int yy = (int)(cam_pos.y / 64) - oy;
 			
 			for(int y = yy - ss - 1; y <= yy + ss; y++) {
 				for(int x = xx - ss - 1; x <= xx + ss; x++) {
@@ -452,12 +452,12 @@ public class WorldRender {
 				
 				//if(!has) continue;
 				renderCube(
-					body.yMin * 4 + 0.5f,
-					body.xMax * 4 + 0.5f,
+					body.yMin + 0.5f,
+					body.xMax + 0.5f,
 					0 + 0.5f,
 					
-					ys * 4,
-					xs * 4,
+					ys,
+					xs,
 					0,
 					
 					0x20ffffff
@@ -485,31 +485,31 @@ public class WorldRender {
 				
 				//if(!has) continue;
 				Matrix4f matrix = new Matrix4f();
+				
 				if(body.isStatic_0_2 == 2) {
-					
 					matrix.translateLocal(
-						middle.x + body.xWorld * 4,
-						middle.y + body.yWorld * 4,
-						middle.z + body.zWorld * 4
+						middle.x + body.xWorld,
+						middle.y + body.yWorld,
+						middle.z + body.zWorld
 					);
 					
 					matrix.rotateAroundLocal(body.quat,
-						body.xWorld * 4,
-						body.yWorld * 4,
-						body.zWorld * 4
+						body.xWorld,
+						body.yWorld,
+						body.zWorld
 					);
 				} else {
 					matrix.translateLocal(
-						middle.x + body.xWorld * 4,
-						middle.y + body.yWorld * 4,
-						middle.z + body.zWorld * 4
+						middle.x + body.xWorld,
+						middle.y + body.yWorld,
+						middle.z + body.zWorld
 					);
 					
 					if(body.staticFlags < -1) {
 						matrix.rotateAroundLocal(body.quat,
-							body.xWorld * 4,
-							body.yWorld * 4,
-							body.zWorld * 4
+							body.xWorld,
+							body.yWorld,
+							body.zWorld
 						);
 					}
 				}
@@ -518,6 +518,7 @@ public class WorldRender {
 				float ym = bounds.yMin - middle.y * 2.0f;
 				float zm = bounds.zMin - middle.z * 2.0f;
 				
+				GL11.glPushMatrix();
 				GL11.glMultMatrixf(matrix.get(new float[16]));
 				renderCube(
 					bounds.xMin - middle.x + 0.5f,
@@ -531,54 +532,53 @@ public class WorldRender {
 					0x7fff0000
 				);
 				
+				float a_len = 0.5f;
 				GL11.glBegin(GL_LINES);
 					GL11.glColor3f(1, 0, 0);
 					GL11.glVertex3f(xm, ym, zm);
-					GL11.glVertex3f(xm + 3, ym, zm);
+					GL11.glVertex3f(xm + a_len, ym, zm);
 					
 					GL11.glColor3f(0, 1, 0);
 					GL11.glVertex3f(xm, ym, zm);
-					GL11.glVertex3f(xm, ym, zm + 3);
+					GL11.glVertex3f(xm, ym, zm + a_len);
 					
 					GL11.glColor3f(0, 0, 1);
 					GL11.glVertex3f(xm, ym, zm);
-					GL11.glVertex3f(xm, ym + 3, zm);
+					GL11.glVertex3f(xm, ym + a_len, zm);
 				GL11.glEnd();
-				
-				GL11.glMultMatrixf(matrix.invert(new Matrix4f()).get(new float[16]));
+				GL11.glPopMatrix();
 			}
+			
 			GL11.glDisable(GL11.GL_BLEND);
 			GL11.glDisable(GL11.GL_ALPHA);
 			
-			GL11.glEnable(GL_DEPTH_TEST);
-			for(RigidBody body : bodies) {
-				boolean has = false;
-				for(ChildShape shape : body.shapes) {
-					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
-						has = true;
-						break;
-					}
-				}
-				
-				if(!has) continue;
-				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
-				Vector3f middle = bounds.getMiddle();
-
-				renderCube(
-					0.5f + body.yMin * 4,
-					0.5f + body.xMin * 4,
-					0.5f,
-					
-					-middle.x * 2,
-					-middle.y * 2,
-					-middle.z * 2,
-					
-					0x7f7f7f7f
-				);
-			}
+//			GL11.glEnable(GL_DEPTH_TEST);
+//			for(RigidBody body : bodies) {
+//				boolean has = false;
+//				for(ChildShape shape : body.shapes) {
+//					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
+//						has = true;
+//						break;
+//					}
+//				}
+//				
+//				if(!has) continue;
+//				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
+//				Vector3f middle = bounds.getMiddle();
+//				
+//				renderCube(
+//					0.5f + body.yMin,
+//					0.5f + body.xMin,
+//					0.5f,
+//					
+//					-middle.x * 2,
+//					-middle.y * 2,
+//					-middle.z * 2,
+//					
+//					0x7f7f7f7f
+//				);
+//			}
 		}
-		
-		GL11.glEnable(GL_DEPTH_TEST);
 		
 		// Center of world
 		renderCube(

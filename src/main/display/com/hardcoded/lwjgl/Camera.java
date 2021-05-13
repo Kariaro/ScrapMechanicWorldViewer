@@ -73,7 +73,7 @@ public class Camera {
 			}
 		}
 		
-		float speed = 0.1f * (float)Math.pow(5, speedMod - 1);
+		float speed = 0.025f * (float)Math.pow(5, speedMod - 1);
 //		if(Input.keys[GLFW_KEY_F]) {
 //			speed *= 100;
 //		}
