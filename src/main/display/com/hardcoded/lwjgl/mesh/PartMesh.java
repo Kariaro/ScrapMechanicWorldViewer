@@ -87,31 +87,32 @@ public class PartMesh extends RenderableMeshImpl {
 		float z = shape.zPos - 0.5f;
 		
 		Matrix4f matrix = new Matrix4f();
+		matrix.scale(1 / 4.0f);
 		
 		RigidBody body = shape.body;
 		if(body.isStatic_0_2 == 2) {
 			matrix.translateLocal(
-				x + body.xWorld * 4,
-				y + body.yWorld * 4,
-				z + body.zWorld * 4
+				(x / 4.0f) + body.xWorld,
+				(y / 4.0f) + body.yWorld,
+				(z / 4.0f) + body.zWorld
 			);
 			matrix.rotateAroundLocal(body.quat,
-				body.xWorld * 4,
-				body.yWorld * 4,
-				body.zWorld * 4
+				body.xWorld,
+				body.yWorld,
+				body.zWorld
 			);
 		} else {
 			matrix.translateLocal(
-				x + body.xWorld * 4,
-				y + body.yWorld * 4,
-				z + body.zWorld * 4
+				(x / 4.0f) + body.xWorld,
+				(y / 4.0f) + body.yWorld,
+				(z / 4.0f) + body.zWorld
 			);
 			
 			if(body.staticFlags < -1) {
 				matrix.rotateAroundLocal(body.quat,
-					body.xWorld * 4,
-					body.yWorld * 4,
-					body.zWorld * 4
+					body.xWorld,
+					body.yWorld,
+					body.zWorld
 				);
 			}
 		}
@@ -159,9 +160,7 @@ public class PartMesh extends RenderableMeshImpl {
 				
 				if(mat != null) {
 					mat.bind(shader);
-					
 					meshes[i].render();
-					
 					mat.unbind(shader);
 				} else {
 					meshes[i].render();

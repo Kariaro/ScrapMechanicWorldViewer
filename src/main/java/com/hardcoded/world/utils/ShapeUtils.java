@@ -74,7 +74,15 @@ public class ShapeUtils {
 			}
 		}
 		
-		return new Bounds3D(posi, size);
+		Bounds3D bounds = new Bounds3D(posi, size);
+		bounds.xMax *= 0.25f;
+		bounds.xMin *= 0.25f;
+		bounds.yMax *= 0.25f;
+		bounds.yMin *= 0.25f;
+		bounds.zMax *= 0.25f;
+		bounds.zMin *= 0.25f;
+		
+		return bounds;
 	}
 	
 	public static class Bounds3D {

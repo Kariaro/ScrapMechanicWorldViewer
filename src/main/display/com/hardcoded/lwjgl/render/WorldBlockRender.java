@@ -63,39 +63,38 @@ public class WorldBlockRender {
 		float z = shape.zPos;
 		
 		RigidBody body = shape.body;
+
+		Matrix4f matrix = new Matrix4f();
+		matrix.scale(1 / 4.0f);
 		
 		if(shape.body.isStatic_0_2 == 2) {
-			Matrix4f matrix = new Matrix4f();
 			matrix.translateLocal(
-				x + body.xWorld * 4,
-				y + body.yWorld * 4,
-				z + body.zWorld * 4
+				(x / 4.0f) + body.xWorld,
+				(y / 4.0f) + body.yWorld,
+				(z / 4.0f) + body.zWorld
 			);
 			matrix.rotateAroundLocal(body.quat,
-				body.xWorld * 4,
-				body.yWorld * 4,
-				body.zWorld * 4
+				body.xWorld,
+				body.yWorld,
+				body.zWorld
 			);
-			
-			shader.setUniform("transformationMatrix", matrix);
 		} else {
-			Matrix4f matrix = new Matrix4f();
 			matrix.translateLocal(
-				x + body.xWorld * 4,
-				y + body.yWorld * 4,
-				z + body.zWorld * 4
+				(x / 4.0f) + body.xWorld,
+				(y / 4.0f) + body.yWorld,
+				(z / 4.0f) + body.zWorld
 			);
 			
 			if(body.staticFlags < -1) {
 				matrix.rotateAroundLocal(body.quat,
-					body.xWorld * 4,
-					body.yWorld * 4,
-					body.zWorld * 4
+					body.xWorld,
+					body.yWorld,
+					body.zWorld
 				);
 			}
-			shader.setUniform("transformationMatrix", matrix);
 		}
-		
+
+		shader.setUniform("transformationMatrix", matrix);
 		shader.setUniform("localTransform", x, y, z);
 		shader.setUniform("tiling", block.tiling);
 		shader.setUniform("scale",

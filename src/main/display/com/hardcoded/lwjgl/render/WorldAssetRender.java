@@ -37,16 +37,11 @@ public class WorldAssetRender {
 	}
 	
 	public void render(Vector3f pos, Asset asset, Quaternionf quat, Vector3f scale, Camera camera) {
-//		for(int i = 0; i < meshes.size(); i++) {
-//			AssetMesh mesh = meshes.get(i);
-//			mesh.render(pos, quat, scale);
-//			break;
-//		}
-//		if(!meshes.isEmpty()) {
-//			AssetMesh last = meshes.get(meshes.size() - 1);
-//			last.render(pos, quat, scale);
-//			return;
-//		}
+		if(!meshes.isEmpty()) {
+			AssetMesh last = meshes.get(meshes.size() - 1);
+			last.render(asset, pos, quat, scale);
+			return;
+		}
 		
 		for(AssetMesh mesh : meshes) {
 			mesh.render(asset, pos, quat, scale);
