@@ -10,6 +10,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.hardcoded.lwjgl.shader.TileShader;
 import com.hardcoded.tile.Tile;
+import com.hardcoded.tile.impl.TilePart;
 
 public class TileMesh {
 	private int vaoId;
@@ -143,6 +144,112 @@ public class TileMesh {
 		}
 		System.out.println();
 		*/
+		
+		buildObject(verts, colors, uvs, materials);
+	}
+	
+	public TileMesh(TilePart part) {
+		int width = 1;
+		int height = 1;
+		
+		
+		float[] verts = new float[32 * 32 * 3 * 6];
+		float[] colors = new float[32 * 32 * 4 * 6];
+		float[] uvs = new float[32 * 32 * 2 * 6];
+		int[] materials = new int[32 * 32 * 16 * 6];
+		
+		float[] tile_heights = part.vertexHeight; // tile.getVertexHeight();
+		long[] tile_mats = part.ground; // tile.getGround();
+		int[] tile_colors = part.vertexColor; // tile.getVertexColor();
+		
+		int tchw = 0x20 + 1;
+		int thcw = 0x20 + 1;
+		int tgrw = 0x40 + 1;
+		
+		float mul = 2;
+		for(int y = 0; y < height * 32; y++) {
+			for(int x = 0; x < width * 32; x++) {
+				int vidx = (x + y * width * 32) * 3 * 6;
+				int cidx = (x + y * width * 32) * 4 * 6;
+				int midx = (x + y * width * 32) * 16 * 6;
+				int uidx = (x + y * width * 32) * 2 * 6;
+				
+				int c00 = tile_colors[(x    ) + (y    ) * tchw]; //tile.getVertexColor(x, y);
+				int c01 = tile_colors[(x    ) + (y + 1) * tchw]; //tile.getVertexColor(x, y + 1);
+				int c10 = tile_colors[(x + 1) + (y    ) * tchw]; //tile.getVertexColor(x + 1, y);
+				int c11 = tile_colors[(x + 1) + (y + 1) * tchw]; //tile.getVertexColor(x + 1, y + 1);
+				
+				float h00 = tile_heights[(x    ) + (y    ) * thcw]; //tile.getVertexHeight(x, y);
+				float h01 = tile_heights[(x    ) + (y + 1) * thcw]; //tile.getVertexHeight(x, y + 1);
+				float h10 = tile_heights[(x + 1) + (y    ) * thcw]; //tile.getVertexHeight(x + 1, y);
+				float h11 = tile_heights[(x + 1) + (y + 1) * thcw]; //tile.getVertexHeight(x + 1, y + 1);
+				
+				long m00 = tile_mats[(x*2    ) + (y*2    ) * tgrw]; //tile.getGroundMaterial(x * 2    , y * 2    );
+				long m01 = tile_mats[(x*2    ) + (y*2 + 1) * tgrw]; //tile.getGroundMaterial(x * 2    , y * 2 + 1);
+				long m10 = tile_mats[(x*2 + 1) + (y*2    ) * tgrw]; //tile.getGroundMaterial(x * 2 + 1, y * 2    );
+				long m11 = tile_mats[(x*2 + 1) + (y*2 + 1) * tgrw]; //tile.getGroundMaterial(x * 2 + 1, y * 2 + 1);
+				
+				float x0 = x;
+				float x1 = x + 1;
+				float y0 = y;
+				float y1 = y + 1;
+				
+				//   00 --+-- 10
+				//   |    |  .'|
+				//   |____|.'  |
+				//   |   .'    |
+				//   | .'      |
+				//   01 ------11
+				
+				for(int j = 0; j < 6; j++) {
+					writeMaterial(materials, midx +  0, m00);
+					writeMaterial(materials, midx +  4, m01);
+					writeMaterial(materials, midx +  8, m10);
+					writeMaterial(materials, midx + 12, m11);
+					midx += 16;
+				}
+				
+				verts[vidx    ] = x0 * mul;
+				verts[vidx + 1] = y0 * mul;
+				verts[vidx + 2] = h00;
+				writeColor(colors, cidx, c00);
+				writeUv(uvs, uidx, 0, 0);
+				
+				verts[vidx + 3] = x1 * mul;
+				verts[vidx + 4] = y0 * mul;
+				verts[vidx + 5] = h10;
+				writeColor(colors, cidx + 4, c10);
+				writeUv(uvs, uidx + 2, 1, 0);
+				
+				verts[vidx + 6] = x0 * mul;
+				verts[vidx + 7] = y1 * mul;
+				verts[vidx + 8] = h01;
+				writeColor(colors, cidx + 8, c01);
+				writeUv(uvs, uidx + 4, 0, 1);
+				
+				uidx += 6;
+				vidx += 9;
+				cidx += 12;
+				
+				verts[vidx    ] = x0 * mul;
+				verts[vidx + 1] = y1 * mul;
+				verts[vidx + 2] = h01;
+				writeColor(colors, cidx, c01);
+				writeUv(uvs, uidx, 0, 1);
+				
+				verts[vidx + 3] = x1 * mul;
+				verts[vidx + 4] = y0 * mul;
+				verts[vidx + 5] = h10;
+				writeColor(colors, cidx + 4, c10);
+				writeUv(uvs, uidx + 2, 1, 0);
+				
+				verts[vidx + 6] = x1 * mul;
+				verts[vidx + 7] = y1 * mul;
+				verts[vidx + 8] = h11;
+				writeColor(colors, cidx + 8, c11);
+				writeUv(uvs, uidx + 4, 1, 1);
+			}
+		}
 		
 		buildObject(verts, colors, uvs, materials);
 	}

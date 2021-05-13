@@ -1,4 +1,4 @@
-package com.hardcoded.world.types;
+package com.hardcoded.world.utils;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -6,6 +6,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
+import com.hardcoded.db.types.SMPart;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
 

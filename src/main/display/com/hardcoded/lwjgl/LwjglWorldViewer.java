@@ -10,8 +10,8 @@ import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
+import com.hardcoded.lwjgl.data.Texture;
 import com.hardcoded.lwjgl.input.Input;
-import com.hardcoded.lwjgl.mesh.Texture;
 
 public class LwjglWorldViewer implements Runnable {
 	public static final BufferedImage ICON = null;

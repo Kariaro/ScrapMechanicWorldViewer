@@ -3,7 +3,7 @@ package com.hardcoded.lwjgl.shader;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 
-import com.hardcoded.lwjgl.mesh.Texture;
+import com.hardcoded.lwjgl.data.Texture;
 import com.hardcoded.util.FileUtils;
 
 public class TileShader extends Shader {

@@ -18,7 +18,7 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
 
-import com.hardcoded.lwjgl.mesh.Texture;
+import com.hardcoded.lwjgl.data.Texture;
 
 // TODO: The text should be rendered in a shader and not with the gl functions!
 public class Text {

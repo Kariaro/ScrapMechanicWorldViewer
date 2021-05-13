@@ -14,22 +14,20 @@ import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
+import com.hardcoded.db.types.*;
 import com.hardcoded.error.TileException;
 import com.hardcoded.game.World;
 import com.hardcoded.logger.Log;
 import com.hardcoded.lwjgl.gui.Gui;
 import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
-import com.hardcoded.math.Vec3;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
 import com.hardcoded.sm.objects.TileData;
 import com.hardcoded.tile.Tile;
 import com.hardcoded.tile.TileReader;
-import com.hardcoded.tile.impl.TilePart;
-import com.hardcoded.tile.object.Asset;
-import com.hardcoded.world.types.*;
-import com.hardcoded.world.types.ShapeUtils.Bounds3D;
+import com.hardcoded.world.utils.ShapeUtils;
+import com.hardcoded.world.utils.ShapeUtils.Bounds3D;
 
 public class WorldRender {
 	private static final Log LOGGER = Log.getLogger();
@@ -68,6 +66,10 @@ public class WorldRender {
 		camera = new Camera(window);
 		gui = new Gui(this);
 		setViewport(width, height);
+		
+		camera.x = -7000;
+		camera.y = -6640;
+		camera.z = 160;
 		
 		try {
 			//checkWorldUpdate();
@@ -240,7 +242,6 @@ public class WorldRender {
 		//long o_index = ((long)(ox) & 0xffffffffL) | (((long)oy) << 32L);
 		
 		TileParts parts = null;
-		
 		if(tile_data.containsKey(path)) {
 			parts = tile_data.get(path);
 		} else {
@@ -255,10 +256,8 @@ public class WorldRender {
 			}
 		}
 		
-		
-		Tile tile = parts.getTile(ox, oy);
 		LOGGER.info("Init: '%s'", path);
-		WorldTileRender render = new WorldTileRender(this, x, y, path, tile, tileShader, assetShader);
+		WorldTileRender render = new WorldTileRender(this, x, y, ox, oy, parts, tileShader, assetShader);
 		tiles.put(index, render);
 		return render;
 	}
@@ -385,10 +384,6 @@ public class WorldRender {
 			for(ChildShape shape : body.shapes) {
 				WorldPartRender mesh = getPartRender(shape.uuid);
 				
-				// @c0159b96-edf3-46cd-9fbe-96ee1126304b@obj_survivalobject_powercoresocket
-//				if(!shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
-//					//continue;
-//				}
 				if(mesh != null) {
 					mesh.render(shape, bounds, camera);
 				}
@@ -396,41 +391,31 @@ public class WorldRender {
 		}
 		partShader.unbind();
 		
+		{
+			// correct = (-2270, -2567, 10)
+			// current = (-1676, -1500, 1)
+			
+			int ox = 0;
+			int oy = 0;
+			int ss = 1;
+			
+			Vector3f cam_pos = camera.getPosition();
+			int xx = (int)((cam_pos.x / 4) / 64) - ox;
+			int yy = (int)((cam_pos.y / 4) / 64) - oy;
+			
+			for(int y = yy - ss - 1; y <= yy + ss; y++) {
+				for(int x = xx - ss - 1; x <= xx + ss; x++) {
+					WorldTileRender render = getTileRender(x, y);
+					if(render != null) {
+						render.render(ox, oy, projectionTran, camera);
+					}
+				}
+			}
+		}
 		
 		
 		GL11.glPushMatrix();
 		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
-		
-//		{
-//			if(loaded_tile != null) {
-//				for(int y = 0; y < loaded_tile.getHeight(); y++) {
-//					for(int x = 0; x < loaded_tile.getWidth(); x++) {
-//						TilePart part = loaded_tile.getPart(x, y);
-//						Vector3f part_offset = new Vector3f(x * 64, y * 64, 0);
-//						
-//						for(int i = 0; i < 4; i++) {
-//							List<Asset> list = part.assets[i];
-//							
-//							for(Asset asset : list) {
-//								Vec3 pos = asset.getPosition();
-//								Vec3 scl = asset.getSize();
-//								
-//								renderCube(
-//									pos.x + part_offset.x,
-//									pos.y + part_offset.y,
-//									pos.z + part_offset.z,
-//									scl.x,
-//									scl.y,
-//									scl.z,
-//									
-//									0x20ffffff
-//								);
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
 		/*for(RigidBody body : bodies) {
 			//System.out.println(body.bodyId);
 			for(ChildShape shape : body.shapes) {
@@ -457,13 +442,13 @@ public class WorldRender {
 				float ys = body.yMax - body.yMin;
 				float xs = body.xMin - body.xMax;
 
-				boolean has = false;
-				for(ChildShape shape : body.shapes) {
-					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
-						has = true;
-						break;
-					}
-				}
+//				boolean has = false;
+//				for(ChildShape shape : body.shapes) {
+//					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
+//						has = true;
+//						break;
+//					}
+//				}
 				
 				//if(!has) continue;
 				renderCube(
@@ -490,13 +475,13 @@ public class WorldRender {
 				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
 				Vector3f middle = bounds.getMiddle();
 				
-				boolean has = false;
-				for(ChildShape shape : body.shapes) {
-					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
-						has = true;
-						break;
-					}
-				}
+//				boolean has = false;
+//				for(ChildShape shape : body.shapes) {
+//					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
+//						has = true;
+//						break;
+//					}
+//				}
 				
 				//if(!has) continue;
 				Matrix4f matrix = new Matrix4f();
@@ -590,28 +575,6 @@ public class WorldRender {
 					
 					0x7f7f7f7f
 				);
-			}
-		}
-		
-		{
-			// correct = (-2270, -2567, 10)
-			// current = (-1676, -1500, 1)
-			
-			int ox = 0;
-			int oy = 0;
-			int ss = 3;
-			
-			Vector3f cam_pos = camera.getPosition();
-			int xx = (int)((cam_pos.x / 4) / 64) - ox;
-			int yy = (int)((cam_pos.y / 4) / 64) - oy;
-			
-			for(int y = yy - ss; y <= yy + ss; y++) {
-				for(int x = xx - ss; x <= xx + ss; x++) {
-					WorldTileRender render = getTileRender(x, y);
-					if(render != null) {
-						render.render(ox, oy, projectionTran, camera);
-					}
-				}
 			}
 		}
 		

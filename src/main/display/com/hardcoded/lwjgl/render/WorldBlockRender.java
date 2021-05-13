@@ -4,13 +4,13 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL20;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
+import com.hardcoded.db.types.SMBlock;
+import com.hardcoded.lwjgl.data.Texture;
 import com.hardcoded.lwjgl.mesh.BlockMesh;
-import com.hardcoded.lwjgl.mesh.Texture;
 import com.hardcoded.lwjgl.shader.BlockShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
-import com.hardcoded.world.types.SMBlock;
-import com.hardcoded.world.types.ShapeUtils.Bounds3D;
+import com.hardcoded.world.utils.ShapeUtils.Bounds3D;
 
 /**
  * A block renderer.

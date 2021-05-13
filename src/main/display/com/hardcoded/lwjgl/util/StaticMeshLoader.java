@@ -17,7 +17,6 @@ import org.lwjgl.assimp.AIString;
 import org.lwjgl.assimp.AIVector3D;
 import org.lwjgl.assimp.Assimp;
 
-import com.hardcoded.lwjgl.mesh.Material;
 import com.hardcoded.lwjgl.mesh.Mesh;
 
 public class StaticMeshLoader {
@@ -38,7 +37,7 @@ public class StaticMeshLoader {
 		
 		int numMaterials = aiScene.mNumMaterials();
 		PointerBuffer aiMaterials = aiScene.mMaterials();
-		List<Material> materials = new ArrayList<>();
+		List<LoadedMaterial> materials = new ArrayList<>();
 		for(int i = 0; i < numMaterials; i++) {
 			AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(i));
 			processMaterial(aiMaterial, materials);
@@ -59,24 +58,24 @@ public class StaticMeshLoader {
 		return meshes;
 	}
 	
-	private static void processMaterial(AIMaterial aiMaterial, List<Material> materials) throws Exception {
+	private static void processMaterial(AIMaterial aiMaterial, List<LoadedMaterial> materials) throws Exception {
 		AIColor4D colour = AIColor4D.create();
 		AIString path = AIString.calloc();
 		Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, path, (IntBuffer)null, null, null, null, null, null);
 		
-		Vector4f ambient = Material.DEFAULT_COLOUR;
+		Vector4f ambient = LoadedMaterial.DEFAULT_COLOR;
 		int result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, colour);
 		if(result == 0) {
 			ambient = new Vector4f(colour.r(), colour.g(), colour.b(), colour.a());
 		}
 		
-		Vector4f diffuse = Material.DEFAULT_COLOUR;
+		Vector4f diffuse = LoadedMaterial.DEFAULT_COLOR;
 		result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, colour);
 		if(result == 0) {
 			diffuse = new Vector4f(colour.r(), colour.g(), colour.b(), colour.a());
 		}
 		
-		Vector4f specular = Material.DEFAULT_COLOUR;
+		Vector4f specular = LoadedMaterial.DEFAULT_COLOR;
 		result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, aiTextureType_NONE, 0, colour);
 		if(result == 0) {
 			specular = new Vector4f(colour.r(), colour.g(), colour.b(), colour.a());
@@ -85,11 +84,11 @@ public class StaticMeshLoader {
 		AIString aiString = AIString.create();
 		Assimp.aiGetMaterialString(aiMaterial, "?mat.name", aiTextureType_NONE, 0, aiString);
 		
-		Material material = new Material(aiString.dataString(), ambient, diffuse, specular, 1.0f);
+		LoadedMaterial material = new LoadedMaterial(aiString.dataString(), ambient, diffuse, specular, 1.0f);
 		materials.add(material);
 	}
 	
-	private static Mesh processMesh(AIMesh aiMesh, List<Material> materials) {
+	private static Mesh processMesh(AIMesh aiMesh, List<LoadedMaterial> materials) {
 		List<Float> vertices = new ArrayList<>();
 		List<Float> textures = new ArrayList<>();
 		List<Float> normals = new ArrayList<>();
@@ -107,13 +106,13 @@ public class StaticMeshLoader {
 			listIntToArray(indices)
 		);
 		
-		Material material;
+		LoadedMaterial material;
 		int materialIdx = aiMesh.mMaterialIndex();
 		
 		if(materialIdx >= 0 && materialIdx < materials.size()) {
 			material = materials.get(materialIdx);
 		} else {
-			material = new Material();
+			material = new LoadedMaterial();
 		}
 		
 		mesh.setMaterial(material);

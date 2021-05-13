@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+import com.hardcoded.db.types.*;
 import com.hardcoded.logger.Log;
 import com.hardcoded.logger.Log.Level;
-import com.hardcoded.world.types.*;
 
 import valve.Steam;
 
@@ -44,7 +44,6 @@ public final class ScrapMechanicAssetHandler {
 		$SURVIVAL_DATA = new File(game_path, "Survival").getAbsolutePath();
 		$GAME_DATA = new File(game_path, "Data").getAbsolutePath();
 		
-		// TODO: ?????
 		String appdata_path = System.getenv("APPDATA");
 		File sm_userpath = new File(appdata_path, "Axolot Games/Scrap Mechanic/User");
 		File[] sm_users = sm_userpath.listFiles();
@@ -73,6 +72,9 @@ public final class ScrapMechanicAssetHandler {
 	protected final Map<UUID, SMAsset> assets;
 	protected final Map<UUID, SMPart> parts;
 	
+	
+	protected final Map<String, SMMaterial> materials;
+	
 	private File basePath;
 	private File gameDataPath;
 	private File challengeDataPath;
@@ -89,6 +91,7 @@ public final class ScrapMechanicAssetHandler {
 		assets = new HashMap<>();
 		parts = new HashMap<>();
 		
+		materials = new HashMap<>();
 	}
 	
 	/**
@@ -179,6 +182,16 @@ public final class ScrapMechanicAssetHandler {
 	 */
 	public static SMClutter getClutter(UUID uuid) {
 		return INSTANCE.clutters.get(uuid);
+	}
+	
+	
+	/**
+	 * Get the material with the specified {@code key}.
+	 * @param key the key of the material
+	 * @return the material object or {@code null} if that material didn't exist
+	 */
+	public static SMMaterial getHLSLMaterial(String key) {
+		return INSTANCE.materials.get(key);
 	}
 	
 	

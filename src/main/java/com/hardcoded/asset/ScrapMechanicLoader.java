@@ -7,13 +7,14 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hardcoded.db.types.*;
 import com.hardcoded.logger.Log;
 import com.hardcoded.util.FileUtils;
 import com.hardcoded.util.StringUtils;
 import com.hardcoded.util.ValueUtils;
-import com.hardcoded.world.types.*;
 
 /**
  * This class is used to load data.
@@ -23,6 +24,12 @@ import com.hardcoded.world.types.*;
  */
 class ScrapMechanicLoader {
 	private static final Log LOGGER = Log.getLogger();
+	
+	// Materials
+	public static final String TERRAINMATERIALS = "Terrain/Materials/terrainmaterials.json";
+	public static final String PARTMATERIALS    = "Objects/Materials/partmaterials.json";
+	
+	// Database
 	public static final String SHAPE_SETS = "Objects/Database/shapesets.json";
 	public static final String ASSET_SETS = "Terrain/Database/assetsets.json";
 	public static final String CLUTTER    = "Terrain/Database/clutter.json";
@@ -32,32 +39,86 @@ class ScrapMechanicLoader {
 		this.handler = handler;
 	}
 	
+	private String[] paths;
 	protected void load() throws Exception {
+		this.paths = new String[] {
+			$GAME_DATA,
+			$SURVIVAL_DATA,
+			$CHALLENGE_DATA
+		};
+		
 		loadAllShapeSets();
 		loadAllAssetSets();
 		loadAllClutter();
+		loadAllMaterials();
+		
+//		Set<String> set = new LinkedHashSet<>();
+//		for(String key : handler.materials.keySet()) {
+//			SMMaterial mat = handler.materials.get(key);
+//			
+//			set.addAll(mat.flags);
+//		}
+//		
+//		System.out.println(set);
+//		System.in.read();
 	}
 	
 	private void loadAllShapeSets() throws Exception {
 		Set<String> set = new HashSet<>();
-		loadShapeSets(new File($GAME_DATA, SHAPE_SETS), set);
-		loadShapeSets(new File($SURVIVAL_DATA, SHAPE_SETS), set);
-		loadShapeSets(new File($CHALLENGE_DATA, SHAPE_SETS), set);
+		for(String path : paths) {
+			loadShapeSets(new File(path, SHAPE_SETS), set);
+		}
 	}
 	
 	private void loadAllAssetSets() throws Exception {
 		Set<String> set = new HashSet<>();
-		loadAssetSets(new File($GAME_DATA, ASSET_SETS), set);
-		loadAssetSets(new File($SURVIVAL_DATA, ASSET_SETS), set);
-		loadAssetSets(new File($CHALLENGE_DATA, ASSET_SETS), set);
+		for(String path : paths) {
+			loadAssetSets(new File(path, ASSET_SETS), set);
+		}
 	}
 	
 	private void loadAllClutter() throws Exception {
-		loadClutter(new File($GAME_DATA, CLUTTER));
-		loadClutter(new File($SURVIVAL_DATA, CLUTTER));
-		loadClutter(new File($CHALLENGE_DATA, CLUTTER));
+		for(String path : paths) {
+			loadClutter(new File(path, CLUTTER));
+		}
 	}
 	
+	private void loadAllMaterials() throws Exception {
+		Set<String> set = new HashSet<>();
+		for(String path : paths) {
+			loadPartMaterials(new File(path, PARTMATERIALS), set);
+		}
+		
+		for(String path : paths) {
+			loadPartMaterials(new File(path, TERRAINMATERIALS), set);
+		}
+	}
+	
+	private void loadPartMaterials(File partmaterials, Set<String> loaded) throws Exception {
+		if(!partmaterials.exists()) return;
+		LOGGER.debug("Reading path: %s", partmaterials);
+		
+		String materials = FileUtils.readFile(partmaterials);
+		JsonFactory factory = new JsonFactory();
+		JsonParser parser = factory.createParser(StringUtils.removeComments(materials));
+		
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+		List<Map<String, SMMaterial>> list = mapper.readValues(parser, new TypeReference<Map<String, SMMaterial>>() {}).readAll();
+		
+		for(int i = 0; i < list.size(); i++) {
+			Map<String, SMMaterial> map = list.get(i);
+			
+			for(String key : map.keySet()) {
+				SMMaterial mat = map.get(key);
+				
+				if(!handler.materials.containsKey(key)) {
+					mat.name = key;
+					handler.materials.put(key, mat);
+				}
+			}
+		}
+	}
 	
 	private void loadShapeSets(File shapesets, Set<String> loaded) throws Exception {
 		if(!shapesets.exists()) return;
