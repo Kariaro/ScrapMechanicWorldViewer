@@ -397,14 +397,14 @@ public class WorldRender {
 			
 			int ox = 0;
 			int oy = 0;
-			int ss = 1;
+			int ss = 2;
 			
 			Vector3f cam_pos = camera.getPosition();
 			int xx = (int)(cam_pos.x / 64) - ox;
 			int yy = (int)(cam_pos.y / 64) - oy;
 			
-			for(int y = yy - ss - 1; y <= yy + ss; y++) {
-				for(int x = xx - ss - 1; x <= xx + ss; x++) {
+			for(int y = yy - ss - 1; y < yy + ss; y++) {
+				for(int x = xx - ss - 1; x < xx + ss; x++) {
 					WorldTileRender render = getTileRender(x, y);
 					if(render != null) {
 						render.render(ox, oy, projectionTran, camera);

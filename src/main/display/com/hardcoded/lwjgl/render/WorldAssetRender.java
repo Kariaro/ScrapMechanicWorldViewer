@@ -37,9 +37,11 @@ public class WorldAssetRender {
 	}
 	
 	public void render(Vector3f pos, Asset asset, Quaternionf quat, Vector3f scale, Camera camera) {
+		//float dist = camera.getPosition().distance(pos);
+		
 		if(!meshes.isEmpty()) {
-			AssetMesh last = meshes.get(meshes.size() - 1);
-			last.render(asset, pos, quat, scale);
+			AssetMesh mesh = meshes.get(meshes.size() - 1);
+			mesh.render(asset, pos, quat, scale);
 			return;
 		}
 		
