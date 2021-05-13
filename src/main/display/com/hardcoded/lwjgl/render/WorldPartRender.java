@@ -38,29 +38,30 @@ public class WorldPartRender {
 	}
 	
 	public void render(ChildShape shape, Bounds3D bounds, Camera camera) {
+		//float dist = camera.getPosition().distance(pos);
+		
 		if(!meshes.isEmpty()) {
-			PartMesh last = meshes.get(meshes.size() - 1);
-			last.render(shape, bounds);
+			PartMesh mesh = meshes.get(meshes.size() - 1);
+			mesh.render(shape, bounds);
 			return;
 		}
 		
 		for(PartMesh mesh : meshes) {
-			//float dist = pos.distance(shape.xPos, shape.yPos, 0) * 2;
 			mesh.render(shape, bounds);
 			break;
 		}
 	}
 	
 	public void render(Vector3f pos, Quaternionf quat, Vector3f scale, Camera camera) {
+		//float dist = camera.getPosition().distance(pos);
+		
 		if(!meshes.isEmpty()) {
-			PartMesh last = meshes.get(meshes.size() - 1);
-			last.render(pos, quat, scale);
+			PartMesh mesh = meshes.get(meshes.size() - 1);
+			mesh.render(pos, quat, scale);
 			return;
 		}
 		
 		for(PartMesh mesh : meshes) {
-			//float dist = pos.distance(shape.xPos, shape.yPos, 0) * 2;
-			
 			mesh.render(pos, quat, scale);
 			break;
 		}
