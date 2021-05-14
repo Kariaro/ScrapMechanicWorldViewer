@@ -18,6 +18,7 @@ import com.hardcoded.math.Vec3;
 import com.hardcoded.sm.objects.TileData;
 import com.hardcoded.tile.impl.TilePart;
 import com.hardcoded.tile.object.Asset;
+import com.hardcoded.tile.object.Harvestable;
 
 /**
  * A tile renderer.
@@ -37,14 +38,11 @@ public class WorldTileRender {
 	private int x;
 	private int y;
 	private int rot;
-	private float elv;
 	
 	public WorldTileRender(WorldRender render, int x, int y, int ox, int oy, TileParts parts, TileShader tileShader, AssetShader assetShader) {
 		this.render = render;
 		this.x = x;
 		this.y = y;
-		this.elv = TileData.getTileElevation(x, y);
-		this.elv = TileData.getTileCliffLevel(x, y);
 		this.rot = TileData.getTileRotation(x, y);
 
 		TilePart part = parts.getPart(ox, oy);
@@ -75,8 +73,6 @@ public class WorldTileRender {
 		float c_ne = TileData.getTileCliffLevel(x + 1, y + 1);
 		float cliff_level = Math.min(Math.min(c_sw, c_se), Math.min(c_nw, c_ne)) * 8;
 		
-		//float elevation_l = TileData.getTileElevation(x, y);
-		
 		float tz = cliff_level;
 		Matrix4f transform = new Matrix4f(rott);
 		transform.translateLocal(tx, ty, tz);
@@ -95,25 +91,48 @@ public class WorldTileRender {
 		Vector3f part_offset = new Vector3f(tx, ty, tz);
 		
 		for(int i = 0; i < 4; i++) {
-			List<Asset> list = part.assets[i];
+			List<Harvestable> harvestables = part.harvestables[i];
+			List<Asset> assets = part.assets[i];
 			
-			for(Asset asset : list) {
-				UUID uuid = asset.getUUID();
+			for(Asset asset : assets) {
+				UUID uuid = asset.getUuid();
 				Vec3 apos = asset.getPosition();
 				Quat arot = asset.getRotation();
-				Vec3 ascl = asset.getSize();
+				Vec3 asze = asset.getSize();
 				
 				WorldAssetRender mesh = render.getAssetRender(uuid);
 				if(mesh != null) {
-					Vector3f a = new Vector3f(apos.x, apos.y, apos.z);
+					Vector3f a = new Vector3f(apos.toArray());
 					a.add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0);
 					Vector3f vec_pos = a.add(part_offset);
 					
 					mesh.render(
 						vec_pos,
 						asset,
-						new Quaternionf().rotateZ(rot_offset).mul(new Quaternionf(arot.x, arot.y, arot.z, arot.w)),
-						new Vector3f(ascl.x, ascl.y, ascl.z),
+						new Quaternionf().rotateZ(rot_offset).mul(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW())),
+						new Vector3f(asze.toArray()),
+						camera
+					);
+				}
+			}
+			
+			for(Harvestable harvestable : harvestables) {
+				UUID uuid = harvestable.getUuid();
+				Vec3 apos = harvestable.getPosition();
+				Quat arot = harvestable.getRotation();
+				Vec3 asze = harvestable.getSize();
+				
+				WorldHarvestableRender mesh = render.getHarvestableRender(uuid);
+				if(mesh != null) {
+					Vector3f a = new Vector3f(apos.toArray());
+					a.add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0);
+					Vector3f vec_pos = a.add(part_offset);
+					
+					mesh.render(
+						vec_pos,
+						harvestable,
+						new Quaternionf().rotateZ(rot_offset).mul(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW())),
+						new Vector3f(asze.toArray()),
 						camera
 					);
 				}
