@@ -13,6 +13,10 @@ import org.lwjgl.system.MemoryUtil;
 
 import com.hardcoded.lwjgl.util.LoadedMaterial;
 
+/**
+ * @author HardCoded
+ * @since v0.1
+ */
 public class Mesh {
 	public static final int MAX_WEIGHTS = 4;
 	protected final int vaoId;

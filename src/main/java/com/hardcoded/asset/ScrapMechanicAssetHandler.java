@@ -68,6 +68,7 @@ public final class ScrapMechanicAssetHandler {
 	}
 	
 	protected final Map<UUID, SMClutter> clutters;
+	protected final Map<UUID, SMHarvestable> harvestables;
 	protected final Map<UUID, SMBlock> blocks;
 	protected final Map<UUID, SMAsset> assets;
 	protected final Map<UUID, SMPart> parts;
@@ -86,6 +87,7 @@ public final class ScrapMechanicAssetHandler {
 	private ScrapMechanicAssetHandler() {
 		loader = new ScrapMechanicLoader(this);
 		
+		harvestables = new HashMap<>();
 		clutters = new HashMap<>();
 		blocks = new HashMap<>();
 		assets = new HashMap<>();
@@ -176,6 +178,15 @@ public final class ScrapMechanicAssetHandler {
 	}
 	
 	/**
+	 * Get the harvestable with the specified {@code uuid}.
+	 * @param uuid the uuid of the harvestable object
+	 * @return the harvestable object or {@code null} if that part didn't exist
+	 */
+	public static SMHarvestable getHarvestable(UUID uuid) {
+		return INSTANCE.harvestables.get(uuid);
+	}
+	
+	/**
 	 * Get the clutter with the specified {@code uuid}.
 	 * @param uuid the uuid of the clutter object
 	 * @return the clutter object or {@code null} if that clutter didn't exist
@@ -201,6 +212,10 @@ public final class ScrapMechanicAssetHandler {
 	
 	public static Collection<SMAsset> getAllAssets() {
 		return Collections.unmodifiableCollection(INSTANCE.assets.values());
+	}
+	
+	public static Collection<SMHarvestable> getAllHarvestables() {
+		return Collections.unmodifiableCollection(INSTANCE.harvestables.values());
 	}
 	
 	public static Collection<SMBlock> getAllBlocks() {

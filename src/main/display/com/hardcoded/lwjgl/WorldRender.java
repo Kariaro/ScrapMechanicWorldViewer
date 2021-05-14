@@ -47,15 +47,18 @@ public class WorldRender {
 	
 	private World world;
 	private List<RigidBody> bodies = new ArrayList<>();
-	private Map<UUID, WorldAssetRender> assets;
-	private Map<UUID, WorldBlockRender> blocks;
-	private Map<UUID, WorldPartRender> parts;
+	
+	private final Map<UUID, WorldHarvestableRender> harvestables;
+	private final Map<UUID, WorldAssetRender> assets;
+	private final Map<UUID, WorldBlockRender> blocks;
+	private final Map<UUID, WorldPartRender> parts;
 	private Map<String, TileParts> tile_data;
 	private Map<Long, WorldTileRender> tiles;
 	
 	public WorldRender(LwjglWorldViewer parent, long window, int width, int height) {
 		this.parent = parent;
 		this.window = window;
+		harvestables = new HashMap<>();
 		assets = new HashMap<>();
 		blocks = new HashMap<>();
 		parts = new HashMap<>();
@@ -189,13 +192,16 @@ public class WorldRender {
 		//tm = new TileMesh(loaded_tile);
 	}
 	
+	private boolean loadCheck() {
+		return item_load-- > 0;
+	}
+	
 	private int item_load;
 	public WorldBlockRender getBlockRender(UUID uuid) {
 		if(blocks.containsKey(uuid)) return blocks.get(uuid);
 		
 		SMBlock block = ScrapMechanicAssetHandler.getBlock(uuid);
-		if(block == null) return null;
-		if(item_load-- < 0) return null;
+		if(block == null || !loadCheck()) return null;
 		
 		WorldBlockRender render = new WorldBlockRender(block, blockShader);
 		blocks.put(block.uuid, render);
@@ -206,8 +212,7 @@ public class WorldRender {
 		if(parts.containsKey(uuid)) return parts.get(uuid);
 		
 		SMPart part = ScrapMechanicAssetHandler.getPart(uuid);
-		if(part == null) return null;
-		if(item_load-- < 0) return null;
+		if(part == null || !loadCheck()) return null;
 		
 		LOGGER.info("Init: %s", part);
 		WorldPartRender render = new WorldPartRender(part, partShader);
@@ -219,12 +224,23 @@ public class WorldRender {
 		if(assets.containsKey(uuid)) return assets.get(uuid);
 		
 		SMAsset asset = ScrapMechanicAssetHandler.getAsset(uuid);
-		if(asset == null) return null;
-		if(item_load-- < 0) return null;
+		if(asset == null || !loadCheck()) return null;
 		
 		LOGGER.info("Init: %s", asset);
 		WorldAssetRender render = new WorldAssetRender(asset, assetShader);
 		assets.put(asset.uuid, render);
+		return render;
+	}
+	
+	public WorldHarvestableRender getHarvestableRender(UUID uuid) {
+		if(harvestables.containsKey(uuid)) return harvestables.get(uuid);
+		
+		SMHarvestable harvestable = ScrapMechanicAssetHandler.getHarvestable(uuid);
+		if(harvestable == null || !loadCheck()) return null;
+		
+		LOGGER.info("Init: %s", harvestable);
+		WorldHarvestableRender render = new WorldHarvestableRender(harvestable, assetShader);
+		harvestables.put(harvestable.uuid, render);
 		return render;
 	}
 	
@@ -233,9 +249,7 @@ public class WorldRender {
 		if(tiles.containsKey(index)) return tiles.get(index);
 
 		String path = TileData.getTilePath(x, y);
-		if(path == null) return null;
-		
-		if(item_load-- < 0) return null;
+		if(path == null || !loadCheck()) return null;
 		
 		int ox = TileData.getTileOffsetX(x, y);
 		int oy = TileData.getTileOffsetY(x, y);
@@ -346,6 +360,8 @@ public class WorldRender {
 	public void render() {
 		item_load = 1;
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glClearColor(0.369f, 0.784f, 0.886f, 1);
+		
 		//Matrix4f projectionView = camera.getProjectionViewMatrix(60, width, height);
 		Matrix4f projectionTran = camera.getProjectionMatrix(70, width, height);
 		//Matrix4f viewMatrix = camera.getViewMatrix(60, width, height);
@@ -397,7 +413,7 @@ public class WorldRender {
 			
 			int ox = 0;
 			int oy = 0;
-			int ss = 2;
+			int ss = 4;
 			
 			Vector3f cam_pos = camera.getPosition();
 			int xx = (int)(cam_pos.x / 64) - ox;
@@ -438,6 +454,8 @@ public class WorldRender {
 		if(SHOW_AABB) {
 			// Show location in the world of the aabb
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+			
+			// Display aabb on ground.
 			for(RigidBody body : bodies) {
 				float ys = body.yMax - body.yMin;
 				float xs = body.xMin - body.xMax;
@@ -475,15 +493,15 @@ public class WorldRender {
 				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
 				Vector3f middle = bounds.getMiddle();
 				
-//				boolean has = false;
-//				for(ChildShape shape : body.shapes) {
-//					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
-//						has = true;
-//						break;
-//					}
-//				}
+				boolean has = false;
+				for(ChildShape shape : body.shapes) {
+					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
+						has = true;
+						break;
+					}
+				}
 				
-				//if(!has) continue;
+				if(!has) continue;
 				Matrix4f matrix = new Matrix4f();
 				
 				if(body.isStatic_0_2 == 2) {
@@ -552,32 +570,32 @@ public class WorldRender {
 			GL11.glDisable(GL11.GL_BLEND);
 			GL11.glDisable(GL11.GL_ALPHA);
 			
-//			GL11.glEnable(GL_DEPTH_TEST);
-//			for(RigidBody body : bodies) {
-//				boolean has = false;
-//				for(ChildShape shape : body.shapes) {
-//					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
-//						has = true;
-//						break;
-//					}
-//				}
-//				
-//				if(!has) continue;
-//				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
-//				Vector3f middle = bounds.getMiddle();
-//				
-//				renderCube(
-//					0.5f + body.yMin,
-//					0.5f + body.xMin,
-//					0.5f,
-//					
-//					-middle.x * 2,
-//					-middle.y * 2,
-//					-middle.z * 2,
-//					
-//					0x7f7f7f7f
-//				);
-//			}
+			GL11.glEnable(GL_DEPTH_TEST);
+			for(RigidBody body : bodies) {
+				boolean has = false;
+				for(ChildShape shape : body.shapes) {
+					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
+						has = true;
+						break;
+					}
+				}
+				
+				if(!has) continue;
+				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
+				Vector3f middle = bounds.getMiddle();
+				
+				renderCube(
+					0.5f + body.yMin,
+					0.5f + body.xMin,
+					0.5f,
+					
+					-middle.x * 2,
+					-middle.y * 2,
+					-middle.z * 2,
+					
+					0x7f7f7f7f
+				);
+			}
 		}
 		
 		// Center of world

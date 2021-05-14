@@ -29,6 +29,9 @@ class ScrapMechanicLoader {
 	public static final String TERRAINMATERIALS = "Terrain/Materials/terrainmaterials.json";
 	public static final String PARTMATERIALS    = "Objects/Materials/partmaterials.json";
 	
+	// Harvestables
+	public static final String HARVESTABLE_SETS = "Harvestables/Database/harvestablesets.json";
+	
 	// Database
 	public static final String SHAPE_SETS = "Objects/Database/shapesets.json";
 	public static final String ASSET_SETS = "Terrain/Database/assetsets.json";
@@ -50,6 +53,7 @@ class ScrapMechanicLoader {
 		loadAllShapeSets();
 		loadAllAssetSets();
 		loadAllClutter();
+		loadAllHarvestables();
 		loadAllMaterials();
 		
 //		Set<String> set = new LinkedHashSet<>();
@@ -83,6 +87,13 @@ class ScrapMechanicLoader {
 		}
 	}
 	
+	private void loadAllHarvestables() throws Exception {
+		Set<String> set = new HashSet<>();
+		for(String path : paths) {
+			loadHarvestableSets(new File(path, HARVESTABLE_SETS), set);
+		}
+	}
+	
 	private void loadAllMaterials() throws Exception {
 		Set<String> set = new HashSet<>();
 		for(String path : paths) {
@@ -98,9 +109,9 @@ class ScrapMechanicLoader {
 		if(!partmaterials.exists()) return;
 		LOGGER.debug("Reading path: %s", partmaterials);
 		
-		String materials = FileUtils.readFile(partmaterials);
+		String content = FileUtils.readFile(partmaterials);
 		JsonFactory factory = new JsonFactory();
-		JsonParser parser = factory.createParser(StringUtils.removeComments(materials));
+		JsonParser parser = factory.createParser(StringUtils.removeComments(content));
 		
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
@@ -124,11 +135,11 @@ class ScrapMechanicLoader {
 		if(!shapesets.exists()) return;
 		LOGGER.debug("Reading path: %s", shapesets);
 		
-		String shapes = FileUtils.readFile(shapesets);
+		String content = FileUtils.readFile(shapesets);
 		String[] values;
 		{
 			JsonFactory factory = new JsonFactory();
-			JsonParser parser = factory.createParser(StringUtils.removeComments(shapes));
+			JsonParser parser = factory.createParser(StringUtils.removeComments(content));
 			parser.nextValue();
 			parser.nextToken();
 			parser.nextToken();
@@ -152,15 +163,53 @@ class ScrapMechanicLoader {
 	}
 	
 	@SuppressWarnings("rawtypes")
+	private void loadHarvestableSets(File harvestablesets, Set<String> loaded) throws Exception {
+		if(!harvestablesets.exists()) return;
+		LOGGER.debug("Reading path: %s", harvestablesets);
+		
+		String content = FileUtils.readFile(harvestablesets);
+		List<String> values = new ArrayList<>();
+		{
+			JsonFactory factory = new JsonFactory();
+			JsonParser parser = factory.createParser(StringUtils.removeComments(content));
+			parser.nextValue();
+			parser.nextToken();
+			parser.nextToken();
+			
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+			
+			for(Map map : mapper.readValue(parser, Map[].class)) {
+				Object obj = map.get("name");
+				if(obj != null) {
+					values.add(ValueUtils.toString(obj, ""));
+				}
+			}
+		}
+		
+		for(String value : values) {
+			if(loaded.contains(value)) continue;
+			loaded.add(value);
+			
+			String path = resolvePath(value);
+			String json = StringUtils.removeComments(FileUtils.readFile(path));
+			
+			LOGGER.debug("Reading path: %s", path);
+			JsonFactory factory = new JsonFactory();
+			loadObject(factory.createParser(json));
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
 	private void loadAssetSets(File assetsets, Set<String> loaded) throws Exception {
 		if(!assetsets.exists()) return;
 		LOGGER.debug("Reading path: %s", assetsets);
 		
-		String shapes = FileUtils.readFile(assetsets);
+		String content = FileUtils.readFile(assetsets);
 		List<String> values = new ArrayList<>();
 		{
 			JsonFactory factory = new JsonFactory();
-			JsonParser parser = factory.createParser(StringUtils.removeComments(shapes));
+			JsonParser parser = factory.createParser(StringUtils.removeComments(content));
 			parser.nextValue();
 			parser.nextToken();
 			parser.nextToken();
@@ -204,6 +253,10 @@ class ScrapMechanicLoader {
 			case "assetListRenderable":
 				loadAssets(parser);
 				break;
+			case "harvestableList": {
+				loadHarvestables(parser);
+				break;
+			}
 			default:
 				LOGGER.warn("Unsupported type '%s'", typeName);
 		}
@@ -236,6 +289,16 @@ class ScrapMechanicLoader {
 		for(SMAsset asset : array) {
 			if(handler.assets.containsKey(asset.uuid)) continue;
 			handler.assets.put(asset.uuid, asset);
+		}
+	}
+	
+	private void loadHarvestables(JsonParser parser) throws Exception {
+		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		SMHarvestable[] array = mapper.readValue(parser, SMHarvestable[].class);
+		
+		for(SMHarvestable harvestable : array) {
+			if(handler.harvestables.containsKey(harvestable.uuid)) continue;
+			handler.harvestables.put(harvestable.uuid, harvestable);
 		}
 	}
 	
