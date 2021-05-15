@@ -20,7 +20,7 @@ import com.hardcoded.world.utils.ShapeUtils.Bounds3D;
  * 
  * TODO: Transparency
  */
-public class WorldBlockRender {
+public class WorldBlockRender implements WorldObjectRender {
 	private static BlockMesh mesh;
 	private final SMBlock block;
 	private final Texture dif;
@@ -65,35 +65,20 @@ public class WorldBlockRender {
 		RigidBody body = shape.body;
 
 		Matrix4f matrix = new Matrix4f();
-		matrix.scale(1 / 4.0f);
 		
-		if(shape.body.isStatic_0_2 == 2) {
-			matrix.translateLocal(
-				(x / 4.0f) + body.xWorld,
-				(y / 4.0f) + body.yWorld,
-				(z / 4.0f) + body.zWorld
-			);
-			matrix.rotateAroundLocal(body.quat,
-				body.xWorld,
-				body.yWorld,
-				body.zWorld
-			);
-		} else {
-			matrix.translateLocal(
-				(x / 4.0f) + body.xWorld,
-				(y / 4.0f) + body.yWorld,
-				(z / 4.0f) + body.zWorld
-			);
-			
-			if(body.staticFlags < -1) {
-				matrix.rotateAroundLocal(body.quat,
-					body.xWorld,
-					body.yWorld,
-					body.zWorld
-				);
+		{
+			if(shape.body.isGridLocked_0_2 == 2) {
+				matrix.rotate(body.quat);
+			} else {
+				if(body.staticFlags < -1) {
+					matrix.rotate(body.quat);
+				}
 			}
+			matrix.translateLocal(body.xWorld, body.yWorld, body.zWorld);
+			matrix.scale(1 / 4.0f);
+			matrix.translate(x, y, z);
 		}
-
+		
 		shader.setUniform("transformationMatrix", matrix);
 		shader.setUniform("localTransform", x, y, z);
 		shader.setUniform("tiling", block.tiling);
@@ -105,16 +90,10 @@ public class WorldBlockRender {
 		
 		{
 			int rgba = shape.colorRGBA;
-			float r, g, b, a;
-			{
-				r = ((rgba >> 24) & 0xff) / 255.0f;
-				g = ((rgba >> 16) & 0xff) / 255.0f;
-				b = ((rgba >>  8) & 0xff) / 255.0f;
-				a = ((rgba      ) & 0xff) / 255.0f;
-			}
-			//r = (x % 4) / 4.0f;
-			//g = (y % 4) / 4.0f;
-			//b = (z % 4) / 4.0f;
+			float r = ((rgba >> 24) & 0xff) / 255.0f;
+			float g = ((rgba >> 16) & 0xff) / 255.0f;
+			float b = ((rgba >>  8) & 0xff) / 255.0f;
+			float a = ((rgba      ) & 0xff) / 255.0f;
 			shader.setUniform("color", r, g, b, a);
 		}
 		
@@ -127,5 +106,10 @@ public class WorldBlockRender {
 		dif.unbind();
 		asg.unbind();
 		nor.unbind();
+	}
+	
+	@Override
+	public void renderShadows() {
+		mesh.render();
 	}
 }

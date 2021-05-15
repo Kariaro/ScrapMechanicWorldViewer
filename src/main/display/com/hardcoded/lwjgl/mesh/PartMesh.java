@@ -9,9 +9,9 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
-import com.hardcoded.db.types.SMPart;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.Renderable.MeshMap;
+import com.hardcoded.db.types.SMPart;
 import com.hardcoded.lwjgl.data.MeshMaterial;
 import com.hardcoded.lwjgl.data.Texture;
 import com.hardcoded.lwjgl.shader.PartShader;
@@ -81,40 +81,26 @@ public class PartMesh extends RenderableMeshImpl {
 		}
 	}
 	
-	public boolean render(ChildShape shape, Bounds3D bounds) {
+	public void render(ChildShape shape, Bounds3D bounds) {
 		float x = shape.xPos - 0.5f;
 		float y = shape.yPos - 0.5f;
 		float z = shape.zPos - 0.5f;
 		
 		Matrix4f matrix = new Matrix4f();
-		matrix.scale(1 / 4.0f);
 		
 		RigidBody body = shape.body;
-		if(body.isStatic_0_2 == 2) {
-			matrix.translateLocal(
-				(x / 4.0f) + body.xWorld,
-				(y / 4.0f) + body.yWorld,
-				(z / 4.0f) + body.zWorld
-			);
-			matrix.rotateAroundLocal(body.quat,
-				body.xWorld,
-				body.yWorld,
-				body.zWorld
-			);
-		} else {
-			matrix.translateLocal(
-				(x / 4.0f) + body.xWorld,
-				(y / 4.0f) + body.yWorld,
-				(z / 4.0f) + body.zWorld
-			);
-			
-			if(body.staticFlags < -1) {
-				matrix.rotateAroundLocal(body.quat,
-					body.xWorld,
-					body.yWorld,
-					body.zWorld
-				);
+		
+		{
+			if(shape.body.isGridLocked_0_2 == 2) {
+				matrix.rotate(body.quat);
+			} else {
+				if(body.staticFlags < -1) {
+					matrix.rotate(body.quat);
+				}
 			}
+			matrix.translateLocal(body.xWorld, body.yWorld, body.zWorld);
+			matrix.scale(1 / 4.0f);
+			matrix.translate(x, y, z);
 		}
 		
 		applyRotation(shape, matrix);
@@ -131,26 +117,6 @@ public class PartMesh extends RenderableMeshImpl {
 			shader.setUniform("color", r, g, b, a);
 		}
 		
-		// TODO: Implement Lod objects
-		/*
-		if(animations != null) {
-			Mesh[] msh = animations[0];
-			for(int i = 0; i < msh.length; i++) {
-				List<Texture> texs = textures[0];
-				if(texs != null) {
-					for(Texture t : texs) t.bind();
-				}
-				
-				msh[i].render();
-				if(texs != null) {
-					for(Texture t : texs) t.unbind();
-				}
-			}
-		} else {
-			
-		}
-		*/
-		
 		for(int i = 0; i < textures.length; i++) {
 			List<Texture> texs = textures[i];
 			MeshMaterial mat = mats[i];
@@ -177,65 +143,24 @@ public class PartMesh extends RenderableMeshImpl {
 				}
 			}
 		}
-		
-		
-		// TODO: If size is smaller than minViewSize return 'false'
-		// TODO: If distance is greater than maxViewDistance return 'false'
-		return true;
 	}
 	
-	public boolean render(Vector3f pos, Quaternionf quat, Vector3f scale) {
-//		float x = shape.xPos - 0.5f;
-//		float y = shape.yPos - 0.5f;
-//		float z = shape.zPos - 0.5f;
-		
+	// FIXME: BAD
+	public void render(Vector3f pos, Quaternionf quat, Vector3f scale) {
 		Matrix4f matrix = new Matrix4f();
 		matrix.translate(pos);
 		matrix.rotate(quat);
 		matrix.scale(scale);
 		matrix.scale(1 / 4.0f);
 		
-//		applyRotation(shape, matrix);
 		shader.setUniform("transformationMatrix", matrix);
-//		{
-//			int rgba = shape.colorRGBA;
-//			float r, g, b, a;
-//			{
-//				r = ((rgba >> 24) & 0xff) / 255.0f;
-//				g = ((rgba >> 16) & 0xff) / 255.0f;
-//				b = ((rgba >>  8) & 0xff) / 255.0f;
-//				a = ((rgba      ) & 0xff) / 255.0f;
-//			}
-//			shader.setUniform("color", r, g, b, a);
-//		}
-		shader.setUniform("color", 1, 1, 1, 1);
-		
-		// TODO: Implement Lod objects
-		/*
-		if(animations != null) {
-			Mesh[] msh = animations[0];
-			for(int i = 0; i < msh.length; i++) {
-				List<Texture> texs = textures[0];
-				if(texs != null) {
-					for(Texture t : texs) t.bind();
-				}
-				
-				msh[i].render();
-				if(texs != null) {
-					for(Texture t : texs) t.unbind();
-				}
-			}
-		} else {
-			
-		}
-		*/
 		
 		for(int i = 0; i < textures.length; i++) {
 			List<Texture> texs = textures[i];
 			MeshMaterial mat = mats[i];
 			
 			if(texs != null) {
-				for(Texture t : texs) t.bind();
+				//for(Texture t : texs) t.bind();
 				
 				if(mat != null) {
 					mat.bind(shader);
@@ -245,7 +170,7 @@ public class PartMesh extends RenderableMeshImpl {
 					meshes[i].render();
 				}
 				
-				for(Texture t : texs) t.unbind();
+				//for(Texture t : texs) t.unbind();
 			} else {
 				if(mat != null) {
 					mat.bind(shader);
@@ -256,7 +181,5 @@ public class PartMesh extends RenderableMeshImpl {
 				}
 			}
 		}
-		
-		return true;
 	}
 }

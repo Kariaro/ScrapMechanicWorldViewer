@@ -151,4 +151,12 @@ public class Camera {
 		GL11.glRotatef(rz, 0, 1, 0);
 		GL11.glTranslatef(-x, -y, -z);
 	}
+	
+	public float getYaw() {
+		return rx;
+	}
+	
+	public float getPitch() {
+		return ry;
+	}
 }

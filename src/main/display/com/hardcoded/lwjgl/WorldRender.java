@@ -12,6 +12,7 @@ import java.util.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.db.types.*;
@@ -22,26 +23,42 @@ import com.hardcoded.logger.Log;
 import com.hardcoded.lwjgl.gui.Gui;
 import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
+import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
+import com.hardcoded.lwjgl.shadow.ShadowShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
 import com.hardcoded.sm.objects.TileData;
 import com.hardcoded.tile.Tile;
 import com.hardcoded.tile.TileReader;
+import com.hardcoded.world.utils.PartBounds;
+import com.hardcoded.world.utils.PartRotation;
 import com.hardcoded.world.utils.ShapeUtils;
 import com.hardcoded.world.utils.ShapeUtils.Bounds3D;
 
+/**
+ * The world render class.
+ * 
+ * @author HardCoded
+ * @since v0.1
+ */
 public class WorldRender {
 	private static final Log LOGGER = Log.getLogger();
 	
+	public static final float NEAR_PLANE = 0.1f;
+	public static final float FOV = 70;
+	
+	public static int height;
+	public static int width;
+	
 	private final LwjglWorldViewer parent;
 	private final long window;
-	private int height;
-	private int width;
 	
 	private BlockShader blockShader;
 	private AssetShader assetShader;
 	private PartShader partShader;
 	private TileShader tileShader;
+	
+	private ShadowShader shadowShader;
 	
 	public Camera camera;
 	private Gui gui;
@@ -141,8 +158,8 @@ public class WorldRender {
 	}
 	
 	public void setViewport(int width, int height) {
-		this.height = height;
-		this.width = width;
+		WorldRender.height = height;
+		WorldRender.width = width;
 		gui.width = width;
 		gui.height = height;
 		
@@ -175,13 +192,16 @@ public class WorldRender {
 //		return null;
 //	}
 	
+	private ShadowFrameBuffer frameBuffer;
 	private GameContext context;
-	private Tile loaded_tile;
 	private void init() throws Exception {
 		blockShader = new BlockShader();
 		assetShader = new AssetShader();
 		partShader = new PartShader();
 		tileShader = new TileShader();
+		
+		shadowShader = new ShadowShader();
+		frameBuffer = new ShadowFrameBuffer(2048, 2048);
 		
 		this.context = new GameContext(ScrapMechanicAssetHandler.getGamePath());
 		
@@ -367,9 +387,19 @@ public class WorldRender {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0.369f, 0.784f, 0.886f, 1);
 		
+		
 		//Matrix4f projectionView = camera.getProjectionViewMatrix(60, width, height);
-		Matrix4f projectionTran = camera.getProjectionMatrix(70, width, height);
 		//Matrix4f viewMatrix = camera.getViewMatrix(60, width, height);
+		
+		Matrix4f projectionTran = camera.getProjectionMatrix(FOV, width, height);
+//		{
+//			camera.rx = camera.rz = 0; camera.ry = -90;
+//			float side = 25;
+//			float heig = ((float)(height) / (float)width) * side;
+//			
+//			projectionTran = new Matrix4f().ortho(-side, side, -heig, heig, 0.01f, 20000.0f);
+//			projectionTran.translate(-camera.x, -camera.y, -camera.z);
+//		}
 		
 		GL11.glEnable(GL_DEPTH_TEST);
 		GL11.glEnable(GL_CULL_FACE);
@@ -378,22 +408,17 @@ public class WorldRender {
 		checkWorldUpdate();
 		
 		{
-			// correct = (-2270, -2567, 10)
-			// current = (-1676, -1500, 1)
-			
-			int ox = 0;
-			int oy = 0;
 			int ss = 4;
 			
 			Vector3f cam_pos = camera.getPosition();
-			int xx = (int)(cam_pos.x / 64) - ox;
-			int yy = (int)(cam_pos.y / 64) - oy;
+			int xx = (int)(cam_pos.x / 64);
+			int yy = (int)(cam_pos.y / 64);
 			
 			for(int y = yy - ss - 1; y < yy + ss; y++) {
 				for(int x = xx - ss - 1; x < xx + ss; x++) {
 					WorldTileRender render = getTileRender(x, y);
 					if(render != null) {
-						render.render(x, y, ox, oy, projectionTran, camera);
+						render.render(x, y, projectionTran, camera);
 					}
 				}
 			}
@@ -423,7 +448,6 @@ public class WorldRender {
 		for(RigidBody body : bodies) {
 			Bounds3D bounds = ShapeUtils.getBoundingBox(body);
 			
-			//System.out.println("Body: " + body.bodyId);
 			for(ChildShape shape : body.shapes) {
 				WorldPartRender mesh = getPartRender(shape.uuid);
 				
@@ -455,15 +479,14 @@ public class WorldRender {
 		}*/
 		
 		boolean SHOW_AABB = true;
+		boolean SHOW_BOUNDS = false;
 		if(SHOW_AABB) {
-			// Show location in the world of the aabb
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 			
-			// Display aabb on ground.
 			for(RigidBody body : bodies) {
 				float ys = body.yMax - body.yMin;
 				float xs = body.xMin - body.xMax;
-
+				
 //				boolean has = false;
 //				for(ChildShape shape : body.shapes) {
 //					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
@@ -476,7 +499,7 @@ public class WorldRender {
 				renderCube(
 					body.yMin + 0.5f,
 					body.xMax + 0.5f,
-					0 + 0.5f,
+					0.5f,
 					
 					ys,
 					xs,
@@ -493,82 +516,68 @@ public class WorldRender {
 			GL11.glEnable(GL11.GL_ALPHA);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			
-			for(RigidBody body : bodies) {
-				Bounds3D bounds = ShapeUtils.getBoundingBox(body);
-				Vector3f middle = bounds.getMiddle();
-				
-				boolean has = false;
-				for(ChildShape shape : body.shapes) {
-					if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
-						has = true;
-						break;
+			if(SHOW_BOUNDS) {
+				for(RigidBody body : bodies) {
+					Bounds3D bounds = ShapeUtils.getBoundingBox(body);
+					Vector3f middle = bounds.getMiddle();
+					
+//					boolean has = false;
+//					for(ChildShape shape : body.shapes) {
+//						if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
+//							has = true;
+//							break;
+//						}
+//					}
+//					
+//					if(!has) continue;
+					Matrix4f matrix = new Matrix4f();
+					
+					{
+						if(body.isGridLocked_0_2 == 2) {
+							matrix.rotate(body.quat);
+						} else {
+							if(body.staticFlags < -1) {
+								matrix.rotate(body.quat);
+							}
+						}
+						matrix.translateLocal(body.xWorld, body.yWorld, body.zWorld);
+						matrix.translate(middle.x, middle.y, middle.z);
 					}
+					
+					float xm = bounds.xMin - middle.x * 2.0f;
+					float ym = bounds.yMin - middle.y * 2.0f;
+					float zm = bounds.zMin - middle.z * 2.0f;
+					
+					GL11.glPushMatrix();
+					GL11.glMultMatrixf(matrix.get(new float[16]));
+					renderCube(
+						bounds.xMin - middle.x + 0.5f,
+						bounds.yMin - middle.y + 0.5f,
+						bounds.zMin - middle.z + 0.5f,
+						
+						bounds.xMax - bounds.xMin,
+						bounds.yMax - bounds.yMin,
+						bounds.zMax - bounds.zMin,
+						
+						0x7fff0000
+					);
+					
+					float a_len = 0.5f;
+					GL11.glBegin(GL_LINES);
+						GL11.glColor3f(1, 0, 0);
+						GL11.glVertex3f(xm, ym, zm);
+						GL11.glVertex3f(xm + a_len, ym, zm);
+						
+						GL11.glColor3f(0, 1, 0);
+						GL11.glVertex3f(xm, ym, zm);
+						GL11.glVertex3f(xm, ym, zm + a_len);
+						
+						GL11.glColor3f(0, 0, 1);
+						GL11.glVertex3f(xm, ym, zm);
+						GL11.glVertex3f(xm, ym + a_len, zm);
+					GL11.glEnd();
+					GL11.glPopMatrix();
 				}
-				
-				if(!has) continue;
-				Matrix4f matrix = new Matrix4f();
-				
-				if(body.isStatic_0_2 == 2) {
-					matrix.translateLocal(
-						middle.x + body.xWorld,
-						middle.y + body.yWorld,
-						middle.z + body.zWorld
-					);
-					
-					matrix.rotateAroundLocal(body.quat,
-						body.xWorld,
-						body.yWorld,
-						body.zWorld
-					);
-				} else {
-					matrix.translateLocal(
-						middle.x + body.xWorld,
-						middle.y + body.yWorld,
-						middle.z + body.zWorld
-					);
-					
-					if(body.staticFlags < -1) {
-						matrix.rotateAroundLocal(body.quat,
-							body.xWorld,
-							body.yWorld,
-							body.zWorld
-						);
-					}
-				}
-				
-				float xm = bounds.xMin - middle.x * 2.0f;
-				float ym = bounds.yMin - middle.y * 2.0f;
-				float zm = bounds.zMin - middle.z * 2.0f;
-				
-				GL11.glPushMatrix();
-				GL11.glMultMatrixf(matrix.get(new float[16]));
-				renderCube(
-					bounds.xMin - middle.x + 0.5f,
-					bounds.yMin - middle.y + 0.5f,
-					bounds.zMin - middle.z + 0.5f,
-					
-					bounds.xMax - bounds.xMin,
-					bounds.yMax - bounds.yMin,
-					bounds.zMax - bounds.zMin,
-					
-					0x7fff0000
-				);
-				
-				float a_len = 0.5f;
-				GL11.glBegin(GL_LINES);
-					GL11.glColor3f(1, 0, 0);
-					GL11.glVertex3f(xm, ym, zm);
-					GL11.glVertex3f(xm + a_len, ym, zm);
-					
-					GL11.glColor3f(0, 1, 0);
-					GL11.glVertex3f(xm, ym, zm);
-					GL11.glVertex3f(xm, ym, zm + a_len);
-					
-					GL11.glColor3f(0, 0, 1);
-					GL11.glVertex3f(xm, ym, zm);
-					GL11.glVertex3f(xm, ym + a_len, zm);
-				GL11.glEnd();
-				GL11.glPopMatrix();
 			}
 			
 			GL11.glDisable(GL11.GL_BLEND);
@@ -611,7 +620,151 @@ public class WorldRender {
 		GL11.glPopMatrix();
 		GL11.glDisable(GL_DEPTH_TEST);
 		GL11.glDisable(GL_CULL_FACE);
+		//GL11.glEnable(GL_TEXTURE_2D);
 		
 		gui.render();
+		
+		GL11.glPushMatrix();
+		tryRenderShadows(projectionTran);
+		GL11.glPopMatrix();
+	}
+	
+	public void tryRenderShadows(Matrix4f projectionTran) {
+		
+		frameBuffer.bindFrameBuffer();
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		
+		shadowShader.bind();
+		
+		Matrix4f mvpMatrix = new Matrix4f().ortho(-100, 100, -100, 100, 0f, 100.0f);
+		
+//		ShadowBox box = new ShadowBox(mvpMatrix, camera);
+//		box.update();
+		
+		{
+			mvpMatrix.translate(-camera.x, -camera.y, -70);
+			shadowShader.setUniform("mvpMatrix", mvpMatrix);
+		}
+		
+		{
+			// correct = (-2270, -2567, 10)
+			// current = (-1676, -1500, 1)
+			
+			int ss = 4;
+			
+			Vector3f cam_pos = camera.getPosition();
+			int xx = (int)(cam_pos.x / 64);
+			int yy = (int)(cam_pos.y / 64);
+			
+			for(int y = yy - ss - 1; y < yy + ss; y++) {
+				for(int x = xx - ss - 1; x < xx + ss; x++) {
+					WorldTileRender render = getTileRender(x, y);
+					if(render != null) {
+						render.renderShadows(shadowShader, x, y, mvpMatrix);
+					}
+				}
+			}
+			
+			{
+				for(RigidBody body : bodies) {
+					for(ChildShape shape : body.shapes) {
+						WorldPartRender part_mesh = getPartRender(shape.uuid);
+						if(part_mesh == null) continue;
+						Matrix4f matrix = new Matrix4f(mvpMatrix);
+						
+						{
+							float x = shape.xPos - 0.5f;
+							float y = shape.yPos - 0.5f;
+							float z = shape.zPos - 0.5f;
+							
+							matrix.translate((x / 4.0f), (y / 4.0f), (z / 4.0f));
+							if(shape.body.isGridLocked_0_2 == 2) {
+								matrix.rotate(body.quat);
+							} else {
+								if(body.staticFlags < -1) {
+									matrix.rotate(body.quat);
+								}
+							}
+							matrix.translate(body.xWorld, body.yWorld, body.zWorld);
+							matrix.scale(1 / 4.0f);
+							
+							{
+								Matrix4f mul = PartRotation.getRotationMultiplier(shape.partRotation);
+								if(mul != null) matrix.mul(mul);
+								
+								PartBounds bounds = part_mesh.part.getBounds();
+								if(bounds != null) {
+									matrix.translate(
+										(bounds.getWidth() - 1) / 2.0f,
+										(bounds.getHeight() - 1) / 2.0f,
+										(bounds.getDepth() - 1) / 2.0f
+									);
+								}
+							}
+						}
+						
+						shadowShader.setUniform("mvpMatrix", matrix);
+						part_mesh.renderShadows();
+					}
+					
+					for(ChildShape shape : body.shapes) {
+						WorldBlockRender block_mesh = getBlockRender(shape.uuid);
+						if(block_mesh == null) continue;
+						
+						Matrix4f matrix = new Matrix4f(mvpMatrix);
+						
+						{
+							float x = shape.xPos;
+							float y = shape.yPos;
+							float z = shape.zPos;
+							Matrix4f mat = new Matrix4f();
+							
+							{
+								if(shape.body.isGridLocked_0_2 == 2) {
+									mat.rotate(body.quat);
+								} else {
+									if(body.staticFlags < -1) {
+										mat.rotate(body.quat);
+									}
+								}
+								mat.translateLocal(body.xWorld, body.yWorld, body.zWorld);
+								mat.scale(1 / 4.0f);
+								mat.translate(x, y, z);
+								mat.scale(shape.xSize, shape.ySize, shape.zSize);
+							}
+							
+							matrix.mul(mat);
+						}
+						
+						shadowShader.setUniform("mvpMatrix", matrix);
+						block_mesh.renderShadows();
+					}
+				}
+			}
+		}
+		
+		shadowShader.unbind();
+		frameBuffer.unbindFrameBuffer();
+		
+		GL11.glEnable(GL_TEXTURE_2D);
+		GL11.glDisable(GL_CULL_FACE);
+		GL20.glActiveTexture(0);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
+		
+		GL11.glPushMatrix();
+		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
+		GL11.glTranslatef(camera.x, camera.y, 100f);
+		GL11.glColor4f(1, 1, 1, 1);
+		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+			GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-100, -100);
+			GL11.glTexCoord2f(1, 0); GL11.glVertex2f( 100, -100);
+			GL11.glTexCoord2f(1, 1); GL11.glVertex2f( 100,  100);
+			GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-100,  100);
+		GL11.glEnd();
+		GL11.glPopMatrix();
+		
+		GL11.glEnable(GL_CULL_FACE);
 	}
 }
