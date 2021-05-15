@@ -1,21 +1,14 @@
 package com.hardcoded.lwjgl.mesh;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
-import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.db.types.Renderable.Lod;
-import com.hardcoded.db.types.Renderable.MeshMap;
 import com.hardcoded.db.types.SMPart;
 import com.hardcoded.lwjgl.data.MeshMaterial;
 import com.hardcoded.lwjgl.data.Texture;
 import com.hardcoded.lwjgl.shader.PartShader;
-import com.hardcoded.lwjgl.util.StaticMeshLoader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
 import com.hardcoded.world.utils.PartBounds;
@@ -32,39 +25,10 @@ public class PartMesh extends RenderableMeshImpl {
 	private final PartShader shader;
 	private final SMPart part;
 	
-	@SuppressWarnings("unchecked")
 	public PartMesh(Lod lod, PartShader shader, SMPart part) throws Exception {
 		super(lod);
 		this.part = part;
 		this.shader = shader;
-		
-		String path = ScrapMechanicAssetHandler.resolvePath(lod.mesh);
-		this.meshes = StaticMeshLoader.load(path);
-		this.textures = new List[meshes.length];
-		this.mats = new MeshMaterial[meshes.length];
-		
-		
-		Map<String, MeshMap> maps = lod.subMeshMap;
-		for(String name : maps.keySet()) {
-			int index = getMeshIndex(name);
-			
-			List<Texture> list = new ArrayList<>();
-			MeshMaterial meshMat = loadTextures(maps.get(name), list);
-			if(meshMat == null) {
-				System.out.println("PartMesh has no texture!!!");
-				System.out.printf("    SubMesh \"%s\" -> %s\n", name, list);
-				MeshMap meshMap = maps.get(name);
-				System.out.println("    TextureList: " + meshMap.textureList);
-				System.out.println("    Material: " + meshMap.material);
-				
-			}
-			
-			// TODO: Fallback option?
-			if(index < 0) index = 0;
-			mats[index] = meshMat;
-			textures[index] = list;
-		}
-		System.out.println("--------------------");
 	}
 	
 	private void applyRotation(ChildShape shape, Matrix4f matrix) {
@@ -87,7 +51,6 @@ public class PartMesh extends RenderableMeshImpl {
 		float z = shape.zPos - 0.5f;
 		
 		Matrix4f matrix = new Matrix4f();
-		
 		RigidBody body = shape.body;
 		
 		{
@@ -104,7 +67,7 @@ public class PartMesh extends RenderableMeshImpl {
 		}
 		
 		applyRotation(shape, matrix);
-		shader.setUniform("transformationMatrix", matrix);
+		shader.setTransformationMatrix(matrix);
 		{
 			int rgba = shape.colorRGBA;
 			float r, g, b, a;
@@ -117,69 +80,28 @@ public class PartMesh extends RenderableMeshImpl {
 			shader.setUniform("color", r, g, b, a);
 		}
 		
-		for(int i = 0; i < textures.length; i++) {
+		for(int i = 0; i < meshes.length; i++) {
 			List<Texture> texs = textures[i];
 			MeshMaterial mat = mats[i];
 			
-			if(texs != null) {
-				for(Texture t : texs) t.bind();
-				
-				if(mat != null) {
-					mat.bind(shader);
-					meshes[i].render();
-					mat.unbind(shader);
-				} else {
-					meshes[i].render();
-				}
-				
-				for(Texture t : texs) t.unbind();
-			} else {
-				if(mat != null) {
-					mat.bind(shader);
-					meshes[i].render();
-					mat.unbind(shader);
-				} else {
-					meshes[i].render();
-				}
-			}
+			for(Texture t : texs) t.bind();
+			mat.bind(shader);
+			meshes[i].render();
+			mat.unbind(shader);
+			for(Texture t : texs) t.unbind();
 		}
 	}
 	
-	// FIXME: BAD
-	public void render(Vector3f pos, Quaternionf quat, Vector3f scale) {
-		Matrix4f matrix = new Matrix4f();
-		matrix.translate(pos);
-		matrix.rotate(quat);
-		matrix.scale(scale);
-		matrix.scale(1 / 4.0f);
-		
-		shader.setUniform("transformationMatrix", matrix);
-		
-		for(int i = 0; i < textures.length; i++) {
+	public void render() {
+		for(int i = 0; i < meshes.length; i++) {
 			List<Texture> texs = textures[i];
 			MeshMaterial mat = mats[i];
 			
-			if(texs != null) {
-				//for(Texture t : texs) t.bind();
-				
-				if(mat != null) {
-					mat.bind(shader);
-					meshes[i].render();
-					mat.unbind(shader);
-				} else {
-					meshes[i].render();
-				}
-				
-				//for(Texture t : texs) t.unbind();
-			} else {
-				if(mat != null) {
-					mat.bind(shader);
-					meshes[i].render();
-					mat.unbind(shader);
-				} else {
-					meshes[i].render();
-				}
-			}
+			for(Texture t : texs) t.bind();
+			mat.bind(shader);
+			meshes[i].render();
+			mat.unbind(shader);
+			for(Texture t : texs) t.unbind();
 		}
 	}
 }

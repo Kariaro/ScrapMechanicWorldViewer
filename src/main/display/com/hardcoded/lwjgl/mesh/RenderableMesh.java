@@ -2,7 +2,6 @@ package com.hardcoded.lwjgl.mesh;
 
 import java.util.List;
 
-import com.hardcoded.db.types.Renderable.MeshMap;
 import com.hardcoded.lwjgl.data.MeshMaterial;
 import com.hardcoded.lwjgl.data.Texture;
 
@@ -14,18 +13,7 @@ import com.hardcoded.lwjgl.data.Texture;
  */
 public interface RenderableMesh {
 	
-	/**
-	 * Load a texture
-	 * @param map
-	 * @param list
-	 * @return
-	 * @throws Exception
-	 */
-	MeshMaterial loadTextures(MeshMap map, List<Texture> list) throws Exception;
-	
-	int getMeshIndex(String name);
-	
-	Mesh getMesh(String name);
+	List<Texture> loadTextures(MeshMaterial meshMat);
 	
 	void renderShadows();
 }

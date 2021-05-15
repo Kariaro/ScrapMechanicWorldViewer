@@ -3,8 +3,8 @@ package com.hardcoded.lwjgl.data;
 import org.lwjgl.opengl.GL11;
 
 import com.hardcoded.db.types.Renderable.MeshMap;
-import com.hardcoded.db.types.SMMaterial.Types;
 import com.hardcoded.db.types.SMMaterial;
+import com.hardcoded.db.types.SMMaterial.Types;
 import com.hardcoded.lwjgl.shader.Shader;
 
 /**
@@ -14,16 +14,12 @@ import com.hardcoded.lwjgl.shader.Shader;
  * @since v0.1
  */
 public class MeshMaterial {
-	public MeshMap map;
-	public String key;
-	
+	public final String key;
+	public final MeshMap map;
 	public SMMaterial sm;
 	
-	public MeshMaterial() {
-		
-	}
-	
-	public MeshMaterial(MeshMap map) {
+	public MeshMaterial(String key, MeshMap map) {
+		this.key = key;
 		this.map = map;
 	}
 	

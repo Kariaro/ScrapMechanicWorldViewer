@@ -9,7 +9,7 @@ import com.hardcoded.lwjgl.shader.Shader;
  * @since v0.2
  */
 public class ShadowShader extends Shader {
-	public ShadowShader() throws Exception {
+	public ShadowShader() {
 		super(
 			"/shaders/shadow/shadow_vertex.vs",
 			"/shaders/shadow/shadow_fragment.fs"

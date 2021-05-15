@@ -3,13 +3,10 @@ package com.hardcoded.lwjgl.render;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-
 import com.hardcoded.db.types.Renderable;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.SMHarvestable;
-import com.hardcoded.lwjgl.Camera;
+import com.hardcoded.lwjgl.WorldRender;
 import com.hardcoded.lwjgl.mesh.HarvestableMesh;
 import com.hardcoded.lwjgl.shader.Shader;
 import com.hardcoded.tile.object.Harvestable;
@@ -22,9 +19,13 @@ import com.hardcoded.tile.object.Harvestable;
  */
 public class WorldHarvestableRender implements WorldObjectRender {
 	private final List<HarvestableMesh> meshes;
+	private final SMHarvestable harvestable;
+	private final Shader shader;
 	
 	public WorldHarvestableRender(SMHarvestable harvestable, Shader shader) {
-		meshes = new ArrayList<>();
+		this.meshes = new ArrayList<>();
+		this.harvestable = harvestable;
+		this.shader = shader;
 		
 		try {
 			Renderable rend = harvestable.renderable;
@@ -36,24 +37,32 @@ public class WorldHarvestableRender implements WorldObjectRender {
 		}
 	}
 	
-	public void render(Vector3f pos, Harvestable harvestable, Quaternionf quat, Vector3f scale, Camera camera) {
-		//float dist = camera.getPosition().distance(pos);
+	public void render(Harvestable harvestable) {
+		{
+			int color = this.harvestable.color;
+			//color = harvestable.getColor();
+			float r = ((color >> 24) & 0xff) / 255.0f;
+			float g = ((color >> 16) & 0xff) / 255.0f;
+			float b = ((color >>  8) & 0xff) / 255.0f;
+			float a = ((color >>  0) & 0xff) / 255.0f;
+			shader.setUniform("color", r, g, b, a);
+		}
 		
 		if(!meshes.isEmpty()) {
 			HarvestableMesh mesh = meshes.get(meshes.size() - 1);
-			mesh.render(harvestable, pos, quat, scale);
+			mesh.render();
 			return;
 		}
 		
 		for(HarvestableMesh mesh : meshes) {
-			mesh.render(harvestable, pos, quat, scale);
+			mesh.render();
 			break;
 		}
 	}
 	
 	@Override
 	public void renderShadows() {
-		if(!meshes.isEmpty()) {
+		if(WorldRender.LOD_OBJECTS && !meshes.isEmpty()) {
 			HarvestableMesh mesh = meshes.get(meshes.size() - 1);
 			mesh.renderShadows();
 			return;

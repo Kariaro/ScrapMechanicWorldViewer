@@ -16,4 +16,4 @@ The next step with the viewer is to fix the asset shader and allow for colors in
 And loading BlueprintList and Prefabs from the `.TILE` files.
 
 ## Screenshot
-![Viewer](.github/assets/screenshots/image_0.png)
+![Viewer](.github/assets/screenshots/image_1.png)

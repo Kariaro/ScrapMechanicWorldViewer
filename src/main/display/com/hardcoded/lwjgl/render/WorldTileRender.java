@@ -50,7 +50,7 @@ public class WorldTileRender {
 		this.assetShader = assetShader;
 	}
 	
-	public void render(int x, int y, Matrix4f projectionTran, Camera camera) {
+	public void render(int x, int y, Matrix4f toShadowSpace, Matrix4f projectionView, Camera camera) {
 		int ox = TileData.getTileOffsetX(x, y);
 		int oy = TileData.getTileOffsetY(x, y);
 		
@@ -74,18 +74,18 @@ public class WorldTileRender {
 			.translateLocal(tile_x, tile_y, tile_z);
 		
 		tileShader.bind();
-		tileShader.setUniform("projectionView", projectionTran);
-		tileShader.setUniform("transformationMatrix", transform);
+		tileShader.setProjectionView(projectionView);
+		tileShader.setModelMatrix(transform);
+		tileShader.setShadowMapSpace(toShadowSpace);
 		tm.render();
 		tileShader.unbind();
 		
 		assetShader.bind();
-		assetShader.setUniform("projectionView", projectionTran);
-		assetShader.setUniform("transformationMatrix", transform);
-		assetShader.setUniform("color", 1, 1, 1, 1);
+		assetShader.setUniform("projectionView", projectionView);
+		assetShader.setModelMatrix(transform);
+		assetShader.setShadowMapSpace(toShadowSpace);
 		
 		Vector3f part_offset = new Vector3f(tile_x, tile_y, tile_z);
-		
 		for(int i = 0; i < 4; i++) {
 			List<Harvestable> harvestables = part.harvestables[i];
 			List<Asset> assets = part.assets[i];
@@ -94,21 +94,21 @@ public class WorldTileRender {
 				UUID uuid = asset.getUuid();
 				Vec3 apos = asset.getPosition();
 				Quat arot = asset.getRotation();
-				Vec3 asze = asset.getSize();
+				Vec3 _size = asset.getSize();
 				
 				WorldAssetRender mesh = render.getAssetRender(uuid);
 				if(mesh != null) {
-					Vector3f a = new Vector3f(apos.toArray());
-					a.add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0);
-					Vector3f vec_pos = a.add(part_offset);
+					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
+					//float dist = camera.getPosition().distance(pos);
 					
-					mesh.render(
-						asset,
-						vec_pos,
-						new Quaternionf().rotateZ(rot_offset).mul(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW())),
-						new Vector3f(asze.toArray()),
-						camera
-					);
+					Matrix4f modelMatrix = new Matrix4f()
+						//.translate(part_offset).rotateZ(rot_offset).translate(apos.getX(), apos.getY(), apos.getZ())
+						.translate(vec_pos)
+						.rotate(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW()).rotateLocalZ(rot_offset))
+						.scale(_size.getX(), _size.getY(), _size.getZ());
+					
+					assetShader.setModelMatrix(modelMatrix);
+					mesh.render(asset);
 				}
 			}
 			
@@ -116,21 +116,21 @@ public class WorldTileRender {
 				UUID uuid = harvestable.getUuid();
 				Vec3 apos = harvestable.getPosition();
 				Quat arot = harvestable.getRotation();
-				Vec3 asze = harvestable.getSize();
+				Vec3 _size = harvestable.getSize();
 				
 				WorldHarvestableRender mesh = render.getHarvestableRender(uuid);
 				if(mesh != null) {
-					Vector3f a = new Vector3f(apos.toArray());
-					a.add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0);
-					Vector3f vec_pos = a.add(part_offset);
+					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
+					//float dist = camera.getPosition().distance(pos);
 					
-					mesh.render(
-						vec_pos,
-						harvestable,
-						new Quaternionf().rotateZ(rot_offset).mul(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW())),
-						new Vector3f(asze.toArray()),
-						camera
-					);
+					Matrix4f modelMatrix = new Matrix4f()
+						//.translate(part_offset).rotateZ(rot_offset).translate(apos.getX(), apos.getY(), apos.getZ())
+						.translate(vec_pos)
+						.rotate(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW()).rotateLocalZ(rot_offset))
+						.scale(_size.getX(), _size.getY(), _size.getZ());
+					
+					assetShader.setModelMatrix(modelMatrix);
+					mesh.render(harvestable);
 				}
 			}
 		}
@@ -175,18 +175,17 @@ public class WorldTileRender {
 				UUID uuid = asset.getUuid();
 				Vec3 apos = asset.getPosition();
 				Quat arot = asset.getRotation();
-				Vec3 asze = asset.getSize();
+				Vec3 _size = asset.getSize();
 				
 				WorldAssetRender mesh = render.getAssetRender(uuid);
 				if(mesh != null) {
-					Vector3f a = new Vector3f(apos.toArray());
-					a.add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0);
-					Vector3f vec_pos = a.add(part_offset);
+					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
+					//float dist = camera.getPosition().distance(pos);
 					
-					Matrix4f matrix = new Matrix4f(mvpMatrix);
-					matrix.translate(vec_pos);
-					matrix.rotate(new Quaternionf().rotateZ(rot_offset).mul(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW())));
-					matrix.scale(new Vector3f(asze.toArray()));
+					Matrix4f matrix = new Matrix4f(mvpMatrix)
+						.translate(vec_pos)
+						.rotate(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW()).rotateLocalZ(rot_offset))
+						.scale(_size.getX(), _size.getY(), _size.getZ());
 					
 					shader.setUniform("mvpMatrix", matrix);
 					mesh.renderShadows();
@@ -197,18 +196,17 @@ public class WorldTileRender {
 				UUID uuid = harvestable.getUuid();
 				Vec3 apos = harvestable.getPosition();
 				Quat arot = harvestable.getRotation();
-				Vec3 asze = harvestable.getSize();
+				Vec3 _size = harvestable.getSize();
 				
 				WorldHarvestableRender mesh = render.getHarvestableRender(uuid);
 				if(mesh != null) {
-					Vector3f a = new Vector3f(apos.toArray());
-					a.add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0);
-					Vector3f vec_pos = a.add(part_offset);
+					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
+					//float dist = camera.getPosition().distance(pos);
 					
-					Matrix4f matrix = new Matrix4f(mvpMatrix);
-					matrix.translate(vec_pos);
-					matrix.rotate(new Quaternionf().rotateZ(rot_offset).mul(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW())));
-					matrix.scale(new Vector3f(asze.toArray()));
+					Matrix4f matrix = new Matrix4f(mvpMatrix)
+						.translate(vec_pos)
+						.rotate(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW()).rotateLocalZ(rot_offset))
+						.scale(_size.getX(), _size.getY(), _size.getZ());
 					
 					shader.setUniform("mvpMatrix", matrix);
 					mesh.renderShadows();

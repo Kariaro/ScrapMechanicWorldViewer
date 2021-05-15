@@ -29,14 +29,14 @@ public abstract class Shader {
 	protected int vertexShaderId;
 	protected int fragmentShaderId;
 	
-	protected Shader(String vertexPath, String fragmentPath) throws Exception {
+	protected Shader(String vertexPath, String fragmentPath) {
 		programId = GL20.glCreateProgram();
 		if(programId == 0) {
-			throw new Exception("Failed to create shader: GL20.glCreateProgram() returned 0");
+			throw new ShaderException("Failed to create shader: GL20.glCreateProgram() returned 0");
 		}
 		
-		createShaderCode(FileUtils.readStream(Shader.class.getResourceAsStream(vertexPath)), GL20.GL_VERTEX_SHADER);
-		createShaderCode(FileUtils.readStream(Shader.class.getResourceAsStream(fragmentPath)), GL20.GL_FRAGMENT_SHADER);
+		createShader(FileUtils.readStream(Shader.class.getResourceAsStream(vertexPath)), GL20.GL_VERTEX_SHADER);
+		createShader(FileUtils.readStream(Shader.class.getResourceAsStream(fragmentPath)), GL20.GL_FRAGMENT_SHADER);
 		
 		
 		loadBinds();
@@ -50,46 +50,28 @@ public abstract class Shader {
 	protected abstract void loadBinds();
 	protected abstract void loadUniforms();
 	
-	protected int createShader(String shaderPath, int shaderType) throws Exception {
+	private int createShader(String shaderCode, int shaderType) throws ShaderException {
 		int shaderId = glCreateShader(shaderType);
 		if(shaderId == 0) {
-			throw new Exception("Error creating shader. Type: " + shaderType);
-		}
-		
-		String shaderCode = FileUtils.readFile(shaderPath);
-		glShaderSource(shaderId, shaderCode);
-		glCompileShader(shaderId);
-		
-		if(glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
-			throw new Exception("Error compiling Shader code: " + glGetShaderInfoLog(shaderId, 1024));
-		}
-		
-		glAttachShader(programId, shaderId);
-		return shaderId;
-	}
-	
-	public int createShaderCode(String shaderCode, int shaderType) throws Exception {
-		int shaderId = glCreateShader(shaderType);
-		if(shaderId == 0) {
-			throw new Exception("Error creating shader. Type: " + shaderType);
+			throw new ShaderException("Error creating shader. Type: " + shaderType);
 		}
 		
 		glShaderSource(shaderId, shaderCode);
 		glCompileShader(shaderId);
 		
 		if(glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
-			throw new Exception("Error compiling Shader code: " + glGetShaderInfoLog(shaderId, 1024));
+			throw new ShaderException("Error compiling Shader code: " + glGetShaderInfoLog(shaderId, 1024));
 		}
 		
 		glAttachShader(programId, shaderId);
 		return shaderId;
 	}
 	
-	public final void bindAttrib(int index, String name) {
+	protected final void bindAttrib(int index, String name) {
 		GL20.glBindAttribLocation(programId, index, name);
 	}
 	
-	public void createUniform(String uniformName) {
+	protected void createUniform(String uniformName) {
 		int uniformLocation = glGetUniformLocation(programId, uniformName);
 		uniforms.put(uniformName, uniformLocation);
 	}
@@ -159,10 +141,10 @@ public abstract class Shader {
 		return uniforms.get(uniformName);
 	}
 	
-	public final void link() throws Exception {
+	private void link() throws ShaderException {
 		glLinkProgram(programId);
 		if(glGetProgrami(programId, GL_LINK_STATUS) == 0) {
-			throw new Exception("Error linking Shader code: " + glGetProgramInfoLog(programId, 1024));
+			throw new ShaderException("Error linking Shader code: " + glGetProgramInfoLog(programId, 1024));
 		}
 		
 		if(vertexShaderId != 0) {

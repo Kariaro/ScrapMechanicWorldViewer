@@ -12,6 +12,7 @@ import java.util.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
@@ -44,8 +45,10 @@ import com.hardcoded.world.utils.ShapeUtils.Bounds3D;
 public class WorldRender {
 	private static final Log LOGGER = Log.getLogger();
 	
+	
 	public static final float NEAR_PLANE = 0.1f;
 	public static final float FOV = 70;
+	public static boolean LOD_OBJECTS = false;
 	
 	public static int height;
 	public static int width;
@@ -92,6 +95,10 @@ public class WorldRender {
 		camera.y = -1660;
 		camera.z = 40;
 		
+		camera.x = 0;
+		camera.y = 0;
+		camera.z = 0;
+		
 		try {
 			//checkWorldUpdate();
 			init();
@@ -101,7 +108,6 @@ public class WorldRender {
 		}
 	}
 	
-	//private TileMesh tm;
 	public static int updates = 0;
 	public static long lastTimed = 0;
 	
@@ -117,8 +123,8 @@ public class WorldRender {
 		
 		long now = filePath.lastModified();
 		if(last != now) {
-			//System.out.println("Hello??????? Testing?????");
-			/*if(lastTimed == 0) {
+			/*
+			if(lastTimed == 0) {
 				lastTimed = System.currentTimeMillis();
 			} else {
 				if(System.currentTimeMillis() - lastTimed > 1000) {
@@ -129,6 +135,7 @@ public class WorldRender {
 			}
 			updates ++;
 			*/
+			
 			try {
 				File copyPath = new File("res/clone/", fileName);
 				
@@ -170,28 +177,6 @@ public class WorldRender {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW_MATRIX);
 	}
 	
-//	private static String getTile(String name) {
-//		File tile_path = new File("C:/Users/Admin/AppData/Roaming/Axolot Games/Scrap Mechanic/User/User_76561198251506208/Tiles/");
-//		
-//		for(File dir_file : tile_path.listFiles()) {
-//			for(File file : dir_file.listFiles()) {
-//				if(file.getName().equals(name + ".tile")) return file.getAbsolutePath();
-//			}
-//		}
-//		
-//		return null;
-//	}
-	
-//	private static String getGameTile(String name) {
-//		File tile_path = new File("D:/Steam/steamapps/common/Scrap Mechanic/Data/Terrain/Tiles/ClassicCreativeTiles/");
-//		
-//		for(File file : tile_path.listFiles()) {
-//			if(file.getName().equals(name + ".tile")) return file.getAbsolutePath();
-//		}
-//		
-//		return null;
-//	}
-	
 	private ShadowFrameBuffer frameBuffer;
 	private GameContext context;
 	private void init() throws Exception {
@@ -204,16 +189,6 @@ public class WorldRender {
 		frameBuffer = new ShadowFrameBuffer(2048, 2048);
 		
 		this.context = new GameContext(ScrapMechanicAssetHandler.getGamePath());
-		
-		//String path = "GROUND512_01";
-		//path = getTile("tile_0");
-		//path = getGameTile("GROUND512_01");
-		//path = getGameTile("HILLS512_01");
-		//path = "res/testing/TestHideout.tile";
-		//tm = new TileMesh(TileReader.read("D:/Steam/steamapps/common/Scrap Mechanic/Data/Terrain/Tiles/" + name + ".tile"));
-		
-		//this.loaded_tile = TileReader.loadTile(path);
-		//tm = new TileMesh(loaded_tile);
 	}
 	
 	private boolean loadCheck() {
@@ -271,14 +246,11 @@ public class WorldRender {
 	public WorldTileRender getTileRender(int x, int y) {
 		if(!TileData.hasTile(x, y)) return null;
 		
-		//long index = ((long)(x) & 0xffffffffL) | (((long)y) << 32L);
 		long index = TileData.getTileId(x, y);
 		if(tiles.containsKey(index)) return tiles.get(index);
 
 		String path = TileData.getTilePath(x, y);
 		if(path == null || !loadCheck()) return null;
-		
-		//long o_index = ((long)(ox) & 0xffffffffL) | (((long)oy) << 32L);
 		
 		TileParts parts = null;
 		if(tile_data.containsKey(path)) {
@@ -382,6 +354,17 @@ public class WorldRender {
 		GL11.glEnd();
 	}
 	
+	
+	private Matrix4f getOrthoProjectionMatrix(float width, float height, float length) {
+		Matrix4f matrix = new Matrix4f();
+		matrix.m00( 2f / width);
+		matrix.m11( 2f / height);
+		matrix.m22(-2f / length);
+		matrix.m33(1);
+		
+		return matrix;
+	}
+	
 	public void render() {
 		item_load = 1;
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
@@ -401,24 +384,34 @@ public class WorldRender {
 //			projectionTran.translate(-camera.x, -camera.y, -camera.z);
 //		}
 		
+		Matrix4f mvpMatrix = getOrthoProjectionMatrix(500, 500, 400);
+		mvpMatrix.translate(-((int)(camera.x / 64)) * 64, -((int)(camera.y / 64)) * 64, -70);
+		
 		GL11.glEnable(GL_DEPTH_TEST);
 		GL11.glEnable(GL_CULL_FACE);
 		GL11.glEnable(GL_TEXTURE_2D);
 		
 		checkWorldUpdate();
 		
+		GL11.glPushMatrix();
+		tryRenderShadows(projectionTran, mvpMatrix);
+		GL11.glPopMatrix();
+		
+		Matrix4f toShadowSpace = createOffset().mul(mvpMatrix);
+		
 		{
-			int ss = 4;
+			int ss = 3;
 			
 			Vector3f cam_pos = camera.getPosition();
 			int xx = (int)(cam_pos.x / 64);
 			int yy = (int)(cam_pos.y / 64);
-			
+			GL13.glActiveTexture(GL13.GL_TEXTURE9);
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
 			for(int y = yy - ss - 1; y < yy + ss; y++) {
 				for(int x = xx - ss - 1; x < xx + ss; x++) {
 					WorldTileRender render = getTileRender(x, y);
 					if(render != null) {
-						render.render(x, y, projectionTran, camera);
+						render.render(x, y, toShadowSpace, projectionTran, camera);
 					}
 				}
 			}
@@ -426,7 +419,7 @@ public class WorldRender {
 		
 		blockShader.bind();
 		blockShader.setUniform("projectionView", projectionTran);
-		blockShader.setUniform("transformationMatrix", new Matrix4f());
+		blockShader.setTransformationMatrix(new Matrix4f());
 		blockShader.setUniform("cameraDirection", camera.getViewDirection());
 		blockShader.setUniform("color", 1, 1, 1, 1);
 		for(RigidBody body : bodies) {
@@ -434,7 +427,7 @@ public class WorldRender {
 			
 			for(ChildShape shape : body.shapes) {
 				WorldBlockRender mesh = getBlockRender(shape.uuid);
-
+				
 				if(mesh != null) {
 					mesh.render(shape, bounds);
 				}
@@ -444,7 +437,7 @@ public class WorldRender {
 		
 		partShader.bind();
 		partShader.setUniform("projectionView", projectionTran);
-		partShader.setUniform("transformationMatrix", new Matrix4f());
+		partShader.setTransformationMatrix(new Matrix4f());
 		for(RigidBody body : bodies) {
 			Bounds3D bounds = ShapeUtils.getBoundingBox(body);
 			
@@ -478,6 +471,23 @@ public class WorldRender {
 			}
 		}*/
 		
+		debugRenders();
+		
+		// Center of world
+		renderCube(
+			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
+			0x20ffffff
+		);
+		
+		GL11.glPopMatrix();
+		
+		GL11.glDisable(GL_DEPTH_TEST);
+		GL11.glDisable(GL_CULL_FACE);
+		
+		gui.render();
+	}
+	
+	public void debugRenders() {
 		boolean SHOW_AABB = true;
 		boolean SHOW_BOUNDS = false;
 		if(SHOW_AABB) {
@@ -610,43 +620,16 @@ public class WorldRender {
 				);
 			}
 		}
-		
-		// Center of world
-		renderCube(
-			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
-			0x20ffffff
-		);
-		
-		GL11.glPopMatrix();
-		GL11.glDisable(GL_DEPTH_TEST);
-		GL11.glDisable(GL_CULL_FACE);
-		//GL11.glEnable(GL_TEXTURE_2D);
-		
-		gui.render();
-		
-		GL11.glPushMatrix();
-		tryRenderShadows(projectionTran);
-		GL11.glPopMatrix();
 	}
 	
-	public void tryRenderShadows(Matrix4f projectionTran) {
-		
+	public void tryRenderShadows(Matrix4f projectionTran, Matrix4f mvpMatrix) {
 		frameBuffer.bindFrameBuffer();
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		
 		shadowShader.bind();
-		
-		Matrix4f mvpMatrix = new Matrix4f().ortho(-100, 100, -100, 100, 0f, 100.0f);
-		
-//		ShadowBox box = new ShadowBox(mvpMatrix, camera);
-//		box.update();
-		
-		{
-			mvpMatrix.translate(-camera.x, -camera.y, -70);
-			shadowShader.setUniform("mvpMatrix", mvpMatrix);
-		}
+		shadowShader.setUniform("mvpMatrix", mvpMatrix);
 		
 		{
 			// correct = (-2270, -2567, 10)
@@ -750,21 +733,27 @@ public class WorldRender {
 		
 		GL11.glEnable(GL_TEXTURE_2D);
 		GL11.glDisable(GL_CULL_FACE);
-		GL20.glActiveTexture(0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
 		
 		GL11.glPushMatrix();
 		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
-		GL11.glTranslatef(camera.x, camera.y, 100f);
+		GL11.glTranslatef(0, 0, 100f);////camera.x, camera.y, 100f);
 		GL11.glColor4f(1, 1, 1, 1);
+		GL20.glActiveTexture(GL20.GL_TEXTURE0);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-			GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-100, -100);
-			GL11.glTexCoord2f(1, 0); GL11.glVertex2f( 100, -100);
-			GL11.glTexCoord2f(1, 1); GL11.glVertex2f( 100,  100);
-			GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-100,  100);
+			GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-50, -50);
+			GL11.glTexCoord2f(1, 0); GL11.glVertex2f( 50, -50);
+			GL11.glTexCoord2f(1, 1); GL11.glVertex2f( 50,  50);
+			GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-50,  50);
 		GL11.glEnd();
 		GL11.glPopMatrix();
 		
 		GL11.glEnable(GL_CULL_FACE);
+	}
+	
+	public static Matrix4f createOffset() {
+		return new Matrix4f()
+			.translate(0.5f, 0.5f, 0.5f)
+			.scale(0.5f, 0.5f, 0.5f);
 	}
 }

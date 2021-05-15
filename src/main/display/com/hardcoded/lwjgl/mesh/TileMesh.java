@@ -1,7 +1,5 @@
 package com.hardcoded.lwjgl.mesh;
 
-import static org.lwjgl.opengl.GL11.*;
-
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -46,20 +44,20 @@ public class TileMesh {
 				int midx = (x + y * width * 32) * 16 * 6;
 				int uidx = (x + y * width * 32) * 2 * 6;
 				
-				int c00 = tile_colors[(x    ) + (y    ) * tchw]; //tile.getVertexColor(x, y);
-				int c01 = tile_colors[(x    ) + (y + 1) * tchw]; //tile.getVertexColor(x, y + 1);
-				int c10 = tile_colors[(x + 1) + (y    ) * tchw]; //tile.getVertexColor(x + 1, y);
-				int c11 = tile_colors[(x + 1) + (y + 1) * tchw]; //tile.getVertexColor(x + 1, y + 1);
+				int c00 = tile_colors[(x    ) + (y    ) * tchw];
+				int c01 = tile_colors[(x    ) + (y + 1) * tchw];
+				int c10 = tile_colors[(x + 1) + (y    ) * tchw];
+				int c11 = tile_colors[(x + 1) + (y + 1) * tchw];
 				
-				float h00 = tile_heights[(x    ) + (y    ) * thcw]; //tile.getVertexHeight(x, y);
-				float h01 = tile_heights[(x    ) + (y + 1) * thcw]; //tile.getVertexHeight(x, y + 1);
-				float h10 = tile_heights[(x + 1) + (y    ) * thcw]; //tile.getVertexHeight(x + 1, y);
-				float h11 = tile_heights[(x + 1) + (y + 1) * thcw]; //tile.getVertexHeight(x + 1, y + 1);
+				float h00 = tile_heights[(x    ) + (y    ) * thcw];
+				float h01 = tile_heights[(x    ) + (y + 1) * thcw];
+				float h10 = tile_heights[(x + 1) + (y    ) * thcw];
+				float h11 = tile_heights[(x + 1) + (y + 1) * thcw];
 				
-				long m00 = tile_mats[(x*2    ) + (y*2    ) * tgrw]; //tile.getGroundMaterial(x * 2    , y * 2    );
-				long m01 = tile_mats[(x*2    ) + (y*2 + 1) * tgrw]; //tile.getGroundMaterial(x * 2    , y * 2 + 1);
-				long m10 = tile_mats[(x*2 + 1) + (y*2    ) * tgrw]; //tile.getGroundMaterial(x * 2 + 1, y * 2    );
-				long m11 = tile_mats[(x*2 + 1) + (y*2 + 1) * tgrw]; //tile.getGroundMaterial(x * 2 + 1, y * 2 + 1);
+				long m00 = tile_mats[(x*2    ) + (y*2    ) * tgrw];
+				long m01 = tile_mats[(x*2    ) + (y*2 + 1) * tgrw];
+				long m10 = tile_mats[(x*2 + 1) + (y*2    ) * tgrw];
+				long m11 = tile_mats[(x*2 + 1) + (y*2 + 1) * tgrw];
 				
 				float x0 = x;
 				float x1 = x + 1;
@@ -304,26 +302,26 @@ public class TileMesh {
 			vboVertex = GL15.glGenBuffers();
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertex);
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, verticesBuffer, GL15.GL_STATIC_DRAW);
-			GL20.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0L);
+			GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0L);
 			
 			vboColors = GL15.glGenBuffers();
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColors);
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorsBuffer, GL15.GL_STATIC_DRAW);
-			GL20.glVertexAttribPointer(1, 4, GL_FLOAT, false, 0, 0L);
+			GL20.glVertexAttribPointer(1, 4, GL11.GL_FLOAT, false, 0, 0L);
 			
 			vboTextures = GL15.glGenBuffers();
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboTextures);
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, texturesBuffer, GL15.GL_STATIC_DRAW);
-			GL20.glVertexAttribPointer(2, 2, GL_FLOAT, false, 0, 0L);
+			GL20.glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, 0, 0L);
 			
 			
 			vboMaterial = GL15.glGenBuffers();
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboMaterial);
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, materialsBuffer, GL15.GL_STATIC_DRAW);
-			GL20.glVertexAttribPointer(3, 4, GL_INT, false, 64,  0L);
-			GL20.glVertexAttribPointer(4, 4, GL_INT, false, 64, 16L);
-			GL20.glVertexAttribPointer(5, 4, GL_INT, false, 64, 32L);
-			GL20.glVertexAttribPointer(6, 4, GL_INT, false, 64, 48L);
+			GL20.glVertexAttribPointer(3, 4, GL11.GL_INT, false, 64,  0L);
+			GL20.glVertexAttribPointer(4, 4, GL11.GL_INT, false, 64, 16L);
+			GL20.glVertexAttribPointer(5, 4, GL11.GL_INT, false, 64, 32L);
+			GL20.glVertexAttribPointer(6, 4, GL11.GL_INT, false, 64, 48L);
 			
 			
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
