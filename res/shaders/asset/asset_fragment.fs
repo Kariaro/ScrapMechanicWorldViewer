@@ -3,6 +3,7 @@
 in vec3 pass_Normal;
 in vec3 pass_Cam;
 in vec2 dif_uv;
+in vec4 pass_ShadowCoords;
 
 out vec4 out_color;
 
@@ -10,6 +11,9 @@ uniform sampler2D dif_tex;
 uniform sampler2D asg_tex;
 uniform sampler2D nor_tex;
 uniform sampler2D ao_tex;
+
+uniform sampler2D shadowMap;
+
 
 uniform int hasAlpha;
 uniform int tiling;
@@ -22,6 +26,12 @@ void main() {
 	vec4 asg = texture2D(asg_tex, dif_uv);
 	vec4 nor = texture2D(nor_tex, dif_uv);
 	vec4 ao = texture2D(ao_tex, dif_uv);
+	
+	float objectNearestLight = texture(shadowMap, pass_ShadowCoords.xy).r;
+	float lightFactor = 1.0;
+	if(pass_ShadowCoords.z - objectNearestLight > 0.001) {
+		lightFactor = 1.0 - 0.4;
+	}
 	
 	vec3 col_a = dif.rgb * dif.a;
 	vec3 col_b = color.rgb * (1 - dif.a);
@@ -36,5 +46,5 @@ void main() {
 	// float diff = max(dot(pass_Normal, pass_Cam), 0);
 	// diffuse.xyz *= clamp(diff, 0.8, 1);
 	
-	out_color = diffuse;
+	out_color = vec4(diffuse.rgb * lightFactor, diffuse.a);
 }

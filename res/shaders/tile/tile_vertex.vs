@@ -18,11 +18,14 @@ out mat4 pass_MatA;
 out mat4 pass_MatB;
 out vec2 pass_Uv;
 out vec4 pass_Pos;
+out vec4 pass_ShadowCoords;
 
-uniform mat4 transformationMatrix;
+uniform mat4 modelMatrix;
 uniform mat4 projectionView;
 
-uniform ivec4 testColor;
+uniform mat4 toShadowMapSpace;
+
+//uniform ivec4 testColor;
 
 // Works
 /*vec4 createVec(float value) {
@@ -46,7 +49,8 @@ vec4 createVec(vec2 v) {
 }
 
 void main() {
-	gl_Position = projectionView * transformationMatrix * in_Position;
+	gl_Position = projectionView * modelMatrix * in_Position;
+	pass_ShadowCoords = toShadowMapSpace * modelMatrix * in_Position;
 	
 	pass_Color = in_Color;
 	pass_Pos = in_Position;

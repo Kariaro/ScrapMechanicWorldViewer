@@ -3,6 +3,7 @@
 in vec4 pass_Color;
 in vec4 pass_Pos;
 in vec2 pass_Uv;
+in vec4 pass_ShadowCoords;
 
 in flat mat4 pass_MatA; // m00, m01
 in flat mat4 pass_MatB; // m10, m11
@@ -17,6 +18,9 @@ uniform sampler2D tex_6;
 uniform sampler2D tex_7;
 uniform sampler2D tex_8;
 
+
+uniform sampler2D shadowMap;
+
 out vec4 out_color;
 
 vec4 calculateColor(vec4 color, vec2 uv, vec4 mat_0, vec4 mat_1) {
@@ -28,16 +32,6 @@ vec4 calculateColor(vec4 color, vec2 uv, vec4 mat_0, vec4 mat_1) {
 	vec4 t6 = texture2D(tex_6, uv);
 	vec4 t7 = texture2D(tex_7, uv);
 	vec4 t8 = texture2D(tex_8, uv);
-	
-	//if(mat_0.x > 0) mat_0.x = 1;
-	//if(mat_0.y > 0) mat_0.y = 1;
-	//if(mat_0.z > 0) mat_0.z = 1;
-	//if(mat_0.w > 0) mat_0.w = 1;
-	
-	//if(mat_1.x > 0) mat_1.x = 1;
-	//if(mat_1.y > 0) mat_1.y = 1;
-	//if(mat_1.z > 0) mat_1.z = 1;
-	//if(mat_1.w > 0) mat_1.w = 1;
 	
 	vec4 result = color;
 	if(mat_0.x > 0) result = mix(result, t1, mat_0.x);
@@ -54,6 +48,13 @@ vec4 calculateColor(vec4 color, vec2 uv, vec4 mat_0, vec4 mat_1) {
 }
 
 void main() {
+	float objectNearestLight = texture(shadowMap, pass_ShadowCoords.xy).r;
+	float lightFactor = 1.0;
+	if(pass_ShadowCoords.z - objectNearestLight > 0.001) {
+		lightFactor = 1.0 - 0.4;
+	}
+	
+	
 	vec2 uv = pass_Pos.xy / 4.0;
 	vec4 t0 = texture2D(tex_0, uv);
 	
@@ -76,5 +77,5 @@ void main() {
 	}
 	
 	dif.a = 1;
-	out_color = dif * vec4(pass_Color.rgb, 1);
+	out_color = dif * vec4(pass_Color.rgb, 1) * lightFactor;
 }

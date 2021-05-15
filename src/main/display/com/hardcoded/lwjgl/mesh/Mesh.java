@@ -185,18 +185,6 @@ public class Mesh {
 		GL30.glBindVertexArray(0);
 	}
 	
-//	public void renderForShadow() {
-//		// Draw the mesh
-//		GL30.glBindVertexArray(getVaoId());
-//		GL20.glEnableVertexAttribArray(0);
-//		
-//		GL11.glDrawElements(GL11.GL_TRIANGLES, getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-//		
-//		// Restore state
-//		GL20.glDisableVertexAttribArray(0);
-//		GL30.glBindVertexArray(0);
-//	}
-	
 	public void cleanUp() {
 		GL20.glDisableVertexAttribArray(0);
 		

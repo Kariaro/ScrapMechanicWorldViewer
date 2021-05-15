@@ -79,7 +79,7 @@ public class WorldBlockRender implements WorldObjectRender {
 			matrix.translate(x, y, z);
 		}
 		
-		shader.setUniform("transformationMatrix", matrix);
+		shader.setTransformationMatrix(matrix);
 		shader.setUniform("localTransform", x, y, z);
 		shader.setUniform("tiling", block.tiling);
 		shader.setUniform("scale",

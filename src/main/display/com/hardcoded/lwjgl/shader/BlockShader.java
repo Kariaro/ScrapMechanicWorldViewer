@@ -1,5 +1,7 @@
 package com.hardcoded.lwjgl.shader;
 
+import org.joml.Matrix4f;
+
 /**
  * A container class for the block shader.
  * 
@@ -7,7 +9,7 @@ package com.hardcoded.lwjgl.shader;
  * @since v0.1
  */
 public class BlockShader extends Shader {
-	public BlockShader() throws Exception {
+	public BlockShader() {
 		super(
 			"/shaders/block/block_vertex.vs",
 			"/shaders/block/block_fragment.fs"
@@ -35,5 +37,9 @@ public class BlockShader extends Shader {
 		setUniform("dif_tex", 0);
 		setUniform("asg_tex", 1);
 		setUniform("nor_tex", 2);
+	}
+	
+	public void setTransformationMatrix(Matrix4f transformationMatrix) {
+		setUniform("transformationMatrix", transformationMatrix);
 	}
 }
