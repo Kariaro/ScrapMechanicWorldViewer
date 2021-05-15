@@ -32,50 +32,45 @@ public class WorldTileRender {
 	private AssetShader assetShader;
 	private TileShader tileShader;
 	
-	private TilePart part;
-	private TileMesh tm;
+	private TileParts parts;
 	
-	private int x;
-	private int y;
-	private int rot;
-	
-	public WorldTileRender(WorldRender render, int x, int y, int ox, int oy, TileParts parts, TileShader tileShader, AssetShader assetShader) {
+	public WorldTileRender(WorldRender render, int x, int y, TileParts parts, TileShader tileShader, AssetShader assetShader) {
 		this.render = render;
-		this.x = x;
-		this.y = y;
-		this.rot = TileData.getTileRotation(x, y);
-
-		TilePart part = parts.getPart(ox, oy);
-		TileMesh mesh = parts.getMesh(ox, oy);
-		this.part = part;
-		this.tm = mesh;
+		this.parts = parts;
+		
+//		int ox = TileData.getTileOffsetX(x, y);
+//		int oy = TileData.getTileOffsetY(x, y);
+//		TilePart part = parts.getPart(ox, oy);
+//		TileMesh mesh = parts.getMesh(ox, oy);
+		
+//		this.part = part;
+//		this.tm = mesh;
 		this.tileShader = tileShader;
 		this.assetShader = assetShader;
 	}
 	
-	public void render(int ofx, int ofy, Matrix4f projectionTran, Camera camera) {
-		if(part == null) {
-			// Bad part
-			return;
-		}
+	public void render(int x, int y, int ofx, int ofy, Matrix4f projectionTran, Camera camera) {
+		int ox = TileData.getTileOffsetX(x, y);
+		int oy = TileData.getTileOffsetY(x, y);
 		
-		int tx = (ofx + this.x) * 64;
-		int ty = (ofy + this.y) * 64;
+		TilePart part = parts.getPart(ox, oy);
+		TileMesh tm = parts.getMesh(ox, oy);
 		
-		Matrix4f rott = new Matrix4f();
-		//int rot = 0;
-		float rot_offset = rot * (float)(Math.PI / 2.0);
-		rott.translateLocal(-32, -32, 0).rotateLocalZ(rot_offset).translateLocal(32, 32, 0);
-
 		float c_sw = TileData.getTileCliffLevel(x    , y    );
 		float c_se = TileData.getTileCliffLevel(x + 1, y    );
 		float c_nw = TileData.getTileCliffLevel(x    , y + 1);
 		float c_ne = TileData.getTileCliffLevel(x + 1, y + 1);
 		float cliff_level = Math.min(Math.min(c_sw, c_se), Math.min(c_nw, c_ne)) * 8;
 		
-		float tz = cliff_level;
-		Matrix4f transform = new Matrix4f(rott);
-		transform.translateLocal(tx, ty, tz);
+		float tile_x = (ofx + x) * 64;
+		float tile_y = (ofy + y) * 64;
+		float tile_z = cliff_level;
+		
+		int rot = TileData.getTileRotation(x, y);
+		float rot_offset = rot * (float)(Math.PI / 2.0);
+		Matrix4f transform = new Matrix4f()
+			.translateLocal(-32, -32, 0).rotateLocalZ(rot_offset).translateLocal(32, 32, 0)
+			.translateLocal(tile_x, tile_y, tile_z);
 		
 		tileShader.bind();
 		tileShader.setUniform("projectionView", projectionTran);
@@ -88,7 +83,7 @@ public class WorldTileRender {
 		assetShader.setUniform("transformationMatrix", transform);
 		assetShader.setUniform("color", 1, 1, 1, 1);
 		
-		Vector3f part_offset = new Vector3f(tx, ty, tz);
+		Vector3f part_offset = new Vector3f(tile_x, tile_y, tile_z);
 		
 		for(int i = 0; i < 4; i++) {
 			List<Harvestable> harvestables = part.harvestables[i];

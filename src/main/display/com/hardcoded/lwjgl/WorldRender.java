@@ -16,6 +16,7 @@ import org.lwjgl.opengl.GL11;
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.db.types.*;
 import com.hardcoded.error.TileException;
+import com.hardcoded.game.GameContext;
 import com.hardcoded.game.World;
 import com.hardcoded.logger.Log;
 import com.hardcoded.lwjgl.gui.Gui;
@@ -174,12 +175,15 @@ public class WorldRender {
 //		return null;
 //	}
 	
+	private GameContext context;
 	private Tile loaded_tile;
 	private void init() throws Exception {
 		blockShader = new BlockShader();
 		assetShader = new AssetShader();
 		partShader = new PartShader();
 		tileShader = new TileShader();
+		
+		this.context = new GameContext(ScrapMechanicAssetHandler.getGamePath());
 		
 		//String path = "GROUND512_01";
 		//path = getTile("tile_0");
@@ -245,14 +249,15 @@ public class WorldRender {
 	}
 	
 	public WorldTileRender getTileRender(int x, int y) {
-		long index = ((long)(x) & 0xffffffffL) | (((long)y) << 32L);
+		if(!TileData.hasTile(x, y)) return null;
+		
+		//long index = ((long)(x) & 0xffffffffL) | (((long)y) << 32L);
+		long index = TileData.getTileId(x, y);
 		if(tiles.containsKey(index)) return tiles.get(index);
 
 		String path = TileData.getTilePath(x, y);
 		if(path == null || !loadCheck()) return null;
 		
-		int ox = TileData.getTileOffsetX(x, y);
-		int oy = TileData.getTileOffsetY(x, y);
 		//long o_index = ((long)(ox) & 0xffffffffL) | (((long)oy) << 32L);
 		
 		TileParts parts = null;
@@ -260,7 +265,7 @@ public class WorldRender {
 			parts = tile_data.get(path);
 		} else {
 			try {
-				Tile tile = TileReader.loadTile(path);
+				Tile tile = TileReader.readTile(path, context);
 				parts = new TileParts(tile);
 				tile_data.put(path, parts);
 			} catch(TileException e) {
@@ -271,7 +276,7 @@ public class WorldRender {
 		}
 		
 		LOGGER.info("Init: '%s'", path);
-		WorldTileRender render = new WorldTileRender(this, x, y, ox, oy, parts, tileShader, assetShader);
+		WorldTileRender render = new WorldTileRender(this, x, y, parts, tileShader, assetShader);
 		tiles.put(index, render);
 		return render;
 	}
@@ -372,6 +377,28 @@ public class WorldRender {
 		
 		checkWorldUpdate();
 		
+		{
+			// correct = (-2270, -2567, 10)
+			// current = (-1676, -1500, 1)
+			
+			int ox = 0;
+			int oy = 0;
+			int ss = 4;
+			
+			Vector3f cam_pos = camera.getPosition();
+			int xx = (int)(cam_pos.x / 64) - ox;
+			int yy = (int)(cam_pos.y / 64) - oy;
+			
+			for(int y = yy - ss - 1; y < yy + ss; y++) {
+				for(int x = xx - ss - 1; x < xx + ss; x++) {
+					WorldTileRender render = getTileRender(x, y);
+					if(render != null) {
+						render.render(x, y, ox, oy, projectionTran, camera);
+					}
+				}
+			}
+		}
+		
 		blockShader.bind();
 		blockShader.setUniform("projectionView", projectionTran);
 		blockShader.setUniform("transformationMatrix", new Matrix4f());
@@ -406,29 +433,6 @@ public class WorldRender {
 			}
 		}
 		partShader.unbind();
-		
-		{
-			// correct = (-2270, -2567, 10)
-			// current = (-1676, -1500, 1)
-			
-			int ox = 0;
-			int oy = 0;
-			int ss = 4;
-			
-			Vector3f cam_pos = camera.getPosition();
-			int xx = (int)(cam_pos.x / 64) - ox;
-			int yy = (int)(cam_pos.y / 64) - oy;
-			
-			for(int y = yy - ss - 1; y < yy + ss; y++) {
-				for(int x = xx - ss - 1; x < xx + ss; x++) {
-					WorldTileRender render = getTileRender(x, y);
-					if(render != null) {
-						render.render(ox, oy, projectionTran, camera);
-					}
-				}
-			}
-		}
-		
 		
 		GL11.glPushMatrix();
 		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
