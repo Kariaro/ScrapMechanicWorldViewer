@@ -78,8 +78,13 @@ public class BodyList extends SQLiteObject {
 		public int worldId;
 		
 		
-		// These three could be just one?
-		public int isStatic_0_2 = 0; // 1 is static, 2 is dynamic
+		/**
+		 * <pre>
+		 * 1: grid locked
+		 * 2: dynamic
+		 * </pre>
+		 */
+		public int isGridLocked_0_2 = 0;
 		public int unk_2_1 = 0;
 		
 		/** offset:3 size:4 */ public int bodyId_3_4 = 0;
@@ -122,7 +127,7 @@ public class BodyList extends SQLiteObject {
 		
 		// TODO: Next values
 		// Only if 'isStatic' == '2'
-		public Matrix4f matrix;
+		//public Matrix4f matrix;
 		
 		public RigidBodyBounds bounds;
 		//public RigidBodyBoundsNode node;
@@ -147,7 +152,7 @@ public class BodyList extends SQLiteObject {
 			//node = new RigidBodyBoundsNode(sqlite.execute("SELECT * FROM RigidBodyBounds_node WHERE nodeno = " + nodeId));
 			
 			
-			isStatic_0_2 = Util.getShort(data, 0, true);
+			isGridLocked_0_2 = Util.getShort(data, 0, true);
 			unk_2_1 = data[2];
 			bodyId_3_4 = Util.getInt(data, 3, true);
 			unk_7_2 = Util.getShort(data, 7, true);
@@ -163,13 +168,13 @@ public class BodyList extends SQLiteObject {
 			float cc = Util.getFloat(data, 35, true);
 			float dd = Util.getFloat(data, 39, true);
 			quat = new Quaternionf(aa, bb, cc, dd);
-			matrix = quat.get(new Matrix4f());
+			//matrix = quat.get(new Matrix4f());
 			
 			xWorld = Util.getFloat(data, 43, true);
 			yWorld = Util.getFloat(data, 47, true);
 			zWorld = Util.getFloat(data, 51, true);
 			
-			if(isStatic_0_2 == 1) {
+			if(isGridLocked_0_2 == 1) {
 				// This value has with how the object is stuck....
 				staticFlags = Util.getInt(data, 55, true);
 				//System.out.println("55: " + staticFlags);
@@ -197,7 +202,7 @@ public class BodyList extends SQLiteObject {
 				e.printStackTrace();
 			}*/
 			
-			if(isStatic_0_2 == 2) {
+			if(isGridLocked_0_2 == 2) {
 				xVelocity = Util.getFloat(data, 55, true);
 				yVelocity = Util.getFloat(data, 59, true);
 				zVelocity = Util.getFloat(data, 63, true);

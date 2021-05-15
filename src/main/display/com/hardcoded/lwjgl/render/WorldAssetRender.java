@@ -20,8 +20,8 @@ import com.hardcoded.tile.object.Asset;
  * @author HardCoded
  * @since v0.1
  */
-public class WorldAssetRender {
-	private final List<AssetMesh> meshes;
+public class WorldAssetRender implements WorldObjectRender {
+	public final List<AssetMesh> meshes;
 	
 	public WorldAssetRender(SMAsset asset, AssetShader shader) {
 		meshes = new ArrayList<>();
@@ -36,17 +36,31 @@ public class WorldAssetRender {
 		}
 	}
 	
-	public void render(Vector3f pos, Asset asset, Quaternionf quat, Vector3f scale, Camera camera) {
+	public void render(Asset asset, Vector3f pos, Quaternionf quat, Vector3f scale, Camera camera) {
 		//float dist = camera.getPosition().distance(pos);
 		
-//		if(!meshes.isEmpty()) {
-//			AssetMesh mesh = meshes.get(meshes.size() - 1);
-//			mesh.render(asset, pos, quat, scale);
-//			return;
-//		}
+		if(!meshes.isEmpty()) {
+			AssetMesh mesh = meshes.get(meshes.size() - 1);
+			mesh.render(asset, pos, quat, scale);
+			return;
+		}
 		
 		for(AssetMesh mesh : meshes) {
 			mesh.render(asset, pos, quat, scale);
+			break;
+		}
+	}
+	
+	@Override
+	public void renderShadows() {
+		if(!meshes.isEmpty()) {
+			AssetMesh mesh = meshes.get(meshes.size() - 1);
+			mesh.renderShadows();
+			return;
+		}
+		
+		for(AssetMesh mesh : meshes) {
+			mesh.renderShadows();
 			break;
 		}
 	}

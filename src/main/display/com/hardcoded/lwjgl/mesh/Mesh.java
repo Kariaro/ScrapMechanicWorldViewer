@@ -1,14 +1,14 @@
 package com.hardcoded.lwjgl.mesh;
 
+import static org.lwjgl.opengl.GL15.*;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
+
+import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
 
 import com.hardcoded.lwjgl.util.LoadedMaterial;
@@ -43,64 +43,66 @@ public class Mesh {
 			vertexCount = indices.length;
 			vboIdList = new ArrayList<>();
 			
-			vaoId = glGenVertexArrays();
-			glBindVertexArray(vaoId);
+			vaoId = GL30.glGenVertexArrays();
+			GL30.glBindVertexArray(vaoId);
 			
 			// Position VBO
-			int vboId = glGenBuffers();
+			int vboId = GL15.glGenBuffers();
 			vboIdList.add(vboId);
 			posBuffer = MemoryUtil.memAllocFloat(positions.length);
 			posBuffer.put(positions).flip();
-			glBindBuffer(GL_ARRAY_BUFFER, vboId);
-			glBufferData(GL_ARRAY_BUFFER, posBuffer, GL_STATIC_DRAW);
-			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, posBuffer, GL15.GL_STATIC_DRAW);
+			GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
 			
 			// Texture coordinates VBO
-			vboId = glGenBuffers();
+			vboId = GL15.glGenBuffers();
 			vboIdList.add(vboId);
 			textCoordsBuffer = MemoryUtil.memAllocFloat(textCoords.length);
 			textCoordsBuffer.put(textCoords).flip();
-			glBindBuffer(GL_ARRAY_BUFFER, vboId);
-			glBufferData(GL_ARRAY_BUFFER, textCoordsBuffer, GL_STATIC_DRAW);
-			glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, textCoordsBuffer, GL15.GL_STATIC_DRAW);
+			GL20.glVertexAttribPointer(1, 2, GL11.GL_FLOAT, false, 0, 0);
 			
 			// Vertex normals VBO
-			vboId = glGenBuffers();
+			vboId = GL15.glGenBuffers();
 			vboIdList.add(vboId);
 			vecNormalsBuffer = MemoryUtil.memAllocFloat(normals.length);
 			vecNormalsBuffer.put(normals).flip();
-			glBindBuffer(GL_ARRAY_BUFFER, vboId);
-			glBufferData(GL_ARRAY_BUFFER, vecNormalsBuffer, GL_STATIC_DRAW);
-			glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vecNormalsBuffer, GL15.GL_STATIC_DRAW);
+			GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 0, 0);
 			
 			// Weights
-			vboId = glGenBuffers();
+			vboId = GL15.glGenBuffers();
 			vboIdList.add(vboId);
 			weightsBuffer = MemoryUtil.memAllocFloat(weights.length);
 			weightsBuffer.put(weights).flip();
-			glBindBuffer(GL_ARRAY_BUFFER, vboId);
-			glBufferData(GL_ARRAY_BUFFER, weightsBuffer, GL_STATIC_DRAW);
-			glVertexAttribPointer(3, 4, GL_FLOAT, false, 0, 0);
+			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, weightsBuffer, GL15.GL_STATIC_DRAW);
+			GL20.glVertexAttribPointer(3, 4, GL11.GL_FLOAT, false, 0, 0);
 			
 			// Joint indices
-			vboId = glGenBuffers();
+			vboId = GL15.glGenBuffers();
 			vboIdList.add(vboId);
 			jointIndicesBuffer = MemoryUtil.memAllocInt(jointIndices.length);
 			jointIndicesBuffer.put(jointIndices).flip();
-			glBindBuffer(GL_ARRAY_BUFFER, vboId);
-			glBufferData(GL_ARRAY_BUFFER, jointIndicesBuffer, GL_STATIC_DRAW);
-			glVertexAttribPointer(4, 4, GL_FLOAT, false, 0, 0);
+			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, jointIndicesBuffer, GL15.GL_STATIC_DRAW);
+			GL20.glVertexAttribPointer(4, 4, GL11.GL_FLOAT, false, 0, 0);
 			
 			// Index VBO
-			vboId = glGenBuffers();
+			vboId = GL15.glGenBuffers();
 			vboIdList.add(vboId);
 			indicesBuffer = MemoryUtil.memAllocInt(indices.length);
 			indicesBuffer.put(indices).flip();
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboId);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
+			GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
+			GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
 			
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
+			
+			
+			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+			GL30.glBindVertexArray(0);
 		} finally {
 			if(posBuffer != null) {
 				MemoryUtil.memFree(posBuffer);
@@ -169,46 +171,44 @@ public class Mesh {
 	
 	public void render() {
 		// Draw the mesh
-		glBindVertexArray(getVaoId());
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(2);
+		GL30.glBindVertexArray(getVaoId());
+		GL20.glEnableVertexAttribArray(0);
+		GL20.glEnableVertexAttribArray(1);
+		GL20.glEnableVertexAttribArray(2);
 		
-		glDrawElements(GL_TRIANGLES, getVertexCount(), GL_UNSIGNED_INT, 0);
+		GL11.glDrawElements(GL11.GL_TRIANGLES, getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
 		
 		// Restore state
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-		glDisableVertexAttribArray(2);
-		glBindVertexArray(0);
+		GL20.glDisableVertexAttribArray(0);
+		GL20.glDisableVertexAttribArray(1);
+		GL20.glDisableVertexAttribArray(2);
+		GL30.glBindVertexArray(0);
 	}
+	
+//	public void renderForShadow() {
+//		// Draw the mesh
+//		GL30.glBindVertexArray(getVaoId());
+//		GL20.glEnableVertexAttribArray(0);
+//		
+//		GL11.glDrawElements(GL11.GL_TRIANGLES, getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+//		
+//		// Restore state
+//		GL20.glDisableVertexAttribArray(0);
+//		GL30.glBindVertexArray(0);
+//	}
 	
 	public void cleanUp() {
-		glDisableVertexAttribArray(0);
+		GL20.glDisableVertexAttribArray(0);
 		
 		// Delete the VBOs
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		GL15.glBindBuffer(GL_ARRAY_BUFFER, 0);
 		for(int vboId : vboIdList) {
-			glDeleteBuffers(vboId);
+			GL15.glDeleteBuffers(vboId);
 		}
 		
 		// Delete the VAO
-		glBindVertexArray(0);
-		glDeleteVertexArrays(vaoId);
-	}
-	
-	public void deleteBuffers() {
-		glDisableVertexAttribArray(0);
-		
-		// Delete the VBOs
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		for(int vboId : vboIdList) {
-			glDeleteBuffers(vboId);
-		}
-		
-		// Delete the VAO
-		glBindVertexArray(0);
-		glDeleteVertexArrays(vaoId);
+		GL30.glBindVertexArray(0);
+		GL30.glDeleteVertexArrays(vaoId);
 	}
 	
 	protected static float[] createEmptyFloatArray(int length, float defaultValue) {

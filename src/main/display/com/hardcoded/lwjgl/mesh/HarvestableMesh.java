@@ -29,7 +29,6 @@ public class HarvestableMesh extends RenderableMeshImpl {
 	public final SMHarvestable harvestable;
 	
 	private final List<Texture>[] textures;
-	private final MeshMaterial[] mats;
 	
 	@SuppressWarnings("unchecked")
 	public HarvestableMesh(Lod lod, Shader shader, SMHarvestable harvestable) throws Exception {
@@ -67,7 +66,7 @@ public class HarvestableMesh extends RenderableMeshImpl {
 		System.out.println("--------------------");
 	}
 	
-	public boolean render(Harvestable harvestable, Vector3f pos, Quaternionf quat, Vector3f scale) {
+	public void render(Harvestable harvestable, Vector3f pos, Quaternionf quat, Vector3f scale) {
 		Matrix4f matrix = new Matrix4f();
 		matrix.translate(pos);
 		matrix.rotate(quat);
@@ -109,7 +108,5 @@ public class HarvestableMesh extends RenderableMeshImpl {
 				}
 			}
 		}
-		
-		return true;
 	}
 }

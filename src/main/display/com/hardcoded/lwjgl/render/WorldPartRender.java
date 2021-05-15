@@ -21,11 +21,13 @@ import com.hardcoded.world.utils.ShapeUtils.Bounds3D;
  * @author HardCoded
  * @since v0.1
  */
-public class WorldPartRender {
-	private final List<PartMesh> meshes;
+public class WorldPartRender implements WorldObjectRender {
+	public final List<PartMesh> meshes;
+	public final SMPart part;
 	
 	public WorldPartRender(SMPart part, PartShader shader) {
 		meshes = new ArrayList<>();
+		this.part = part;
 		
 		try {
 			Renderable rend = part.renderable;
@@ -55,14 +57,28 @@ public class WorldPartRender {
 	public void render(Vector3f pos, Quaternionf quat, Vector3f scale, Camera camera) {
 		//float dist = camera.getPosition().distance(pos);
 		
-//		if(!meshes.isEmpty()) {
-//			PartMesh mesh = meshes.get(meshes.size() - 1);
-//			mesh.render(pos, quat, scale);
-//			return;
-//		}
+		if(!meshes.isEmpty()) {
+			PartMesh mesh = meshes.get(meshes.size() - 1);
+			mesh.render(pos, quat, scale);
+			return;
+		}
 		
 		for(PartMesh mesh : meshes) {
 			mesh.render(pos, quat, scale);
+			break;
+		}
+	}
+	
+	@Override
+	public void renderShadows() {
+		if(!meshes.isEmpty()) {
+			PartMesh mesh = meshes.get(meshes.size() - 1);
+			mesh.renderShadows();
+			return;
+		}
+		
+		for(PartMesh mesh : meshes) {
+			mesh.renderShadows();
 			break;
 		}
 	}

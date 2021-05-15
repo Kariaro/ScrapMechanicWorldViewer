@@ -19,9 +19,20 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.stb.STBImage;
 
+import com.hardcoded.logger.Log;
+
+/**
+ * A texture class.
+ * 
+ * @author HardCoded
+ * @since v0.1
+ */
 public class Texture {
+	private static final Log LOGGER = Log.getLogger();
+	
 	public static final Texture NONE = new Texture();
-	private static final Map<String, Integer> cacheTextureId = new HashMap<>();
+	public static final Map<String, Integer> cacheTextureId = new HashMap<>();
+	
 	public final BufferedImage bi;
 	public final String name;
 	public final int activeId;
@@ -118,6 +129,7 @@ public class Texture {
 		}
 		
 		if(!file.exists()) {
+			LOGGER.warn("Tried to load texture '" + path + "' but that file does not exist");
 			return NONE;
 		}
 		

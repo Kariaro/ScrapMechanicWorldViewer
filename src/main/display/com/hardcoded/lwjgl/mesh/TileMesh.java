@@ -391,6 +391,16 @@ public class TileMesh {
 		GL30.glBindVertexArray(0);
 	}
 	
+	public void renderShadows() {
+		GL30.glBindVertexArray(vaoId);
+		GL20.glEnableVertexAttribArray(0);
+		
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
+		
+		GL20.glDisableVertexAttribArray(0);
+		GL30.glBindVertexArray(0);
+	}
+	
 	public void cleanup() {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		GL30.glBindVertexArray(0);

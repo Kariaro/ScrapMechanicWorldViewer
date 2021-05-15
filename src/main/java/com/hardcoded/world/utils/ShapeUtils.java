@@ -16,7 +16,7 @@ public class ShapeUtils {
 		Vector3f size = new Vector3f(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
 		
 		for(ChildShape shape : body.shapes) {
-			if(shape.shapeType == 0x1f || true) {
+			if(shape.shapeType == 0x1f) {
 				float x = shape.xPos;
 				float y = shape.yPos;
 				float z = shape.zPos;

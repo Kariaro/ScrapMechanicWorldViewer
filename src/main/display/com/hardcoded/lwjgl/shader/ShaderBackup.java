@@ -16,39 +16,20 @@ import org.lwjgl.system.MemoryStack;
 
 import com.hardcoded.util.FileUtils;
 
-/**
- * A simple shader implementation.
- * 
- * @author HardCoded
- * @since v0.1
- */
-public abstract class Shader {
+public class ShaderBackup {
 	private Map<String, Integer> uniforms = new HashMap<>();
 	
-	protected final int programId;
+	protected int programId;
 	protected int vertexShaderId;
 	protected int fragmentShaderId;
 	
-	protected Shader(String vertexPath, String fragmentPath) throws Exception {
-		programId = GL20.glCreateProgram();
-		if(programId == 0) {
-			throw new Exception("Failed to create shader: GL20.glCreateProgram() returned 0");
-		}
-		
-		createShaderCode(FileUtils.readStream(Shader.class.getResourceAsStream(vertexPath)), GL20.GL_VERTEX_SHADER);
-		createShaderCode(FileUtils.readStream(Shader.class.getResourceAsStream(fragmentPath)), GL20.GL_FRAGMENT_SHADER);
-		
-		
-		loadBinds();
-		link();
-		
-		bind();
-		loadUniforms();
-		unbind();
+	public void createVertexShader(String shaderPath) throws Exception {
+		vertexShaderId = createShader(shaderPath, GL20.GL_VERTEX_SHADER);
 	}
 	
-	protected abstract void loadBinds();
-	protected abstract void loadUniforms();
+	public void createFragmentShader(String shaderPath) throws Exception {
+		fragmentShaderId = createShader(shaderPath, GL20.GL_FRAGMENT_SHADER);
+	}
 	
 	protected int createShader(String shaderPath, int shaderType) throws Exception {
 		int shaderId = glCreateShader(shaderType);

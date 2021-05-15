@@ -23,7 +23,8 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 	public final double maxViewDistance;
 	public final double minViewSize;
 	
-	protected Mesh[] meshes = new Mesh[0];
+	// FIXME: Make protected
+	public Mesh[] meshes = new Mesh[0];
 	//protected Mesh[][] animations; // TODO: Animations
 	
 	@SuppressWarnings("unchecked")
@@ -251,5 +252,11 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 		}
 		return -1;
 	}
-
+	
+	@Override
+	public void renderShadows() {
+		for(int i = 0; i < meshes.length; i++) {
+			meshes[i].render();
+		}
+	}
 }

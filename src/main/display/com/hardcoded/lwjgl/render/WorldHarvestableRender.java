@@ -20,7 +20,7 @@ import com.hardcoded.tile.object.Harvestable;
  * @author HardCoded
  * @since v0.2
  */
-public class WorldHarvestableRender {
+public class WorldHarvestableRender implements WorldObjectRender {
 	private final List<HarvestableMesh> meshes;
 	
 	public WorldHarvestableRender(SMHarvestable harvestable, Shader shader) {
@@ -39,14 +39,28 @@ public class WorldHarvestableRender {
 	public void render(Vector3f pos, Harvestable harvestable, Quaternionf quat, Vector3f scale, Camera camera) {
 		//float dist = camera.getPosition().distance(pos);
 		
-//		if(!meshes.isEmpty()) {
-//			HarvestableMesh mesh = meshes.get(meshes.size() - 1);
-//			mesh.render(harvestable, pos, quat, scale);
-//			return;
-//		}
+		if(!meshes.isEmpty()) {
+			HarvestableMesh mesh = meshes.get(meshes.size() - 1);
+			mesh.render(harvestable, pos, quat, scale);
+			return;
+		}
 		
 		for(HarvestableMesh mesh : meshes) {
 			mesh.render(harvestable, pos, quat, scale);
+			break;
+		}
+	}
+	
+	@Override
+	public void renderShadows() {
+		if(!meshes.isEmpty()) {
+			HarvestableMesh mesh = meshes.get(meshes.size() - 1);
+			mesh.renderShadows();
+			return;
+		}
+		
+		for(HarvestableMesh mesh : meshes) {
+			mesh.renderShadows();
 			break;
 		}
 	}

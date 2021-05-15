@@ -26,4 +26,6 @@ public interface RenderableMesh {
 	int getMeshIndex(String name);
 	
 	Mesh getMesh(String name);
+	
+	void renderShadows();
 }

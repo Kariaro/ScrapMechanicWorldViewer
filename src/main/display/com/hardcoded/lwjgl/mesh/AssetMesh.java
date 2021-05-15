@@ -7,9 +7,9 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
-import com.hardcoded.db.types.SMAsset;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.Renderable.MeshMap;
+import com.hardcoded.db.types.SMAsset;
 import com.hardcoded.lwjgl.data.MeshMaterial;
 import com.hardcoded.lwjgl.data.Texture;
 import com.hardcoded.lwjgl.shader.AssetShader;
@@ -25,7 +25,6 @@ public class AssetMesh extends RenderableMeshImpl {
 	public final SMAsset asset;
 	
 	private final List<Texture>[] textures;
-	private final MeshMaterial[] mats;
 	
 	private Map<String, int[]> defaultColors;
 	
@@ -137,7 +136,7 @@ public class AssetMesh extends RenderableMeshImpl {
 		shader.setUniform("color", r, g, b, a);
 	}
 	
-	public boolean render(Asset asset, Vector3f pos, Quaternionf quat, Vector3f scale) {
+	public void render(Asset asset, Vector3f pos, Quaternionf quat, Vector3f scale) {
 		Matrix4f matrix = new Matrix4f();
 		matrix.translate(pos);
 		matrix.rotate(quat);
@@ -173,7 +172,5 @@ public class AssetMesh extends RenderableMeshImpl {
 				}
 			}
 		}
-		
-		return true;
 	}
 }
