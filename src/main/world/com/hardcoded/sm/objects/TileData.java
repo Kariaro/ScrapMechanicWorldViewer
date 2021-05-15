@@ -997,6 +997,10 @@ public class TileData {
 		return data.get("tileOffsetX").get(y).getInt(x);
 	}
 	
+	public static int getTileId(int x, int y) {
+		return tileIds.get(y).getInt(x);
+	}
+	
 	public static int getTileOffsetY(int x, int y) {
 		if(!hasTile(x, y)) return 0;
 		return data.get("tileOffsetY").get(y).getInt(x);

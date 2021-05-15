@@ -39,11 +39,11 @@ public class WorldHarvestableRender {
 	public void render(Vector3f pos, Harvestable harvestable, Quaternionf quat, Vector3f scale, Camera camera) {
 		//float dist = camera.getPosition().distance(pos);
 		
-		if(!meshes.isEmpty()) {
-			HarvestableMesh mesh = meshes.get(meshes.size() - 1);
-			mesh.render(harvestable, pos, quat, scale);
-			return;
-		}
+//		if(!meshes.isEmpty()) {
+//			HarvestableMesh mesh = meshes.get(meshes.size() - 1);
+//			mesh.render(harvestable, pos, quat, scale);
+//			return;
+//		}
 		
 		for(HarvestableMesh mesh : meshes) {
 			mesh.render(harvestable, pos, quat, scale);

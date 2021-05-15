@@ -55,11 +55,11 @@ public class WorldPartRender {
 	public void render(Vector3f pos, Quaternionf quat, Vector3f scale, Camera camera) {
 		//float dist = camera.getPosition().distance(pos);
 		
-		if(!meshes.isEmpty()) {
-			PartMesh mesh = meshes.get(meshes.size() - 1);
-			mesh.render(pos, quat, scale);
-			return;
-		}
+//		if(!meshes.isEmpty()) {
+//			PartMesh mesh = meshes.get(meshes.size() - 1);
+//			mesh.render(pos, quat, scale);
+//			return;
+//		}
 		
 		for(PartMesh mesh : meshes) {
 			mesh.render(pos, quat, scale);

@@ -146,6 +146,10 @@ public final class ScrapMechanicAssetHandler {
 		return path;
 	}
 	
+	public static File getGamePath() {
+		return INSTANCE.basePath;
+	}
+	
 	private void load() throws Exception {
 		loader.load();
 	}
