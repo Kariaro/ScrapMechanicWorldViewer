@@ -136,7 +136,7 @@ public class Camera {
 	
 	public Matrix4f getProjectionMatrix(float fov, float width, float height) {
 		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 10000000);
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.5f, 10000000);
 		return projectionMatrix
 				.rotate(MathUtils.toRadians(ry), 1, 0, 0)
 				.rotate(MathUtils.toRadians(rx), 0, 0, 1)
