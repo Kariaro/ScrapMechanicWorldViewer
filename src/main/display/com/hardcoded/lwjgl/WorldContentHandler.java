@@ -74,48 +74,52 @@ public class WorldContentHandler {
 	}
 	
 	public WorldBlockRender getBlockRender(UUID uuid) {
-		if(blocks.containsKey(uuid)) return blocks.get(uuid);
+		WorldBlockRender render = blocks.get(uuid);
+		if(render != null) return render;
 		
 		SMBlock block = ScrapMechanicAssetHandler.getBlock(uuid);
 		if(block == null || !loadCheck()) return null;
 		
-		WorldBlockRender render = new WorldBlockRender(block, blockShader);
+		render = new WorldBlockRender(block, blockShader);
 		blocks.put(block.uuid, render);
 		return render;
 	}
 	
 	public WorldPartRender getPartRender(UUID uuid) {
-		if(parts.containsKey(uuid)) return parts.get(uuid);
+		WorldPartRender render = parts.get(uuid);
+		if(render != null) return render;
 		
 		SMPart part = ScrapMechanicAssetHandler.getPart(uuid);
 		if(part == null || !loadCheck()) return null;
 		
 		LOGGER.info("Init: %s", part);
-		WorldPartRender render = new WorldPartRender(part, partShader);
+		render = new WorldPartRender(part, partShader);
 		parts.put(part.uuid, render);
 		return render;
 	}
 	
 	public WorldAssetRender getAssetRender(UUID uuid) {
-		if(assets.containsKey(uuid)) return assets.get(uuid);
+		WorldAssetRender render = assets.get(uuid);
+		if(render != null) return render;
 		
 		SMAsset asset = ScrapMechanicAssetHandler.getAsset(uuid);
 		if(asset == null || !loadCheck()) return null;
 		
 		LOGGER.info("Init: %s", asset);
-		WorldAssetRender render = new WorldAssetRender(asset, assetShader);
+		render = new WorldAssetRender(asset, assetShader);
 		assets.put(asset.uuid, render);
 		return render;
 	}
 	
 	public WorldHarvestableRender getHarvestableRender(UUID uuid) {
-		if(harvestables.containsKey(uuid)) return harvestables.get(uuid);
+		WorldHarvestableRender render = harvestables.get(uuid);
+		if(render != null) return render;
 		
 		SMHarvestable harvestable = ScrapMechanicAssetHandler.getHarvestable(uuid);
 		if(harvestable == null || !loadCheck()) return null;
 		
 		LOGGER.info("Init: %s", harvestable);
-		WorldHarvestableRender render = new WorldHarvestableRender(harvestable, assetShader);
+		render = new WorldHarvestableRender(harvestable, assetShader);
 		harvestables.put(harvestable.uuid, render);
 		return render;
 	}

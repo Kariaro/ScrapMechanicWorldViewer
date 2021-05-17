@@ -43,6 +43,8 @@ public class PartMesh extends RenderableMeshImpl {
 	}
 	
 	public void render(ChildShape shape, Bounds3D bounds) {
+		if(!isLoaded) return;
+		
 		float x = shape.xPos - 0.5f;
 		float y = shape.yPos - 0.5f;
 		float z = shape.zPos - 0.5f;
@@ -93,6 +95,8 @@ public class PartMesh extends RenderableMeshImpl {
 	}
 	
 	public void render() {
+		if(!isLoaded) return;
+		
 		for(int i = 0; i < meshes.length; i++) {
 			List<Texture> texs = textures[i];
 			MeshMaterial mat = mats[i];

@@ -25,6 +25,8 @@ public class HarvestableMesh extends RenderableMeshImpl {
 	}
 	
 	public void render() {
+		if(!isLoaded) return;
+		
 		for(int i = 0; i < meshes.length; i++) {
 			List<Texture> texs = textures[i];
 			MeshMaterial mat = mats[i];
