@@ -148,6 +148,11 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 		return textures;
 	}
 	
+	// TODO: Make this the universal call function
+	public void render() {
+		
+	}
+	
 	@Override
 	public void renderShadows() {
 		if(!isLoaded) return;

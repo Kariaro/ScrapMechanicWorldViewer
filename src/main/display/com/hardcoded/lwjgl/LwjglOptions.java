@@ -9,6 +9,6 @@ package com.hardcoded.lwjgl;
 public class LwjglOptions {
 	private LwjglOptions() {}
 	
-	public static final int MAX_LIGHTS = 8;
+	public static final int MAX_LIGHTS = 1;
 	public static boolean LOD_OBJECTS = false;
 }

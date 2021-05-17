@@ -30,14 +30,17 @@ public abstract class Shader {
 	protected int fragmentShaderId;
 	
 	protected Shader(String vertexPath, String fragmentPath) {
+		this(vertexPath, fragmentPath, Map.of());
+	}
+	
+	protected Shader(String vertexPath, String fragmentPath, Map<String, Object> defines) {
 		programId = GL20.glCreateProgram();
 		if(programId == 0) {
 			throw new ShaderException("Failed to create shader: GL20.glCreateProgram() returned 0");
 		}
 		
-		createShader(FileUtils.readStream(Shader.class.getResourceAsStream(vertexPath)), GL20.GL_VERTEX_SHADER);
-		createShader(FileUtils.readStream(Shader.class.getResourceAsStream(fragmentPath)), GL20.GL_FRAGMENT_SHADER);
-		
+		createShader(replaceDefines(FileUtils.readStream(Shader.class.getResourceAsStream(vertexPath)), defines), GL20.GL_VERTEX_SHADER);
+		createShader(replaceDefines(FileUtils.readStream(Shader.class.getResourceAsStream(fragmentPath)), defines), GL20.GL_FRAGMENT_SHADER);
 		
 		loadBinds();
 		link();
@@ -45,6 +48,18 @@ public abstract class Shader {
 		bind();
 		loadUniforms();
 		unbind();
+	}
+	
+	private String replaceDefines(String code, Map<String, Object> defines) {
+		String result = code;
+		
+		for(String key : defines.keySet()) {
+			String pattern = "#define " + key + " [^\\r\\n]";
+			Object value = defines.get(key);
+			result = result.replaceFirst(pattern, "#define " + key + " " + value);
+		}
+		
+		return result;
 	}
 	
 	protected abstract void loadBinds();
@@ -60,6 +75,7 @@ public abstract class Shader {
 		glCompileShader(shaderId);
 		
 		if(glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
+			System.out.println(shaderCode);
 			throw new ShaderException("Error compiling Shader code: " + glGetShaderInfoLog(shaderId, 1024));
 		}
 		

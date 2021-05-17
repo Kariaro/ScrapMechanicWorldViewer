@@ -1,21 +1,41 @@
 #version 130
+#define MAX_LIGHTS 8
 
-in vec4 in_Position;
+in vec3 in_Position;
 in vec3 in_Normal;
+in vec3 in_Tangent;
 
-out vec4 pass_Pos;
-out vec3 pass_Nor;
-out vec3 pass_Cam;
+out vec4 pass_Position;
+out vec4 pass_ShadowCoords;
+out vec3 pass_lightVector[MAX_LIGHTS];
+out mat3 pass_toTangentSpace;
 
 uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
 uniform mat4 projectionView;
 uniform vec3 scale;
 
+uniform mat4 toShadowMapSpace;
+uniform vec3 lightPositionEyeSpace[MAX_LIGHTS];
+
 void main() {
-	vec4 vert = in_Position * vec4(scale, 1);
+	vec4 vert = vec4(in_Position * scale, 1.0);
 	gl_Position = projectionView * modelMatrix * vert;
+	pass_ShadowCoords = toShadowMapSpace * modelMatrix * vert;
+	pass_Position = vert;
 	
-	pass_Cam = normalize(vec3(projectionView[0][2], projectionView[1][2], projectionView[2][2]));
-	pass_Nor = in_Normal;
-	pass_Pos = vert;
+	mat4 modelViewMatrix = viewMatrix * modelMatrix;
+	vec3 norm = normalize((modelViewMatrix * vec4(in_Normal, 0.0)).xyz);
+	vec3 tang = normalize((modelViewMatrix * vec4(in_Tangent, 0.0)).xyz);
+	vec3 bitang = normalize(cross(norm, tang));
+	mat3 toTangentSpace = mat3(
+		tang.x, bitang.x, norm.x,
+		tang.y, bitang.y, norm.y,
+		tang.z, bitang.z, norm.z
+	);
+	
+	pass_toTangentSpace = toTangentSpace;
+	
+	//pass_Cam = normalize(vec3(projectionView[0][2], projectionView[1][2], projectionView[2][2]));
+	//pass_Nor = in_Normal;
 }
