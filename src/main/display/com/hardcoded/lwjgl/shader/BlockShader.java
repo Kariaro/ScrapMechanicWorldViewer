@@ -24,6 +24,8 @@ public class BlockShader extends ShaderObjectImpl {
 	@Override
 	protected void loadBinds() {
 		bindAttrib(0, "in_Position");
+		bindAttrib(1, "in_Normal");
+		bindAttrib(2, "in_Tangent");
 	}
 	
 	@Override
@@ -38,6 +40,8 @@ public class BlockShader extends ShaderObjectImpl {
 		setUniform("dif_tex", 0);
 		setUniform("asg_tex", 1);
 		setUniform("nor_tex", 2);
+		
+		setUniform("shadowMap", 9);
 	}
 	
 	public void setLocalTransform(float x, float y, float z) {

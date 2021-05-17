@@ -48,7 +48,7 @@ public class WorldTileRender {
 		this.assetShader = assetShader;
 	}
 	
-	public void render(int x, int y, Matrix4f toShadowSpace, Matrix4f projectionView, Camera camera) {
+	public void render(int x, int y, Matrix4f toShadowSpace, Matrix4f viewMatrix, Matrix4f projectionView, Camera camera) {
 		int ox = TileData.getTileOffsetX(x, y);
 		int oy = TileData.getTileOffsetY(x, y);
 		
@@ -80,6 +80,7 @@ public class WorldTileRender {
 		
 		assetShader.bind();
 		assetShader.setProjectionView(projectionView);
+		assetShader.setViewMatrix(viewMatrix);
 		assetShader.setModelMatrix(transform);
 		assetShader.setShadowMapSpace(toShadowSpace);
 		
