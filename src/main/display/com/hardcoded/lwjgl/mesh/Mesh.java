@@ -11,7 +11,9 @@ import java.util.List;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
 
+import com.hardcoded.lwjgl.async.LwjglAsyncThread;
 import com.hardcoded.lwjgl.util.LoadedMaterial;
+import com.hardcoded.lwjgl.util.StaticMeshLoaderAsync.AsyncMesh;
 
 /**
  * @author HardCoded
@@ -37,7 +39,24 @@ public class Mesh {
 		);
 	}
 	
-	public Mesh(float[] positions, float[] textCoords, float[] normals, float[] tangents, int[] indices, int[] jointIndices, float[] weights) {
+	public Mesh(AsyncMesh mesh) {
+		this(
+			mesh.vertexs,
+			mesh.uvs,
+			mesh.normals,
+			mesh.tangents,
+			mesh.indices,
+			createEmptyIntArray(MAX_WEIGHTS * mesh.vertexs.length / 3, 0),
+			createEmptyFloatArray(MAX_WEIGHTS * mesh.vertexs.length / 3, 0)
+		);
+		setMaterial(mesh.material);
+	}
+	
+	protected Mesh(float[] positions, float[] textCoords, float[] normals, float[] tangents, int[] indices, int[] jointIndices, float[] weights) {
+		if(LwjglAsyncThread.isCurrentThread()) {
+			throw new RuntimeException("Meshes can only be loaded on the main thread");
+		}
+		
 		FloatBuffer posBuffer = null;
 		FloatBuffer textCoordsBuffer = null;
 		FloatBuffer vecNormalsBuffer = null;
@@ -45,9 +64,8 @@ public class Mesh {
 		FloatBuffer weightsBuffer = null;
 		IntBuffer jointIndicesBuffer = null;
 		IntBuffer indicesBuffer = null;
+		
 		try {
-			//calculateBoundingRadius(positions);
-			
 			vertexCount = indices.length;
 			vboIdList = new ArrayList<>();
 			
@@ -115,8 +133,6 @@ public class Mesh {
 			indicesBuffer.put(indices).flip();
 			GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
 			GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
-			
-			
 			
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 			GL30.glBindVertexArray(0);

@@ -200,8 +200,6 @@ public class WorldRender {
 		frameBuffer = worldHandler.frameBuffer;
 	}
 	
-	
-	
 	public int getFps() {
 		return parent.getFps();
 	}
@@ -298,7 +296,7 @@ public class WorldRender {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0.369f, 0.784f, 0.886f, 1);
 		
-		worldHandler.setLoadLimit(1);
+		worldHandler.setLoadLimit(1000);
 		
 		//Matrix4f projectionView = camera.getProjectionViewMatrix(60, width, height);
 		
@@ -322,9 +320,9 @@ public class WorldRender {
 		checkWorldUpdate();
 		
 		// We only need to calculate the shadows when we move
-//		GL11.glPushMatrix();
-//		tryRenderShadows(projectionView, mvpMatrix);
-//		GL11.glPopMatrix();
+		GL11.glPushMatrix();
+		tryRenderShadows(projectionView, mvpMatrix);
+		GL11.glPopMatrix();
 		
 		Matrix4f toShadowSpace = createOffset().mul(mvpMatrix);
 		{
