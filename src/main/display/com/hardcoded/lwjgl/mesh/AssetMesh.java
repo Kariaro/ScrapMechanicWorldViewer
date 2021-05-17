@@ -68,6 +68,8 @@ public class AssetMesh extends RenderableMeshImpl {
 	}
 	
 	public void render(Asset asset) {
+		if(!isLoaded) return;
+		
 		for(int i = 0; i < meshes.length; i++) {
 			List<Texture> texs = textures[i];
 			MeshMaterial mat = mats[i];

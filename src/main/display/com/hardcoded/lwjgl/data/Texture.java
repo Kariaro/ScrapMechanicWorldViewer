@@ -19,6 +19,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.stb.STBImage;
 
 import com.hardcoded.logger.Log;
+import com.hardcoded.lwjgl.async.LwjglAsyncThread;
 
 /**
  * A texture class.
@@ -36,74 +37,94 @@ public class Texture {
 	public static final Texture NONE = new Texture();
 	public static final Map<String, Integer> cacheTextureId = new HashMap<>();
 	
-	public final BufferedImage bi;
+	private final String path;
 	public final String name;
 	public final int activeId;
 	public final int textureId;
-	public final int height;
-	public final int width;
+	public final int interpolation;
+	public int height;
+	public int width;
 	
 	private Texture() {
-		bi = null;
 		name = null;
+		path = null;
+		interpolation = -1;
 		activeId = -1;
 		textureId = -1;
-		height = -1;
-		width = -1;
 	}
 	
 	private Texture(File file, String path, int id, int interpolation) throws IOException {
 		this.activeId = GL20.GL_TEXTURE0 + id;
+		this.textureId = GL11.glGenTextures();
+		this.interpolation = interpolation;
 		this.name = path;
+		this.path = path;
 		
-		ByteBuffer buf;
-		if(path.toLowerCase().endsWith(".tga")) {
-			int[] w = new int[1];
-			int[] h = new int[1];
-			int[] channels = new int[1];
-			buf = STBImage.stbi_load(path, h, w, channels, 4);
-			height = w[0];
-			width = h[0];
-			bi = null;
-		} else {
-			bi = ImageIO.read(file);
-			System.out.println(file);
-			buf = loadBuffer(bi, false);
-			height = bi.getHeight();
-			width = bi.getWidth();
-		}
-		
-		textureId = GL11.glGenTextures();
-		load(buf, interpolation);
+		//load(buf, interpolation);
 		
 		cacheTextureId.put(path, this.textureId);
+		
+		if(!LwjglAsyncThread.isCurrentThread()) {
+			LwjglAsyncThread.runAsync(this::loadData);
+			return;
+		}
+		
+		loadData();
 	}
 	
 	private Texture(int textureId, int activeId) {
 		this.textureId = textureId;
 		this.activeId = GL20.GL_TEXTURE0 + activeId;
 		this.name = null;
-		height = -1;
-		width = -1;
-		bi = null;
+		this.path = null;
+		this.interpolation = -1;
 	}
 	
 	private Texture(BufferedImage bi, int id, int interpolation) {
 		this.activeId = GL20.GL_TEXTURE0 + id;
+		this.textureId = GL11.glGenTextures();
+		this.interpolation = interpolation;
 		this.name = bi.toString();
+		this.path = null;
 		
 		ByteBuffer buf = loadBuffer(bi, false);
 		this.height = bi.getHeight();
 		this.width = bi.getWidth();
-		this.bi = bi;
 		
-		textureId = GL11.glGenTextures();
 		load(buf, interpolation);
-		
-		cacheTextureId.put(this.name, this.textureId);
 	}
 	
 	private void load(ByteBuffer buf, int interpolation) {
+		GL20.glActiveTexture(this.activeId);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
+		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_REPEAT);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_REPEAT);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, interpolation);
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, interpolation);
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buf);
+	}
+	
+	private void loadData() {
+		ByteBuffer buf = null;
+//		try {
+//			if(path.toLowerCase().endsWith(".tga")) {
+			int[] w = new int[1];
+			int[] h = new int[1];
+			int[] channels = new int[1];
+			buf = STBImage.stbi_load(path, h, w, channels, 4);
+			height = w[0];
+			width = h[0];
+			//bi = null;
+//			}
+//			else {
+//				BufferedImage bi = ImageIO.read(new File(path));
+//				buf = loadBuffer(bi, false);
+//				height = bi.getHeight();
+//				width = bi.getWidth();
+//			}
+//		}
+		
 		GL20.glActiveTexture(this.activeId);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
 		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
@@ -147,7 +168,7 @@ public class Texture {
 	
 	private static Texture loadTexture0(File file, String path, int activeId, int interpolation) throws IOException {
 		if(!file.exists()) {
-			LOGGER.warn("Tried to load texture '" + path + "' but that file does not exist");
+			// LOGGER.warn("Tried to load texture '" + path + "' but that file does not exist");
 			return NONE;
 		}
 		
@@ -158,7 +179,7 @@ public class Texture {
 			return new Texture(cacheTextureId.get(path), activeId);
 		}
 		
-		return tex;
+		return new Texture(tex.textureId, activeId);
 	}
 	
 	public static Texture loadResourceTexture(String path, int interpolation) throws IOException, URISyntaxException {
