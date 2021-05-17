@@ -146,7 +146,9 @@ public class BodyList extends SQLiteObject {
 			//System.out.println(bounds);
 			
 			ResultSet childSet = sqlite.execute("SELECT * FROM ChildShape WHERE bodyId = " + bodyId);
-			while(childSet.next()) shapes.add(new ChildShape(this, childSet));
+			while(childSet.next()) {
+				shapes.add(new ChildShape(this, childSet));
+			}
 			
 			//int nodeId = (int)sqlite.executeSingle("SELECT nodeno FROM RigidBodyBounds_rowid WHERE rowid = " + bodyId);
 			//node = new RigidBodyBoundsNode(sqlite.execute("SELECT * FROM RigidBodyBounds_node WHERE nodeno = " + nodeId));

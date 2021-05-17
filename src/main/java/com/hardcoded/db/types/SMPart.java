@@ -7,8 +7,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hardcoded.util.ValueUtils;
 import com.hardcoded.world.utils.BoxBounds;
-import com.hardcoded.world.utils.CylinderBounds;
-import com.hardcoded.world.utils.PartBounds;
 
 /**
  * An implementation of a part asset.
@@ -38,9 +36,10 @@ public class SMPart {
 	public Boolean showInInventory = false;
 	public UUID autoTool;
 	public UUID baseUuid;
+	public Object scripted;
 	
 	@JsonIgnore
-	private PartBounds bounds;
+	private BoxBounds bounds;
 	
 	
 	public String physicsMaterial;
@@ -48,7 +47,7 @@ public class SMPart {
 	public Integer qualityLevel = 0;
 	public Double density = 0.0;
 	
-	public PartBounds getBounds() {
+	public BoxBounds getBounds() {
 		return bounds;
 	}
 	
@@ -61,22 +60,39 @@ public class SMPart {
 				ValueUtils.toInt(map.get("z"))
 			);
 		} else if(name.equals("cylinder")) {
-			if(map.containsKey("margin")) {
-				bounds = new CylinderBounds(
-					ValueUtils.toInt(map.get("diameter")),
-					ValueUtils.toInt(map.get("depth")),
-					ValueUtils.toFloat(map.get("margin")),
-					ValueUtils.toString(map.get("axis"))
-				);
-			} else {
-				bounds = new CylinderBounds(
-					ValueUtils.toInt(map.get("diameter")),
-					ValueUtils.toInt(map.get("depth")),
-					0,
-					ValueUtils.toString(map.get("axis"))
-				);
+			String axis = ValueUtils.toString(map.get("axis"));
+			
+			float diameter = ValueUtils.toFloat(map.get("diameter"));
+			float depth = ValueUtils.toFloat(map.get("depth"));
+			
+			switch(axis.toLowerCase()) {
+				case "x": {
+					bounds = new BoxBounds(depth, diameter, diameter);
+					break;
+				}
+				case "y": {
+					bounds = new BoxBounds(diameter, depth, diameter);
+					break;
+				}
+				case "z": {
+					bounds = new BoxBounds(diameter, diameter, depth);
+					break;
+				}
 			}
+		} else if(name.equals("sphere")) {
+			float diameter = ValueUtils.toFloat(map.get("diameter"));
+			bounds = new BoxBounds(diameter, diameter, diameter);
 		}
+		
+//		if(bounds == null) {
+//			System.out.println(name + ", " + map);
+//			try {
+//				System.in.read();
+//			} catch(IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 	}
 	
 	@Override

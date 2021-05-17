@@ -1,6 +1,7 @@
 package com.hardcoded.lwjgl.util;
 
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 /**
  * A material container class.
@@ -10,9 +11,9 @@ import org.joml.Vector4f;
  */
 public class LoadedMaterial {
 	public static final Vector4f DEFAULT_COLOR = new Vector4f(1, 1, 1, 1);
-	public final Vector4f ambient;
-	public final Vector4f diffuse;
-	public final Vector4f specular;
+	public final Vector4fc ambient;
+	public final Vector4fc diffuse;
+	public final Vector4fc specular;
 	public final float intensity;
 	public final String name;
 	

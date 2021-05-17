@@ -7,13 +7,13 @@ out vec4 pass_Pos;
 out vec3 pass_Nor;
 out vec3 pass_Cam;
 
-uniform mat4 transformationMatrix;
+uniform mat4 modelMatrix;
 uniform mat4 projectionView;
 uniform vec3 scale;
 
 void main() {
 	vec4 vert = in_Position * vec4(scale, 1);
-	gl_Position = projectionView * transformationMatrix * vert;
+	gl_Position = projectionView * modelMatrix * vert;
 	
 	pass_Cam = normalize(vec3(projectionView[0][2], projectionView[1][2], projectionView[2][2]));
 	pass_Nor = in_Normal;

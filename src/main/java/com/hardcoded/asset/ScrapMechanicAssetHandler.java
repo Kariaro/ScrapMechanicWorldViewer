@@ -118,7 +118,7 @@ public final class ScrapMechanicAssetHandler {
 	
 	public static String resolvePath(String path) {
 		if(path == null) {
-			LOGGER.warn("ScrapMechanicAssetHandler.resolvePath was called with a null value");
+			// LOGGER.warn("ScrapMechanicAssetHandler.resolvePath was called with a null value");
 			return "";
 		}
 		
@@ -142,7 +142,7 @@ public final class ScrapMechanicAssetHandler {
 //			//throw new UnsupportedOperationException("The mod path cannot be resolved without knowing the mod folder!");
 //		}
 		
-		LOGGER.warn("Path was specified without a relative path. '%s'", path);
+		// LOGGER.warn("Path was specified without a relative path. '%s'", path);
 		return path;
 	}
 	

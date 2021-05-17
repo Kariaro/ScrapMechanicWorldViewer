@@ -356,36 +356,21 @@ public class TileMesh {
 		GL20.glEnableVertexAttribArray(5);
 		GL20.glEnableVertexAttribArray(6);
 		
-		TileShader.tex_0.bind();
-		TileShader.tex_1.bind();
-		TileShader.tex_2.bind();
-		TileShader.tex_3.bind();
-		TileShader.tex_4.bind();
-		TileShader.tex_5.bind();
-		TileShader.tex_6.bind();
-		TileShader.tex_7.bind();
-		TileShader.tex_8.bind();
+		final int textures = TileShader.textures.length;
+		for(int i = 0; i < textures; i++) TileShader.textures[i].bind();
 		
 		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
 		
-		TileShader.tex_8.unbind();
-		TileShader.tex_7.unbind();
-		TileShader.tex_6.unbind();
-		TileShader.tex_5.unbind();
-		TileShader.tex_4.unbind();
-		TileShader.tex_3.unbind();
-		TileShader.tex_2.unbind();
-		TileShader.tex_1.unbind();
-		TileShader.tex_0.unbind();
+		for(int i = 0; i < textures; i++) TileShader.textures[i].unbind();
 		
-		GL20.glDisableVertexAttribArray(6);
-		GL20.glDisableVertexAttribArray(5);
-		GL20.glDisableVertexAttribArray(4);
-		GL20.glDisableVertexAttribArray(3);
-		
-		GL20.glDisableVertexAttribArray(2);
-		GL20.glDisableVertexAttribArray(1);
 		GL20.glDisableVertexAttribArray(0);
+		GL20.glDisableVertexAttribArray(1);
+		GL20.glDisableVertexAttribArray(2);
+		
+		GL20.glDisableVertexAttribArray(3);
+		GL20.glDisableVertexAttribArray(4);
+		GL20.glDisableVertexAttribArray(5);
+		GL20.glDisableVertexAttribArray(6);
 		GL30.glBindVertexArray(0);
 	}
 	

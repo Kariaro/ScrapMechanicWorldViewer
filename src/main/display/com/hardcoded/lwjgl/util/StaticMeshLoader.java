@@ -24,12 +24,12 @@ public class StaticMeshLoader {
 		return load(resourcePath,
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_Triangulate |
-			aiProcess_FixInfacingNormals);
+			aiProcess_FixInfacingNormals |
+			aiProcess_CalcTangentSpace
+		);
 	}
 	
 	public static Mesh[] load(String resourcePath, int flags) throws Exception {
-		System.out.println(resourcePath);
-		
 		AIScene aiScene = aiImportFile(resourcePath, flags);
 		if(aiScene == null) {
 			throw new Exception("Error loading model");
@@ -53,7 +53,6 @@ public class StaticMeshLoader {
 			Mesh mesh = processMesh(aiMesh, materials);
 			meshes[i] = mesh;
 		}
-		//System.out.println();
 		
 		return meshes;
 	}
@@ -92,17 +91,20 @@ public class StaticMeshLoader {
 		List<Float> vertices = new ArrayList<>();
 		List<Float> textures = new ArrayList<>();
 		List<Float> normals = new ArrayList<>();
+		List<Float> tangents = new ArrayList<>();
 		List<Integer> indices = new ArrayList<>();
 		
 		processVertices(aiMesh, vertices);
-		processNormals(aiMesh, normals);
 		processTextCoords(aiMesh, textures);
+		processNormals(aiMesh, normals);
+		processTangents(aiMesh, tangents);
 		processIndices(aiMesh, indices);
 		
 		Mesh mesh = new Mesh(
 			listToArray(vertices),
 			listToArray(textures),
 			listToArray(normals),
+			listToArray(tangents),
 			listIntToArray(indices)
 		);
 		
@@ -163,18 +165,32 @@ public class StaticMeshLoader {
 		}
 	}
 	
+	private static void processTangents(AIMesh aiMesh, List<Float> tangents) {
+		AIVector3D.Buffer aiTangents = aiMesh.mTangents();
+		
+		while(aiTangents.remaining() > 0) {
+			AIVector3D aiTangent = aiTangents.get();
+			tangents.add(aiTangent.x());
+			tangents.add(aiTangent.y());
+			tangents.add(aiTangent.z());
+		}
+	}
+	
 	private static int[] listIntToArray(List<Integer> list) {
 		int[] ret = list.stream().mapToInt((Integer v) -> v).toArray();
 		return ret;
 	}
 
 	private static float[] listToArray(List<Float> list) {
-		int size = list != null ? list.size() : 0;
-		float[] ret = new float[size];
+		if(list == null) return new float[0];
+		final int size = list.size();
+		float[] result = new float[size];
+		
 		for(int i = 0; i < size; i++) {
-			ret[i] = list.get(i);
+			Float value = list.get(i);
+			result[i] = value == null ? Float.NaN:value;
 		}
 		
-		return ret;
+		return result;
 	}
 }

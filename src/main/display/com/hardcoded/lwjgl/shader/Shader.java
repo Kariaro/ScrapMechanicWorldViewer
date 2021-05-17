@@ -71,12 +71,30 @@ public abstract class Shader {
 		GL20.glBindAttribLocation(programId, index, name);
 	}
 	
-	protected void createUniform(String uniformName) {
-		int uniformLocation = glGetUniformLocation(programId, uniformName);
-		uniforms.put(uniformName, uniformLocation);
+	protected final int getUniformLocation(String uniformName) {
+		return GL20.glGetUniformLocation(programId, uniformName);
 	}
 	
-	public void setUniform(String uniformName, Matrix4f value) {
+	protected void setMatrix4f(int uniformId, Matrix4f value) {
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			FloatBuffer fb = stack.mallocFloat(16);
+			value.get(fb);
+			GL20.glUniformMatrix4fv(uniformId, false, fb);
+		}
+	}
+	
+	protected final void setVector3f(int uniformId, Vector3f v) {
+		GL20.glUniform3f(uniformId, v.x, v.y, v.z);
+	}
+	
+	// OLD FUNCTIONS
+	protected int createUniform(String uniformName) {
+		int uniformLocation = glGetUniformLocation(programId, uniformName);
+		uniforms.put(uniformName, uniformLocation);
+		return uniformLocation;
+	}
+	
+	protected void setUniform(String uniformName, Matrix4f value) {
 		try(MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer fb = stack.mallocFloat(16);
 			value.get(fb);
@@ -84,7 +102,7 @@ public abstract class Shader {
 		}
 	}
 	
-	public void setUniform(String uniformName, Matrix3f value) {
+	protected void setUniform(String uniformName, Matrix3f value) {
 		try(MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer fb = stack.mallocFloat(12);
 			value.get(fb);
@@ -92,42 +110,43 @@ public abstract class Shader {
 		}
 	}
 	
-	public void setUniform(String uniformName, Vector4f v) {
+	protected void setUniform(String uniformName, Vector4f v) {
 		glUniform4f(_uniform(uniformName), v.x, v.y, v.z, v.w);
 	}
 	
-	public void setUniform(String uniformName, Vector3f v) {
+	protected void setUniform(String uniformName, Vector3f v) {
 		glUniform3f(_uniform(uniformName), v.x, v.y, v.z);
 	}
 	
-	public void setUniform(String uniformName, Vector2f v) {
+	protected void setUniform(String uniformName, Vector2f v) {
 		glUniform2f(_uniform(uniformName), v.x, v.y);
 	}
 	
-	public void setUniform(String uniformName, int value) {
+	protected void setUniform(String uniformName, int value) {
 		glUniform1i(_uniform(uniformName), value);
 	}
 	
-	public void setUniform4i(String uniformName, int a, int b, int c, int d) {
+	protected void setUniform4i(String uniformName, int a, int b, int c, int d) {
 		glUniform4i(_uniform(uniformName), a, b, c, d);
 	}
 	
-	public void setUniform(String uniformName, float x, float y, float z, float w) {
+	protected void setUniform(String uniformName, float x, float y, float z, float w) {
 		glUniform4f(_uniform(uniformName), x, y, z, w);
 	}
 	
-	public void setUniform(String uniformName, float x, float y, float z) {
+	protected void setUniform(String uniformName, float x, float y, float z) {
 		glUniform3f(_uniform(uniformName), x, y, z);
 	}
 	
-	public void setUniform(String uniformName, float x, float y) {
+	protected void setUniform(String uniformName, float x, float y) {
 		glUniform2f(_uniform(uniformName), x, y);
 	}
 	
-	public void setUniform(String uniformName, float x) {
+	protected void setUniform(String uniformName, float x) {
 		glUniform1f(_uniform(uniformName), x);
 	}
 	
+	@Deprecated
 	public void setUniform(String uniformName, boolean value) {
 		glUniform1i(_uniform(uniformName), value ? 1 : 0);
 	}
