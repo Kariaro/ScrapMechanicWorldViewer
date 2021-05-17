@@ -1,6 +1,7 @@
 package com.hardcoded.lwjgl.shader;
 
 import java.util.List;
+import java.util.Map;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -17,28 +18,32 @@ import com.hardcoded.lwjgl.shadow.Light;
  */
 public abstract class ShaderObjectImpl extends Shader {
 	protected static final Vector3f DEFAULT_EMPTY = new Vector3f();
-	protected static final int MAX_LIGHTS = LwjglOptions.MAX_LIGHTS;
 	
 	protected int[] load_lightPositionEyeSpace;
 	protected int[] load_lightColor;
+	protected int load_toShadowMapSpace;
 	protected int load_transformationMatrix;
 	protected int load_projectionView;
 	protected int load_modelMatrix;
 	protected int load_viewMatrix;
 	
 	protected ShaderObjectImpl(String vertex, String fragment) {
-		super(vertex, fragment);
+		super(vertex, fragment, Map.of(
+			"MAX_LIGHTS", LwjglOptions.MAX_LIGHTS
+		));
 	}
 	
 	@Override
 	protected void loadUniforms() {
+		load_toShadowMapSpace = getUniformLocation("toShadowMapSpace");
 		load_projectionView = getUniformLocation("projectionView");
 		load_modelMatrix = getUniformLocation("modelMatrix");
 		load_viewMatrix = getUniformLocation("viewMatrix");
 		
-		load_lightPositionEyeSpace = new int[MAX_LIGHTS];
-		//load_lightColor = new int[MAX_LIGHTS];
-		for(int i = 0; i < MAX_LIGHTS; i++) {
+		
+		load_lightPositionEyeSpace = new int[LwjglOptions.MAX_LIGHTS];
+		//load_lightColor = new int[LwjglOptions.MAX_LIGHTS];
+		for(int i = 0; i < LwjglOptions.MAX_LIGHTS; i++) {
 			load_lightPositionEyeSpace[i] = getUniformLocation("load_lightPositionEyeSpace[" + i + "]");
 			//load_lightColor[i] = getUniformLocation("load_lightColor[" + i + "]");
 		}
@@ -56,9 +61,13 @@ public abstract class ShaderObjectImpl extends Shader {
 		setMatrix4f(load_viewMatrix, viewMatrix);
 	}
 	
+	public void setShadowMapSpace(Matrix4f matrix) {
+		setMatrix4f(load_toShadowMapSpace, matrix);
+	}
+	
 	public void loadLights(List<Light> lights, Matrix4f viewMatrix) {
 		final int lightCount = lights.size();
-		for(int i = 0; i < MAX_LIGHTS; i++) {
+		for(int i = 0; i < LwjglOptions.MAX_LIGHTS; i++) {
 			if(i < lightCount) {
 				Light light = lights.get(i);
 				setVector3f(load_lightPositionEyeSpace[i], calculateLightEyePosition(viewMatrix, light.getPosition()));

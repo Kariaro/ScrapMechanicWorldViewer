@@ -11,8 +11,6 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL20;
@@ -30,8 +28,8 @@ import com.hardcoded.lwjgl.async.LwjglAsyncThread;
  * TODO: Clear this class of old unused fields
  */
 public class Texture {
-	private static final Log LOGGER = Log.getLogger();
 	@SuppressWarnings("unused")
+	private static final Log LOGGER = Log.getLogger();
 	private static final Map<String, Texture> cache = new HashMap<>();
 	
 	public static final Texture NONE = new Texture();
@@ -41,14 +39,12 @@ public class Texture {
 	public final String name;
 	public final int activeId;
 	public final int textureId;
-	public final int interpolation;
 	public int height;
 	public int width;
 	
 	private Texture() {
 		name = null;
 		path = null;
-		interpolation = -1;
 		activeId = -1;
 		textureId = -1;
 	}
@@ -56,7 +52,6 @@ public class Texture {
 	private Texture(File file, String path, int id, int interpolation) throws IOException {
 		this.activeId = GL20.GL_TEXTURE0 + id;
 		this.textureId = GL11.glGenTextures();
-		this.interpolation = interpolation;
 		this.name = path;
 		this.path = path;
 		
@@ -65,11 +60,13 @@ public class Texture {
 		cacheTextureId.put(path, this.textureId);
 		
 		if(!LwjglAsyncThread.isCurrentThread()) {
-			LwjglAsyncThread.runAsync(this::loadData);
+			LwjglAsyncThread.runAsync(() -> {
+				loadData(interpolation);
+			});
 			return;
 		}
 		
-		loadData();
+		loadData(interpolation);
 	}
 	
 	private Texture(int textureId, int activeId) {
@@ -77,13 +74,11 @@ public class Texture {
 		this.activeId = GL20.GL_TEXTURE0 + activeId;
 		this.name = null;
 		this.path = null;
-		this.interpolation = -1;
 	}
 	
 	private Texture(BufferedImage bi, int id, int interpolation) {
 		this.activeId = GL20.GL_TEXTURE0 + id;
 		this.textureId = GL11.glGenTextures();
-		this.interpolation = interpolation;
 		this.name = bi.toString();
 		this.path = null;
 		
@@ -91,10 +86,6 @@ public class Texture {
 		this.height = bi.getHeight();
 		this.width = bi.getWidth();
 		
-		load(buf, interpolation);
-	}
-	
-	private void load(ByteBuffer buf, int interpolation) {
 		GL20.glActiveTexture(this.activeId);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
 		GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
@@ -105,25 +96,14 @@ public class Texture {
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buf);
 	}
 	
-	private void loadData() {
+	private void loadData(int interpolation) {
 		ByteBuffer buf = null;
-//		try {
-//			if(path.toLowerCase().endsWith(".tga")) {
-			int[] w = new int[1];
-			int[] h = new int[1];
-			int[] channels = new int[1];
-			buf = STBImage.stbi_load(path, h, w, channels, 4);
-			height = w[0];
-			width = h[0];
-			//bi = null;
-//			}
-//			else {
-//				BufferedImage bi = ImageIO.read(new File(path));
-//				buf = loadBuffer(bi, false);
-//				height = bi.getHeight();
-//				width = bi.getWidth();
-//			}
-//		}
+		int[] w = new int[1];
+		int[] h = new int[1];
+		int[] channels = new int[1];
+		buf = STBImage.stbi_load(path, h, w, channels, 4);
+		height = w[0];
+		width = h[0];
 		
 		GL20.glActiveTexture(this.activeId);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
