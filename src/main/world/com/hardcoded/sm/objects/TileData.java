@@ -989,6 +989,7 @@ public class TileData {
 	
 	public static boolean hasTile(int x, int y) {
 		if(x < xMin || x > xMax + 2 || y < yMin || y > yMax + 2) return false;
+		if(data == null) return false;
 		return true;
 	}
 	
@@ -998,6 +999,7 @@ public class TileData {
 	}
 	
 	public static int getTileId(int x, int y) {
+		if(!hasTile(x, y)) return 0;
 		return tileIds.get(y).getInt(x);
 	}
 	

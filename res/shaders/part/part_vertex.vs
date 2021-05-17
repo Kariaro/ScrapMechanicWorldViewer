@@ -1,28 +1,43 @@
-#version 130
+#version 150
 
 in vec4 in_Position;
 in vec2 in_Uv;
 in vec3 in_Normal;
-//in vec4 in_Weights; // Remove ????????
-//in vec4 in; // Remove ????????
+in vec3 in_Tangent;
 
-out vec2 dif_uv;
-out vec2 asg_uv;
-out vec2 nor_uv;
-out vec2 ao_uv;
-out vec3 pass_Normal;
-out vec3 pass_Cam;
+out vec2 pass_Uv;
+out vec3 pass_toCameraVector;
+out vec3 pass_lightVector[8];
+out vec3 pass_Tangent;
+out mat3 pass_toTangentSpace;
 
-uniform mat4 transformationMatrix;
 uniform mat4 projectionView;
+uniform mat4 viewMatrix;
+uniform mat4 modelMatrix;
+uniform vec3 lightPositionEyeSpace[8];
 
 void main() {
-	gl_Position = projectionView * transformationMatrix * in_Position;
+	mat4 modelViewMatrix = viewMatrix * modelMatrix;
+	vec4 positionRelativeToCam = projectionView * modelMatrix * in_Position;
+	gl_Position = projectionView * modelMatrix * in_Position;
+	pass_Uv = in_Uv;
 	
-	mat4 test = projectionView * transformationMatrix;
-	pass_Cam = normalize(vec3(-test[0][2], -test[1][2], -test[2][2]));
+	vec3 norm = normalize((modelViewMatrix * vec4(in_Normal, 0.0)).xyz);
+	vec3 tang = normalize((modelViewMatrix * vec4(in_Tangent, 0.0)).xyz);
+	vec3 bitang = normalize(cross(norm, tang));
+	pass_Tangent = tang;
 	
-	dif_uv = in_Uv;
+	mat3 toTangentSpace = mat3(
+		tang.x, bitang.x, norm.x,
+		tang.y, bitang.y, norm.y,
+		tang.z, bitang.z, norm.z
+	);
 	
-	pass_Normal = in_Normal;
+	pass_toTangentSpace = toTangentSpace;
+	
+	for(int i = 0; i < 8; i++) {
+		pass_lightVector[i] = toTangentSpace * (lightPositionEyeSpace[i] - positionRelativeToCam.xyz);
+	}
+	
+	pass_toCameraVector = toTangentSpace * (-positionRelativeToCam.xyz);
 }

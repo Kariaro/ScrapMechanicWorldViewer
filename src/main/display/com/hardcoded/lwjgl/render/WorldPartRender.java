@@ -7,7 +7,7 @@ import com.hardcoded.db.types.Renderable;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.SMPart;
 import com.hardcoded.lwjgl.Camera;
-import com.hardcoded.lwjgl.WorldRender;
+import com.hardcoded.lwjgl.LwjglOptions;
 import com.hardcoded.lwjgl.mesh.PartMesh;
 import com.hardcoded.lwjgl.shader.PartShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
@@ -40,7 +40,7 @@ public class WorldPartRender implements WorldObjectRender {
 	}
 	
 	public void render(ChildShape shape, Bounds3D bounds, Camera camera) {
-		if(WorldRender.LOD_OBJECTS && !meshes.isEmpty()) {
+		if(LwjglOptions.LOD_OBJECTS && !meshes.isEmpty()) {
 			PartMesh mesh = meshes.get(meshes.size() - 1);
 			mesh.render(shape, bounds);
 			return;

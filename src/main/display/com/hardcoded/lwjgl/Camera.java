@@ -10,6 +10,12 @@ import org.lwjgl.opengl.GL11;
 import com.hardcoded.lwjgl.input.Input;
 import com.hardcoded.lwjgl.util.MathUtils;
 
+/**
+ * A simple camera implementation.
+ * 
+ * @author HardCoded
+ * @since v0.1
+ */
 public class Camera {
 	private final long window;
 	public float x;
@@ -28,7 +34,6 @@ public class Camera {
 	private Vector2f mouse = new Vector2f(0, 0);
 	private Vector2f delta = new Vector2f(0, 0);
 	private void updateMouse() {
-		// TODO: Use Mouse.java ?!
 		double[] x = new double[1];
 		double[] y = new double[1];
 		glfwGetCursorPos(window, x, y);
@@ -115,21 +120,23 @@ public class Camera {
 		return new Vector3f(x, y, z);
 	}
 	
-	public Matrix4f getViewMatrix(float fov, float width, float height) {
-		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 100000);
-		return projectionMatrix;
+	public Matrix4f getViewMatrix() {
+		return new Matrix4f()
+			.rotate(MathUtils.toRadians(ry), 1, 0, 0)
+			.rotate(MathUtils.toRadians(rx), 0, 0, 1)
+			.rotate(MathUtils.toRadians(rz), 0, 1, 0)
+			.translate(-x, -y, -z);
 	}
 	
-	public Matrix4f getProjectionViewMatrix(float fov, float width, float height) {
-		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 100000);
-		return projectionMatrix.mul(new Matrix4f().translate(-x, -y, -z));
-	}
+//	public Matrix4f getProjectionViewMatrix(float fov, float width, float height) {
+//		Matrix4f projectionMatrix = new Matrix4f();
+//		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 100000);
+//		return projectionMatrix.mul(new Matrix4f().translate(-x, -y, -z));
+//	}
 	
 	public Matrix4f getProjectionMatrix(float fov, float width, float height) {
 		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.5f, 10000000);
+		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.01f, 10000000);
 		return projectionMatrix
 				.rotate(MathUtils.toRadians(ry), 1, 0, 0)
 				.rotate(MathUtils.toRadians(rx), 0, 0, 1)

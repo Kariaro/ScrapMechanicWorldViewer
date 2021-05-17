@@ -55,6 +55,7 @@ public class ScriptData extends SQLiteObject {
 		set = sqlite.execute("SELECT data FROM ScriptData WHERE worldId = 65534");
 		set = sqlite.execute("SELECT data FROM ScriptData WHERE id = 49 AND channel = 48 AND worldId = 1 AND flags = 3");
 		
+		if(set.isClosed()) return;
 		byte[] data = set.getBytes(1);
 		Memory mem = new Memory(data);
 		// System.out.println(StringUtils.getHexString(data, 4096, 64));
@@ -79,6 +80,7 @@ public class ScriptData extends SQLiteObject {
 	
 	private void loadTileData() throws SQLException {
 		ResultSet set = sqlite.execute("SELECT data FROM ScriptData WHERE channel = 1");
+		if(set.isClosed()) return;
 		
 		byte[] data = set.getBytes(1);
 		Memory mem = new Memory(data);

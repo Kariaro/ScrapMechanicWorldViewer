@@ -41,7 +41,7 @@ public class ShapeUtils {
 				float z = shape.zPos;
 				Vector4f zero = new Vector4f();
 				Matrix4f rot = new Matrix4f(PartRotation.getRotationMultiplier(shape.partRotation));
-				PartBounds bounds = part.getBounds();
+				BoxBounds bounds = part.getBounds();
 				rot.setTranslation(0, 0, 0);
 				if(bounds != null) {
 					rot.translate(

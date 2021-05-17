@@ -79,14 +79,10 @@ public class WorldBlockRender implements WorldObjectRender {
 			matrix.translate(x, y, z);
 		}
 		
-		shader.setTransformationMatrix(matrix);
-		shader.setUniform("localTransform", x, y, z);
-		shader.setUniform("tiling", block.tiling);
-		shader.setUniform("scale",
-			shape.xSize,
-			shape.ySize,
-			shape.zSize
-		);
+		shader.setModelMatrix(matrix);
+		shader.setLocalTransform(x, y, z);
+		shader.setTiling(block.tiling);
+		shader.setScale(shape.xSize, shape.ySize, shape.zSize);
 		
 		{
 			int rgba = shape.colorRGBA;
@@ -94,7 +90,7 @@ public class WorldBlockRender implements WorldObjectRender {
 			float g = ((rgba >> 16) & 0xff) / 255.0f;
 			float b = ((rgba >>  8) & 0xff) / 255.0f;
 			float a = ((rgba      ) & 0xff) / 255.0f;
-			shader.setUniform("color", r, g, b, a);
+			shader.setColor(r, g, b, a);
 		}
 		
 		dif.bind();

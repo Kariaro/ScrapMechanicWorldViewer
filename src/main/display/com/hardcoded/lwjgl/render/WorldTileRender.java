@@ -7,9 +7,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import com.hardcoded.lwjgl.Camera;
-import com.hardcoded.lwjgl.TileParts;
-import com.hardcoded.lwjgl.WorldRender;
+import com.hardcoded.lwjgl.*;
 import com.hardcoded.lwjgl.mesh.TileMesh;
 import com.hardcoded.lwjgl.shader.AssetShader;
 import com.hardcoded.lwjgl.shader.TileShader;
@@ -28,15 +26,15 @@ import com.hardcoded.tile.object.Harvestable;
  * @since v0.1
  */
 public class WorldTileRender {
-	private WorldRender render;
+	private WorldContentHandler handler;
 	
 	private AssetShader assetShader;
 	private TileShader tileShader;
 	
 	private TileParts parts;
 	
-	public WorldTileRender(WorldRender render, int x, int y, TileParts parts, TileShader tileShader, AssetShader assetShader) {
-		this.render = render;
+	public WorldTileRender(WorldContentHandler handler, int x, int y, TileParts parts, TileShader tileShader, AssetShader assetShader) {
+		this.handler = handler;
 		this.parts = parts;
 		
 //		int ox = TileData.getTileOffsetX(x, y);
@@ -81,7 +79,7 @@ public class WorldTileRender {
 		tileShader.unbind();
 		
 		assetShader.bind();
-		assetShader.setUniform("projectionView", projectionView);
+		assetShader.setProjectionView(projectionView);
 		assetShader.setModelMatrix(transform);
 		assetShader.setShadowMapSpace(toShadowSpace);
 		
@@ -96,7 +94,7 @@ public class WorldTileRender {
 				Quat arot = asset.getRotation();
 				Vec3 _size = asset.getSize();
 				
-				WorldAssetRender mesh = render.getAssetRender(uuid);
+				WorldAssetRender mesh = handler.getAssetRender(uuid);
 				if(mesh != null) {
 					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
 					//float dist = camera.getPosition().distance(pos);
@@ -118,7 +116,7 @@ public class WorldTileRender {
 				Quat arot = harvestable.getRotation();
 				Vec3 _size = harvestable.getSize();
 				
-				WorldHarvestableRender mesh = render.getHarvestableRender(uuid);
+				WorldHarvestableRender mesh = handler.getHarvestableRender(uuid);
 				if(mesh != null) {
 					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
 					//float dist = camera.getPosition().distance(pos);
@@ -165,7 +163,7 @@ public class WorldTileRender {
 			Matrix4f tmt = new Matrix4f(mvpMatrix);
 			tmt.mul(transform);
 			
-			shader.setUniform("mvpMatrix", tmt);
+			shader.setMvpMatrix(tmt);
 			tm.renderShadows();
 		}
 		
@@ -177,7 +175,7 @@ public class WorldTileRender {
 				Quat arot = asset.getRotation();
 				Vec3 _size = asset.getSize();
 				
-				WorldAssetRender mesh = render.getAssetRender(uuid);
+				WorldAssetRender mesh = handler.getAssetRender(uuid);
 				if(mesh != null) {
 					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
 					//float dist = camera.getPosition().distance(pos);
@@ -187,7 +185,7 @@ public class WorldTileRender {
 						.rotate(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW()).rotateLocalZ(rot_offset))
 						.scale(_size.getX(), _size.getY(), _size.getZ());
 					
-					shader.setUniform("mvpMatrix", matrix);
+					shader.setMvpMatrix(matrix);
 					mesh.renderShadows();
 				}
 			}
@@ -198,7 +196,7 @@ public class WorldTileRender {
 				Quat arot = harvestable.getRotation();
 				Vec3 _size = harvestable.getSize();
 				
-				WorldHarvestableRender mesh = render.getHarvestableRender(uuid);
+				WorldHarvestableRender mesh = handler.getHarvestableRender(uuid);
 				if(mesh != null) {
 					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
 					//float dist = camera.getPosition().distance(pos);
@@ -208,7 +206,7 @@ public class WorldTileRender {
 						.rotate(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW()).rotateLocalZ(rot_offset))
 						.scale(_size.getX(), _size.getY(), _size.getZ());
 					
-					shader.setUniform("mvpMatrix", matrix);
+					shader.setMvpMatrix(matrix);
 					mesh.renderShadows();
 				}
 			}

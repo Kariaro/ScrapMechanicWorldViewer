@@ -15,7 +15,7 @@ import com.hardcoded.lwjgl.input.Input;
 
 public class LwjglWorldViewer implements Runnable {
 	public static final BufferedImage ICON = null;
-	public static final int TARGET_FPS = 120;
+	public static final int TARGET_FPS = 240;
 	
 	private WorldRender render;
 	private boolean running;
@@ -41,7 +41,7 @@ public class LwjglWorldViewer implements Runnable {
 		runningThread = null;
 	}
 	
-	private void init() throws Exception {
+	private void init() {
 		if(!glfwInit()) {
 			return;
 		}
@@ -129,7 +129,6 @@ public class LwjglWorldViewer implements Runnable {
 			long now = System.currentTimeMillis();
 			if(now - last > 1000) {
 				fps = frames;
-				
 				frames = 0;
 				last += 1000;
 			}

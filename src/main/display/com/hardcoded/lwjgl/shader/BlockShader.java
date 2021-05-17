@@ -1,6 +1,6 @@
 package com.hardcoded.lwjgl.shader;
 
-import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL20;
 
 /**
  * A container class for the block shader.
@@ -8,7 +8,12 @@ import org.joml.Matrix4f;
  * @author HardCoded
  * @since v0.1
  */
-public class BlockShader extends Shader {
+public class BlockShader extends ShaderObjectImpl {
+	protected int load_localTransform;
+	protected int load_color;
+	protected int load_tiling;
+	protected int load_scale;
+	
 	public BlockShader() {
 		super(
 			"/shaders/block/block_vertex.vs",
@@ -23,23 +28,31 @@ public class BlockShader extends Shader {
 	
 	@Override
 	protected void loadUniforms() {
-		createUniform("projectionView");
-		createUniform("transformationMatrix");
-		createUniform("localTransform");
-		createUniform("tiling");
-		createUniform("color");
-		createUniform("scale");
+		super.loadUniforms();
 		
-		createUniform("dif_tex");
-		createUniform("asg_tex");
-		createUniform("nor_tex");
+		load_localTransform = createUniform("localTransform");
+		load_color = createUniform("color");
+		load_tiling = createUniform("tiling");
+		load_scale = createUniform("scale");
 		
 		setUniform("dif_tex", 0);
 		setUniform("asg_tex", 1);
 		setUniform("nor_tex", 2);
 	}
 	
-	public void setTransformationMatrix(Matrix4f transformationMatrix) {
-		setUniform("transformationMatrix", transformationMatrix);
+	public void setLocalTransform(float x, float y, float z) {
+		GL20.glUniform3f(load_localTransform, x, y, z);
+	}
+	
+	public void setTiling(int value) {
+		GL20.glUniform1i(load_tiling, value);
+	}
+	
+	public void setScale(float x, float y, float z) {
+		GL20.glUniform3f(load_scale, x, y, z);
+	}
+	
+	public void setColor(float r, float g, float b, float a) {
+		GL20.glUniform4f(load_color, r, g, b, a);
 	}
 }

@@ -23,17 +23,25 @@ public class Mesh {
 	protected final List<Integer> vboIdList;
 	private final int vertexCount;
 	private LoadedMaterial material;
-	private float boundingRadius;
 	private String name;
 	
-	public Mesh(float[] positions, float[] textCoords, float[] normals, int[] indices) {
-		this(positions, textCoords, normals, indices, createEmptyIntArray(MAX_WEIGHTS * positions.length / 3, 0), createEmptyFloatArray(MAX_WEIGHTS * positions.length / 3, 0));
+	public Mesh(float[] positions, float[] textCoords, float[] normals, float[] tangents, int[] indices) {
+		this(
+			positions,
+			textCoords,
+			normals,
+			tangents,
+			indices,
+			createEmptyIntArray(MAX_WEIGHTS * positions.length / 3, 0),
+			createEmptyFloatArray(MAX_WEIGHTS * positions.length / 3, 0)
+		);
 	}
 	
-	public Mesh(float[] positions, float[] textCoords, float[] normals, int[] indices, int[] jointIndices, float[] weights) {
+	public Mesh(float[] positions, float[] textCoords, float[] normals, float[] tangents, int[] indices, int[] jointIndices, float[] weights) {
 		FloatBuffer posBuffer = null;
 		FloatBuffer textCoordsBuffer = null;
 		FloatBuffer vecNormalsBuffer = null;
+		FloatBuffer vecTangentsBuffer = null;
 		FloatBuffer weightsBuffer = null;
 		IntBuffer jointIndicesBuffer = null;
 		IntBuffer indicesBuffer = null;
@@ -73,23 +81,32 @@ public class Mesh {
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vecNormalsBuffer, GL15.GL_STATIC_DRAW);
 			GL20.glVertexAttribPointer(2, 3, GL11.GL_FLOAT, false, 0, 0);
 			
-			// Weights
+			// Vertex tangents VBO
 			vboId = GL15.glGenBuffers();
 			vboIdList.add(vboId);
-			weightsBuffer = MemoryUtil.memAllocFloat(weights.length);
-			weightsBuffer.put(weights).flip();
+			vecTangentsBuffer = MemoryUtil.memAllocFloat(tangents.length);
+			vecTangentsBuffer.put(tangents).flip();
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
-			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, weightsBuffer, GL15.GL_STATIC_DRAW);
-			GL20.glVertexAttribPointer(3, 4, GL11.GL_FLOAT, false, 0, 0);
+			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vecNormalsBuffer, GL15.GL_STATIC_DRAW);
+			GL20.glVertexAttribPointer(3, 3, GL11.GL_FLOAT, false, 0, 0);
 			
-			// Joint indices
-			vboId = GL15.glGenBuffers();
-			vboIdList.add(vboId);
-			jointIndicesBuffer = MemoryUtil.memAllocInt(jointIndices.length);
-			jointIndicesBuffer.put(jointIndices).flip();
-			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
-			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, jointIndicesBuffer, GL15.GL_STATIC_DRAW);
-			GL20.glVertexAttribPointer(4, 4, GL11.GL_FLOAT, false, 0, 0);
+//			// Weights
+//			vboId = GL15.glGenBuffers();
+//			vboIdList.add(vboId);
+//			weightsBuffer = MemoryUtil.memAllocFloat(weights.length);
+//			weightsBuffer.put(weights).flip();
+//			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+//			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, weightsBuffer, GL15.GL_STATIC_DRAW);
+//			GL20.glVertexAttribPointer(4, 4, GL11.GL_FLOAT, false, 0, 0);
+//			
+//			// Joint indices
+//			vboId = GL15.glGenBuffers();
+//			vboIdList.add(vboId);
+//			jointIndicesBuffer = MemoryUtil.memAllocInt(jointIndices.length);
+//			jointIndicesBuffer.put(jointIndices).flip();
+//			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
+//			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, jointIndicesBuffer, GL15.GL_STATIC_DRAW);
+//			GL20.glVertexAttribPointer(5, 4, GL11.GL_FLOAT, false, 0, 0);
 			
 			// Index VBO
 			vboId = GL15.glGenBuffers();
@@ -116,6 +133,10 @@ public class Mesh {
 				MemoryUtil.memFree(vecNormalsBuffer);
 			}
 			
+			if(vecTangentsBuffer != null) {
+				MemoryUtil.memFree(vecTangentsBuffer);
+			}
+			
 			if(weightsBuffer != null) {
 				MemoryUtil.memFree(weightsBuffer);
 			}
@@ -129,16 +150,6 @@ public class Mesh {
 			}
 		}
 	}
-	
-	/*
-	private void calculateBoundingRadius(float[] positions) {
-		int length = positions.length;
-		boundingRadius = 0;
-		for(int i = 0; i < length; i++) {
-			float pos = positions[i];
-			boundingRadius = Math.max(Math.abs(pos), boundingRadius);
-		}
-	}*/
 	
 	public LoadedMaterial getMaterial() {
 		return material;
@@ -161,27 +172,21 @@ public class Mesh {
 		return vertexCount;
 	}
 	
-	public float getBoundingRadius() {
-		return boundingRadius;
-	}
-	
-	public void setBoundingRadius(float boundingRadius) {
-		this.boundingRadius = boundingRadius;
-	}
-	
 	public void render() {
 		// Draw the mesh
-		GL30.glBindVertexArray(getVaoId());
+		GL30.glBindVertexArray(vaoId);
 		GL20.glEnableVertexAttribArray(0);
 		GL20.glEnableVertexAttribArray(1);
 		GL20.glEnableVertexAttribArray(2);
+		GL20.glEnableVertexAttribArray(3);
 		
-		GL11.glDrawElements(GL11.GL_TRIANGLES, getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+		GL11.glDrawElements(GL11.GL_TRIANGLES, vertexCount, GL11.GL_UNSIGNED_INT, 0);
 		
 		// Restore state
-		GL20.glDisableVertexAttribArray(0);
-		GL20.glDisableVertexAttribArray(1);
+		GL20.glDisableVertexAttribArray(3);
 		GL20.glDisableVertexAttribArray(2);
+		GL20.glDisableVertexAttribArray(1);
+		GL20.glDisableVertexAttribArray(0);
 		GL30.glBindVertexArray(0);
 	}
 	

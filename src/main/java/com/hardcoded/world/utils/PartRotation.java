@@ -1,10 +1,6 @@
 package com.hardcoded.world.utils;
 
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
-
-import com.hardcoded.db.types.SMPart;
-import com.hardcoded.sm.objects.BodyList.ChildShape;
 
 /**
  * This was an attempt to understand how rotations work and to fix them in code.
@@ -14,7 +10,6 @@ import com.hardcoded.sm.objects.BodyList.ChildShape;
  * 
  * @author HardCoded
  * @since v0.1
- * @deprecated Find the actual method for doing this
  */
 public final class PartRotation {
 	private static final float pi = (float)Math.PI;
@@ -68,7 +63,10 @@ public final class PartRotation {
 		  0, 0, 1, 1
 	};
 	
-	public static final int[] PartRotationDataValue = {
+	private static final Matrix4f[] PartRotationIndex = new Matrix4f[256];
+	
+	// xaxis, zaxis
+	private static final int[] PartRotationDataValue = {
 		0b010_0101,
 		0b011_0010,
 		0b110_0011,
@@ -101,34 +99,10 @@ public final class PartRotation {
 		X_rot, NegX_rot
 	};
 	
-	public static final Matrix4f[] PartRotationMultiplier;
+	private static final Matrix4f[] PartRotationMultiplier;
 	
-	// TODO: Cache these for each part!
-	public static Vector3f getPartOffset(SMPart part, ChildShape shape) {
-		Matrix4f mul = getRotationMultiplier(shape.partRotation);
-		PartBounds bounds = part.getBounds();
-		if(bounds != null) {//instanceof BoxBounds) {
-			Matrix4f mat = mul.translate(
-				(bounds.getWidth() - 1) / 2.0f,
-				(bounds.getHeight() - 1) / 2.0f,
-				(bounds.getDepth() - 1) / 2.0f
-			, new Matrix4f());
-			
-			return mat.getColumn(3, new Vector3f());
-		}
-
-		return mul.getColumn(3, new Vector3f());
-	}
-	
-	@Deprecated
 	public static Matrix4f getRotationMultiplier(int rotation) {
-		for(int i = 0; i < 24; i++) {
-			if(PartRotationDataValue[i] == rotation) {
-				return PartRotationMultiplier[i];
-			}
-		}
-		
-		return null;
+		return PartRotationIndex[rotation].get(new Matrix4f());
 	}
 	
 	static {
@@ -147,6 +121,7 @@ public final class PartRotation {
 					arr[10 + j * 4]
 				);
 				PartRotationMultiplier[i * 4 + j] = matrix;
+				PartRotationIndex[PartRotationDataValue[i * 4 + j]] = matrix;
 			}
 		}
 	}

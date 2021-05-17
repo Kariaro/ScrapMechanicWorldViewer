@@ -33,8 +33,9 @@ public class AssetMesh extends RenderableMeshImpl {
 		float b = 1;
 		float a = 1;
 		
+		// FIXME: Mat will never be null, remove this
 		if(mat == null) {
-			shader.setUniform("color", r, g, b, a);
+			shader.setColor(r, g, b, a);
 			return;
 		}
 		
@@ -63,7 +64,7 @@ public class AssetMesh extends RenderableMeshImpl {
 			}
 		}
 		
-		shader.setUniform("color", r, g, b, a);
+		shader.setColor(r, g, b, a);
 	}
 	
 	public void render(Asset asset) {

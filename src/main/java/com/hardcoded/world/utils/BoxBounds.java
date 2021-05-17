@@ -8,7 +8,7 @@ import org.joml.Vector3f;
  * @author HardCoded
  * @since v0.1
  */
-public class BoxBounds implements PartBounds {
+public class BoxBounds {
 	private final float width;
 	private final float height;
 	private final float depth;

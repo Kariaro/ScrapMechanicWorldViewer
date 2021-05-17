@@ -9,16 +9,40 @@ import org.lwjgl.opengl.GL11;
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.lwjgl.data.Texture;
 
-public class TileShader extends Shader {
-	public static Texture tex_0; // Default
-	public static Texture tex_1; // Concrete
-	public static Texture tex_2; // Sand
-	public static Texture tex_3; // Stone
-	public static Texture tex_4; // Dirt 
-	public static Texture tex_5; // Weeds
-	public static Texture tex_6; // Rough Stone
-	public static Texture tex_7; // Hay
-	public static Texture tex_8; // Bright Grass
+/**
+ * A tile shader implementation.
+ * 
+ * @author HardCoded
+ * @since v0.1
+ */
+public class TileShader extends ShaderObjectImpl {
+	/**
+	 * The textures that are stored in this array are the following:
+	 * 
+	 * <pre>
+	 * 0: Default
+	 * 1: Concrete
+	 * 2: Sand
+	 * 3: Stone
+	 * 4: Dirt 
+	 * 5: Weeds
+	 * 6: Rough Stone
+	 * 7: Hay
+	 * 8: Bright Grass
+	 * </pre>
+	 */
+	public static final Texture[] textures = new Texture[9];
+	private static final String[] names = {
+		"gnd_grass_dif.tga",
+		"gnd_0_dif.tga",
+		"gnd_1_dif.tga",
+		"gnd_2_dif.tga",
+		"gnd_3_dif.tga",
+		"gnd_4_dif.tga",
+		"gnd_5_dif.tga",
+		"gnd_6_dif.tga",
+		"gnd_7_dif.tga"
+	};
 	
 	public TileShader() {
 		super(
@@ -28,20 +52,11 @@ public class TileShader extends Shader {
 		
 		File terrain_path = new File(ScrapMechanicAssetHandler.$GAME_DATA, "Terrain/Textures/Ground/");
 		
-		//String nmn = "D:/Steam/steamapps/Common/Scrap Mechanic/Data/Terrain/Textures/Ground/";
-		//System.out.println(nmn + ", " + terrain_path.getAbsolutePath());
-		String nmn = terrain_path.getAbsolutePath() + '\\';
-		
 		try {
-			tex_0 = Texture.loadTexture(nmn + "gnd_grass_dif.tga", 0, GL11.GL_LINEAR);
-			tex_1 = Texture.loadTexture(nmn + "gnd_0_dif.tga", 1, GL11.GL_LINEAR);
-			tex_2 = Texture.loadTexture(nmn + "gnd_1_dif.tga", 2, GL11.GL_LINEAR);
-			tex_3 = Texture.loadTexture(nmn + "gnd_2_dif.tga", 3, GL11.GL_LINEAR);
-			tex_4 = Texture.loadTexture(nmn + "gnd_3_dif.tga", 4, GL11.GL_LINEAR);
-			tex_5 = Texture.loadTexture(nmn + "gnd_4_dif.tga", 5, GL11.GL_LINEAR);
-			tex_6 = Texture.loadTexture(nmn + "gnd_5_dif.tga", 6, GL11.GL_LINEAR);
-			tex_7 = Texture.loadTexture(nmn + "gnd_6_dif.tga", 7, GL11.GL_LINEAR);
-			tex_8 = Texture.loadTexture(nmn + "gnd_7_dif.tga", 8, GL11.GL_LINEAR);
+			for(int i = 0; i < names.length; i++) {
+				String path = new File(terrain_path, names[i]).getAbsolutePath();
+				textures[i] = Texture.loadTexture(path, i, GL11.GL_LINEAR);
+			}
 		} catch(IOException e) {
 			throw new ShaderException("Failed to load ground textures");
 		}
@@ -60,8 +75,8 @@ public class TileShader extends Shader {
 	
 	@Override
 	protected void loadUniforms() {
-		createUniform("projectionView");
-		createUniform("modelMatrix");
+		super.loadUniforms();
+		
 		createUniform("toShadowMapSpace");
 		
 		setUniform("tex_0", 0);
@@ -79,16 +94,4 @@ public class TileShader extends Shader {
 	public void setShadowMapSpace(Matrix4f matrix) {
 		setUniform("toShadowMapSpace", matrix);
 	}
-	
-	public void setProjectionView(Matrix4f projectionView) {
-		setUniform("projectionView", projectionView);
-	}
-	
-	public void setModelMatrix(Matrix4f modelMatrix) {
-		setUniform("modelMatrix", modelMatrix);
-	}
-	
-//	public void setModelMatrix(Matrix4f modelMatrix) {
-//		setUniform("modelMatrix", modelMatrix);
-//	}
 }
