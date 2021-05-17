@@ -1,22 +1,25 @@
 #version 130
+#define MAX_LIGHTS 8
 
-in vec4 pass_Pos;
-in vec3 pass_Nor;
-in vec3 pass_Cam;
-out vec4 out_color;
+in vec4 pass_Position;
+in vec4 pass_ShadowCoords;
+in mat3 pass_toTangentSpace;
+
+out vec4 out_Color;
 
 uniform sampler2D dif_tex;
 uniform sampler2D asg_tex;
 uniform sampler2D nor_tex;
+uniform sampler2D shadowMap;
 
 uniform vec3 localTransform;
 uniform vec3 cameraDirection;
 uniform vec4 color;
 uniform int tiling;
 
-void main() {
+vec2 calculateUv() {
 	// Calculate the uv depending the the world position
-	vec3 pos = pass_Pos.xyz + localTransform;
+	vec3 pos = pass_Position.xyz + localTransform;
 	vec2 uv = vec2(0, 0);//pos.xz;
 	
 	// Checks if if the texture is applied on the x, y or z axis
@@ -32,59 +35,33 @@ void main() {
 	uv.x =  uv.x / (tiling + 0.0);
 	uv.y = -uv.y / (tiling + 0.0);
 	
+	return uv;
+}
+
+void main() {
+	vec2 uv = calculateUv();
+	
 	vec4 dif = texture2D(dif_tex, uv);
 	vec4 asg = texture2D(asg_tex, uv);
-	vec3 nor = texture2D(nor_tex, uv).xyz;
+	vec4 nor = 2.0 * texture(nor_tex, uv, -1.0) - 1.0;
 	
-	// Normalize the normal map. From [0,1] -> [-1, 1]
-	nor = nor * 2.0 - 1.0;
-		
-	// TODO: Apply the asg texture and nor texture
+	float objectNearestLight = texture(shadowMap, pass_ShadowCoords.xy).r;
+	float lightFactor = 1.0;
+	if(pass_ShadowCoords.z - objectNearestLight > 0.001) {
+		lightFactor = 1.0 - 0.4;
+	}
+	vec3 unitNormal = normalize(nor.rgb);
 	
 	// Apply the color to the transparent part of the diffuse
 	vec3 col_a = dif.rgb * dif.a;
 	vec3 col_b = color.rgb * (1 - dif.a);
 	vec3 diffuse = clamp(col_a + col_b, 0.1, 1);
+	//diffuse = (pass_Nor + 1.0) / 2.0;
 	
-	// TODO: Calculate the normal using Bitangent, Tangent!
-	if(false) {
-		if(pass_Nor.x == 0 && pass_Nor.z == 0) {
-			mat3x3 TBN = mat3x3(
-				0, 0, -1,
-				-1, 0, 0,
-				0, pass_Nor.y, 0
-			);
-			
-			vec3 worldNormal = TBN * nor;
-			
-			float diff = max(dot(worldNormal, pass_Cam), 0);
-			diffuse *= clamp(diff, 0.6, 1);
-		}
-		if(pass_Nor.x == 0 && pass_Nor.y == 0) {
-			mat3x3 TBN = mat3x3(
-				-1, 0, 0,
-				0, 0, -1,
-				0, 0, pass_Nor.z
-			);
-			
-			vec3 worldNormal = TBN * nor;
-			
-			float diff = max(dot(worldNormal, pass_Cam), 0);
-			diffuse *= clamp(diff, 0.6, 1);
-		}
-		if(pass_Nor.y == 0 && pass_Nor.z == 0) {
-			mat3x3 TBN = mat3x3(
-				0, 0, -1,
-				-1, 0, 0,
-				pass_Nor.x, 0, 0
-			);
-			
-			vec3 worldNormal = TBN * nor;
-			
-			float diff = max(dot(worldNormal, pass_Cam), 0);
-			diffuse *= clamp(diff, 0.6, 1);
-		}
-	}
+	//out_Color = vec4(diffuse, 1);
 	
-	out_color = vec4(diffuse, 1);
+	vec3 lightDir = normalize(vec3(0, 0, -1));
+	vec3 col = normalize(-unitNormal * pass_toTangentSpace);
+	float col_dot = min(max(dot(col, lightDir), 0.7), 2) * lightFactor;
+	out_Color = vec4(diffuse.rgb * col_dot, 1.0);
 }

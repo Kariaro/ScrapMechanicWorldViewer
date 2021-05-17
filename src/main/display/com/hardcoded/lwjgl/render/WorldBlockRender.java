@@ -10,7 +10,6 @@ import com.hardcoded.lwjgl.mesh.BlockMesh;
 import com.hardcoded.lwjgl.shader.BlockShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
-import com.hardcoded.world.utils.ShapeUtils.Bounds3D;
 
 /**
  * A block renderer.
@@ -57,7 +56,7 @@ public class WorldBlockRender implements WorldObjectRender {
 	public static String last_str;
 	public static byte[] dif_bytes;
 	
-	public void render(ChildShape shape, Bounds3D bounds) {
+	public void render(ChildShape shape) {
 		float x = shape.xPos;
 		float y = shape.yPos;
 		float z = shape.zPos;

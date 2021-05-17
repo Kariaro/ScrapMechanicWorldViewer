@@ -149,6 +149,7 @@ public class StaticMeshLoaderAsync {
 	
 	private static void processNormals(AIMesh aiMesh, List<Float> normals) {
 		AIVector3D.Buffer aiNormals = aiMesh.mNormals();
+		if(aiNormals == null) return;
 		
 		while(aiNormals.remaining() > 0) {
 			AIVector3D aiNormal = aiNormals.get();
@@ -160,6 +161,7 @@ public class StaticMeshLoaderAsync {
 	
 	private static void processTangents(AIMesh aiMesh, List<Float> tangents) {
 		AIVector3D.Buffer aiTangents = aiMesh.mTangents();
+		if(aiTangents == null) return;
 		
 		while(aiTangents.remaining() > 0) {
 			AIVector3D aiTangent = aiTangents.get();

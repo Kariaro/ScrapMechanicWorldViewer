@@ -4,8 +4,8 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,13 +22,10 @@ import com.hardcoded.logger.Log;
 import com.hardcoded.lwjgl.gui.Gui;
 import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
-import com.hardcoded.lwjgl.shadow.Light;
 import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
 import com.hardcoded.lwjgl.shadow.ShadowShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
-import com.hardcoded.world.utils.BoxBounds;
-import com.hardcoded.world.utils.PartRotation;
 import com.hardcoded.world.utils.ShapeUtils;
 import com.hardcoded.world.utils.ShapeUtils.Bounds3D;
 
@@ -74,6 +71,12 @@ public class WorldRender {
 //		camera.x = 0;
 //		camera.y = 0;
 //		camera.z = 0;
+		
+		// ASG
+		// r: alpha
+		// g: specular level
+		// b: glow
+		// a: reflectivity
 		
 		try {
 			//checkWorldUpdate();
@@ -144,22 +147,12 @@ public class WorldRender {
 				}
 				//copyPath.delete();
 				
-				FileInputStream stream = new FileInputStream(originPath);
-				byte[] readBytes = stream.readAllBytes();
-				stream.close();
-				
-				FileOutputStream out_stream = new FileOutputStream(targetPath);
-				out_stream.write(readBytes);
-				out_stream.close();
-				
-				//Files.copy(originPath.toPath(), targetPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				//FileUtils.copy(filePath, copyPath, StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(originPath.toPath(), targetPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				
 				world = World.loadWorld(targetPath);
 				bodies.clear();
 				bodies = world.getBodyList().getAllRigidBodies();
 				
-				// TODO: Try to keep the connection open?
 				world.close();
 			} catch(Exception e) {
 				LOGGER.error("Failed to load world file");
@@ -292,27 +285,23 @@ public class WorldRender {
 		return matrix;
 	}
 	
+	private int last_mvp_x;
+	private int last_mvp_y;
 	public void render() {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0.369f, 0.784f, 0.886f, 1);
 		
 		worldHandler.setLoadLimit(1000);
 		
-		//Matrix4f projectionView = camera.getProjectionViewMatrix(60, width, height);
-		
 		Matrix4f projectionView = camera.getProjectionMatrix(FOV, width, height);
 		Matrix4f viewMatrix = camera.getViewMatrix();
-//		{
-//			camera.rx = camera.rz = 0; camera.ry = -90;
-//			float side = 1000;
-//			float heig = ((float)(height) / (float)width) * side;
-//			
-//			projectionView = new Matrix4f().ortho(-side, side, -heig, heig, 0.01f, 20000.0f);
-//			projectionView.translate(-camera.x, -camera.y, -camera.z);
-//		}
 		
 		Matrix4f mvpMatrix = getOrthoProjectionMatrix(500, 500, 400);
-		mvpMatrix.translate(-((int)(camera.x / 64)) * 64, -((int)(camera.y / 64)) * 64, -70);
+		int mvp_x = -((int)(camera.x / 64)) * 64;
+		int mvp_y = -((int)(camera.y / 64)) * 64;
+		mvpMatrix.translate(mvp_x, mvp_y, -70);
+		
+		//projectionView = new Matrix4f(mvpMatrix).translate(0, 0, -camera.z);
 		GL11.glEnable(GL_DEPTH_TEST);
 		GL11.glEnable(GL_CULL_FACE);
 		GL11.glEnable(GL_TEXTURE_2D);
@@ -320,9 +309,19 @@ public class WorldRender {
 		checkWorldUpdate();
 		
 		// We only need to calculate the shadows when we move
-		GL11.glPushMatrix();
-		tryRenderShadows(projectionView, mvpMatrix);
-		GL11.glPopMatrix();
+		if(last_mvp_x != mvp_x || last_mvp_y != mvp_y) {
+			last_mvp_x = mvp_x;
+			last_mvp_y = mvp_y;
+			
+			GL11.glPushMatrix();
+			tryRenderShadows(projectionView, mvpMatrix);
+			GL11.glPopMatrix();
+		}
+		
+//		Light light_test = new Light();
+//		light_test.setColor(1, 1, 1);
+//		light_test.setPosition(-1747, -1643, 10);
+//		partShader.loadLights(List.of(light_test), viewMatrix);
 		
 		Matrix4f toShadowSpace = createOffset().mul(mvpMatrix);
 		{
@@ -340,53 +339,64 @@ public class WorldRender {
 				for(int x = xx - ss - 1; x < xx + ss; x++) {
 					WorldTileRender render = getTileRender(x, y);
 					if(render != null) {
-						render.render(x, y, toShadowSpace, projectionView, camera);
+						render.render(x, y, toShadowSpace, viewMatrix, projectionView, camera);
 					}
 				}
 			}
 		}
 		
-		blockShader.bind();
-		blockShader.setProjectionView(projectionView);
-		blockShader.setModelMatrix(new Matrix4f());
-		blockShader.setColor(1, 1, 1, 1);
-		//blockShader.setUniform("cameraDirection", camera.getViewDirection());
-		for(RigidBody body : bodies) {
-			Bounds3D bounds = ShapeUtils.getBoundingBox(body);
-			
-			for(ChildShape shape : body.shapes) {
-				WorldBlockRender mesh = getBlockRender(shape.uuid);
-				
-				if(mesh != null) {
-					mesh.render(shape, bounds);
-				}
-			}
-		}
-		blockShader.unbind();
-		
 		partShader.bind();
 		partShader.setProjectionView(projectionView);
-		partShader.setModelMatrix(new Matrix4f());
 		partShader.setViewMatrix(viewMatrix);
-		Light light_test = new Light();
-		light_test.setColor(1, 1, 1);
-		light_test.setPosition(-1747, -1643, 10);
-		partShader.loadLights(List.of(light_test), viewMatrix);
+		partShader.setModelMatrix(new Matrix4f());
+		partShader.setShadowMapSpace(toShadowSpace);
 		for(RigidBody body : bodies) {
-			Bounds3D bounds = ShapeUtils.getBoundingBox(body);
-			
 			for(ChildShape shape : body.shapes) {
 				WorldPartRender mesh = getPartRender(shape.uuid);
 				
 				if(mesh != null) {
-					mesh.render(shape, bounds, camera);
+					mesh.render(shape);
 				}
 			}
 		}
 		partShader.unbind();
 		
+		blockShader.bind();
+		blockShader.setProjectionView(projectionView);
+		blockShader.setViewMatrix(viewMatrix);
+		blockShader.setModelMatrix(new Matrix4f());
+		blockShader.setShadowMapSpace(toShadowSpace);
+		for(RigidBody body : bodies) {
+			for(ChildShape shape : body.shapes) {
+				WorldBlockRender mesh = getBlockRender(shape.uuid);
+				
+				if(mesh != null) {
+					mesh.render(shape);
+				}
+			}
+		}
+		blockShader.unbind();
+		
 		GL11.glPushMatrix();
 		GL11.glLoadMatrixf(projectionView.get(new float[16]));
+		debugRenders();
+		
+		// Center of world
+		renderCube(
+			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
+			0x20ffffff
+		);
+		
+		GL11.glPopMatrix();
+		
+		GL11.glDisable(GL_DEPTH_TEST);
+		GL11.glDisable(GL_CULL_FACE);
+		GL11.glColor4f(1, 1, 1, 1);
+		
+		gui.render();
+	}
+	
+	public void debugRenders() {
 		/*for(RigidBody body : bodies) {
 			//System.out.println(body.bodyId);
 			for(ChildShape shape : body.shapes) {
@@ -405,24 +415,6 @@ public class WorldRender {
 			}
 		}*/
 		
-		debugRenders();
-		
-		// Center of world
-		renderCube(
-			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
-			0x20ffffff
-		);
-		
-		GL11.glPopMatrix();
-		
-		GL11.glDisable(GL_DEPTH_TEST);
-		GL11.glDisable(GL_CULL_FACE);
-		
-		GL11.glColor4f(1, 1, 1, 1);
-		gui.render();
-	}
-	
-	public void debugRenders() {
 		boolean SHOW_AABB = true;
 		boolean SHOW_BOUNDS = false;
 		if(SHOW_AABB) {
@@ -567,9 +559,6 @@ public class WorldRender {
 		shadowShader.setMvpMatrix(mvpMatrix);
 		
 		{
-			// correct = (-2270, -2567, 10)
-			// current = (-1676, -1500, 1)
-			
 			int ss = 4;
 			
 			Vector3f cam_pos = camera.getPosition();
@@ -592,39 +581,12 @@ public class WorldRender {
 						if(part_mesh == null) continue;
 						Matrix4f matrix = new Matrix4f(mvpMatrix);
 						
-						{
-							float x = shape.xPos - 0.5f;
-							float y = shape.yPos - 0.5f;
-							float z = shape.zPos - 0.5f;
-							
-							matrix.translate((x / 4.0f), (y / 4.0f), (z / 4.0f));
-							if(shape.body.isGridLocked_0_2 == 2) {
-								matrix.rotate(body.quat);
-							} else {
-								if(body.staticFlags < -1) {
-									matrix.rotate(body.quat);
-								}
-							}
-							matrix.translate(body.xWorld, body.yWorld, body.zWorld);
-							matrix.scale(1 / 4.0f);
-							
-							{
-								Matrix4f mul = PartRotation.getRotationMultiplier(shape.partRotation);
-								if(mul != null) matrix.mul(mul);
-								
-								BoxBounds bounds = part_mesh.part.getBounds();
-								if(bounds != null) {
-									matrix.translate(
-										(bounds.getWidth() - 1) / 2.0f,
-										(bounds.getHeight() - 1) / 2.0f,
-										(bounds.getDepth() - 1) / 2.0f
-									);
-								}
-							}
-						}
+						Matrix4f mat = part_mesh.calculateMatrix(shape);
+						matrix.mul(mat);
 						
 						shadowShader.setMvpMatrix(matrix);
-						part_mesh.renderShadows();
+						// TODO: It's important to apply the material. LIGHT_PASS etc
+						part_mesh.render(shape);
 					}
 					
 					for(ChildShape shape : body.shapes) {
@@ -667,21 +629,23 @@ public class WorldRender {
 		frameBuffer.unbindFrameBuffer();
 		
 		GL11.glEnable(GL_TEXTURE_2D);
-		GL11.glDisable(GL_CULL_FACE);
-		
-		GL11.glPushMatrix();
-		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
-		GL11.glTranslatef(0, 0, 100f);////camera.x, camera.y, 100f);
-		GL11.glColor4f(1, 1, 1, 1);
-		GL20.glActiveTexture(GL20.GL_TEXTURE0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
-		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-			GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-50, -50);
-			GL11.glTexCoord2f(1, 0); GL11.glVertex2f( 50, -50);
-			GL11.glTexCoord2f(1, 1); GL11.glVertex2f( 50,  50);
-			GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-50,  50);
-		GL11.glEnd();
-		GL11.glPopMatrix();
+//		GL11.glDisable(GL_CULL_FACE);
+//		
+//		GL11.glPushMatrix();
+//		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
+//		GL11.glTranslatef(0, 0, 100f);
+//		GL11.glTranslatef((int)(camera.x / 64) * 64, (int)(camera.y / 64) * 64, 0);
+//		
+//		GL11.glColor4f(1, 1, 1, 1);
+//		GL20.glActiveTexture(GL20.GL_TEXTURE0);
+//		GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
+//		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+//			GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-250, -250);
+//			GL11.glTexCoord2f(1, 0); GL11.glVertex2f( 250, -250);
+//			GL11.glTexCoord2f(1, 1); GL11.glVertex2f( 250,  250);
+//			GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-250,  250);
+//		GL11.glEnd();
+//		GL11.glPopMatrix();
 		
 		GL11.glEnable(GL_CULL_FACE);
 	}

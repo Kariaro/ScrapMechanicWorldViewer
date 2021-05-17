@@ -36,6 +36,7 @@ public class PartShader extends ShaderObjectImpl {
 		setUniform("asg_tex", 1);
 		setUniform("nor_tex", 2);
 		setUniform("ao_tex", 3);
+		setUniform("shadowMap", 9);
 	}
 	
 	public void setColor(float r, float g, float b, float a) {
