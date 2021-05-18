@@ -10,6 +10,7 @@ import com.hardcoded.db.types.*;
 import com.hardcoded.error.TileException;
 import com.hardcoded.game.GameContext;
 import com.hardcoded.logger.Log;
+import com.hardcoded.lwjgl.data.TileParts;
 import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
 import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
@@ -34,12 +35,12 @@ public class WorldContentHandler {
 	private final Map<Long, WorldTileRender> tiles;
 	private final Map<String, TileParts> tile_data;
 	
-	protected BlockShader blockShader;
-	protected AssetShader assetShader;
-	protected PartShader partShader;
-	protected TileShader tileShader;
-	protected ShadowShader shadowShader;
-	protected ShadowFrameBuffer frameBuffer;
+	public BlockShader blockShader;
+	public AssetShader assetShader;
+	public PartShader partShader;
+	public TileShader tileShader;
+	public ShadowShader shadowShader;
+	public ShadowFrameBuffer frameBuffer;
 	
 	private GameContext context;
 	private int load_limit;
@@ -70,7 +71,13 @@ public class WorldContentHandler {
 	}
 	
 	private boolean loadCheck() {
-		return load_limit-- > 0;
+		if(load_limit == -1) return true;
+		if(load_limit > 0) {
+			load_limit--;
+			return true;
+		}
+		
+		return false;
 	}
 	
 	public WorldBlockRender getBlockRender(UUID uuid) {

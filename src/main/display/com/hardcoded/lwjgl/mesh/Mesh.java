@@ -16,6 +16,8 @@ import com.hardcoded.lwjgl.util.LoadedMaterial;
 import com.hardcoded.lwjgl.util.StaticMeshLoaderAsync.AsyncMesh;
 
 /**
+ * A simple mesh
+ * 
  * @author HardCoded
  * @since v0.1
  */
@@ -27,32 +29,18 @@ public class Mesh {
 	private LoadedMaterial material;
 	private String name;
 	
-	public Mesh(float[] positions, float[] textCoords, float[] normals, float[] tangents, int[] indices) {
-		this(
-			positions,
-			textCoords,
-			normals,
-			tangents,
-			indices,
-			createEmptyIntArray(MAX_WEIGHTS * positions.length / 3, 0),
-			createEmptyFloatArray(MAX_WEIGHTS * positions.length / 3, 0)
-		);
-	}
-	
 	public Mesh(AsyncMesh mesh) {
 		this(
 			mesh.vertexs,
 			mesh.uvs,
 			mesh.normals,
 			mesh.tangents,
-			mesh.indices,
-			createEmptyIntArray(MAX_WEIGHTS * mesh.vertexs.length / 3, 0),
-			createEmptyFloatArray(MAX_WEIGHTS * mesh.vertexs.length / 3, 0)
+			mesh.indices
 		);
 		setMaterial(mesh.material);
 	}
 	
-	protected Mesh(float[] positions, float[] textCoords, float[] normals, float[] tangents, int[] indices, int[] jointIndices, float[] weights) {
+	protected Mesh(float[] positions, float[] textCoords, float[] normals, float[] tangents, int[] indices) { // int[] jointIndices, float[] weights) {
 		if(LwjglAsyncThread.isCurrentThread()) {
 			throw new RuntimeException("Meshes can only be loaded on the main thread");
 		}
@@ -108,7 +96,7 @@ public class Mesh {
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vecNormalsBuffer, GL15.GL_STATIC_DRAW);
 			GL20.glVertexAttribPointer(3, 3, GL11.GL_FLOAT, false, 0, 0);
 			
-//			// Weights
+//			// Weights VBO
 //			vboId = GL15.glGenBuffers();
 //			vboIdList.add(vboId);
 //			weightsBuffer = MemoryUtil.memAllocFloat(weights.length);
@@ -117,7 +105,7 @@ public class Mesh {
 //			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, weightsBuffer, GL15.GL_STATIC_DRAW);
 //			GL20.glVertexAttribPointer(4, 4, GL11.GL_FLOAT, false, 0, 0);
 //			
-//			// Joint indices
+//			// Joint indices VBO
 //			vboId = GL15.glGenBuffers();
 //			vboIdList.add(vboId);
 //			jointIndicesBuffer = MemoryUtil.memAllocInt(jointIndices.length);
@@ -126,7 +114,7 @@ public class Mesh {
 //			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, jointIndicesBuffer, GL15.GL_STATIC_DRAW);
 //			GL20.glVertexAttribPointer(5, 4, GL11.GL_FLOAT, false, 0, 0);
 			
-			// Index VBO
+			// Indices VBO
 			vboId = GL15.glGenBuffers();
 			vboIdList.add(vboId);
 			indicesBuffer = MemoryUtil.memAllocInt(indices.length);
@@ -180,7 +168,7 @@ public class Mesh {
 		return name;
 	}
 	
-	public final int getVaoId() {
+	public int getVaoId() {
 		return vaoId;
 	}
 	
@@ -199,11 +187,11 @@ public class Mesh {
 		GL11.glDrawElements(GL11.GL_TRIANGLES, vertexCount, GL11.GL_UNSIGNED_INT, 0);
 		
 		// Restore state
-		GL20.glDisableVertexAttribArray(3);
-		GL20.glDisableVertexAttribArray(2);
-		GL20.glDisableVertexAttribArray(1);
-		GL20.glDisableVertexAttribArray(0);
-		GL30.glBindVertexArray(0);
+//		GL20.glDisableVertexAttribArray(3);
+//		GL20.glDisableVertexAttribArray(2);
+//		GL20.glDisableVertexAttribArray(1);
+//		GL20.glDisableVertexAttribArray(0);
+//		GL30.glBindVertexArray(0);
 	}
 	
 	public void cleanUp() {

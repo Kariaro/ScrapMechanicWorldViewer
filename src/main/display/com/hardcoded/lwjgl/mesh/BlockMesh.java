@@ -1,16 +1,9 @@
 package com.hardcoded.lwjgl.mesh;
 
-import static org.lwjgl.assimp.Assimp.*;
-
-import java.io.File;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
-
-import com.hardcoded.lwjgl.util.StaticMeshLoaderAsync;
-import com.hardcoded.lwjgl.util.StaticMeshLoaderAsync.AsyncMesh;
 
 /**
  * @author HardCoded
@@ -24,75 +17,6 @@ public class BlockMesh {
 	private int vboTangent;
 	
 	public BlockMesh() {
-		try {
-			AsyncMesh[] meshes = StaticMeshLoaderAsync.load(new File("res/testing/cube.fbx").getAbsolutePath(),
-				aiProcess_Triangulate |
-				aiProcess_FixInfacingNormals |
-				aiProcess_CalcTangentSpace
-			);
-			AsyncMesh mesh = meshes[0];
-			
-			for(int i = 0; i < mesh.vertexs.length; i++) {
-				mesh.vertexs[i] = (1 + mesh.vertexs[i]) / 2.0f;
-			}
-			System.out.println(Arrays.toString(mesh.vertexs));
-			System.out.println(Arrays.toString(mesh.normals));
-			System.out.println(Arrays.toString(mesh.tangents));
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-		
-//		float[] verts = {
-//			s, s, 0,   0, 0, 0,   0, s, 0,
-//			0, 0, 0,   s, s, 0,   s, 0, 0,
-//			s, s, s,   0, s, s,   0, 0, s,
-//			0, 0, s,   s, 0, s,   s, s, s,
-//			
-//			s, s, 0,   s, s, s,   s, 0, 0,
-//			s, 0, 0,   s, s, s,   s, 0, s,
-//			0, s, 0,   0, 0, 0,   0, s, s,
-//			0, 0, 0,   0, 0, s,   0, s, s,
-//			
-//			0, 0, 0,   s, 0, s,   0, 0, s,
-//			0, 0, 0,   s, 0, 0,   s, 0, s,
-//			0, s, 0,   0, s, s,   s, s, s,
-//			0, s, 0,   s, s, s,   s, s, 0,
-//		};
-//		
-//		float[] normal = {
-//			0, 0, 1,   0, 0, 1,   0, 0, 1,
-//			0, 0, 1,   0, 0, 1,   0, 0, 1,
-//			0, 0,-1,   0, 0,-1,   0, 0,-1,
-//			0, 0,-1,   0, 0,-1,   0, 0,-1,
-//			
-//		   -1, 0, 0,  -1, 0, 0,  -1, 0, 0,
-//		   -1, 0, 0,  -1, 0, 0,  -1, 0, 0,
-//			1, 0, 0,   1, 0, 0,   1, 0, 0,
-//			1, 0, 0,   1, 0, 0,   1, 0, 0,
-//			
-//			0, 1, 0,   0, 1, 0,   0, 1, 0,
-//			0, 1, 0,   0, 1, 0,   0, 1, 0,
-//			0,-1, 0,   0,-1, 0,   0,-1, 0,
-//			0,-1, 0,   0,-1, 0,   0,-1, 0,
-//		};
-//		
-//		float[] tangent = {
-//			0, 0, 1,   0, 0, 1,   0, 0, 1,
-//			0, 0, 1,   0, 0, 1,   0, 0, 1,
-//			0, 0,-1,   0, 0,-1,   0, 0,-1,
-//			0, 0,-1,   0, 0,-1,   0, 0,-1,
-//			
-//		   -1, 0, 0,  -1, 0, 0,  -1, 0, 0,
-//		   -1, 0, 0,  -1, 0, 0,  -1, 0, 0,
-//			1, 0, 0,   1, 0, 0,   1, 0, 0,
-//			1, 0, 0,   1, 0, 0,   1, 0, 0,
-//			
-//			0, 1, 0,   0, 1, 0,   0, 1, 0,
-//			0, 1, 0,   0, 1, 0,   0, 1, 0,
-//			0,-1, 0,   0,-1, 0,   0,-1, 0,
-//			0,-1, 0,   0,-1, 0,   0,-1, 0,
-//		};
-		
 		float[] verts = {
 			0, 1, 1,   1, 0, 1,   1, 1, 1,
 			1, 0, 1,   0, 0, 0,   1, 0, 0,

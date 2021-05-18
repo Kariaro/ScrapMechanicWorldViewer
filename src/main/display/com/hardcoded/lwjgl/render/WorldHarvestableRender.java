@@ -18,13 +18,11 @@ import com.hardcoded.tile.object.Harvestable;
  * @since v0.2
  */
 public class WorldHarvestableRender implements WorldObjectRender {
-	private final List<HarvestableMesh> meshes;
-	private final SMHarvestable harvestable;
-	private final AssetShader shader;
+	public final List<HarvestableMesh> meshes;
+	public final AssetShader shader;
 	
 	public WorldHarvestableRender(SMHarvestable harvestable, AssetShader shader) {
 		this.meshes = new ArrayList<>();
-		this.harvestable = harvestable;
 		this.shader = shader;
 		
 		try {
@@ -39,8 +37,7 @@ public class WorldHarvestableRender implements WorldObjectRender {
 	
 	public void render(Harvestable harvestable) {
 		{
-			int color = this.harvestable.color;
-			color = harvestable.getColor();
+			int color = harvestable.getColor();
 			float r = ((color >> 24) & 0xff) / 255.0f;
 			float g = ((color >> 16) & 0xff) / 255.0f;
 			float b = ((color >>  8) & 0xff) / 255.0f;
@@ -62,7 +59,7 @@ public class WorldHarvestableRender implements WorldObjectRender {
 	
 	@Override
 	public void renderShadows() {
-		if(LwjglOptions.LOD_OBJECTS && !meshes.isEmpty()) {
+		if(LwjglOptions.LOD_OBJECTS) {
 			HarvestableMesh mesh = meshes.get(meshes.size() - 1);
 			mesh.renderShadows();
 			return;
