@@ -3,7 +3,7 @@
 
 in vec4 pass_Position;
 in vec4 pass_ShadowCoords;
-in mat3 pass_toTangentSpace;
+in vec3 pass_lightDirection;
 
 out vec4 out_Color;
 
@@ -38,6 +38,24 @@ vec2 calculateUv() {
 	return uv;
 }
 
+float calcLightFactor() {
+	float objectNearestLight = 0.0;
+	for(int y = 0; y < 3; y++) {
+		for(int x = 0; x < 3; x++) {
+			objectNearestLight += texture(shadowMap, pass_ShadowCoords.xy + vec2(x - 1, y - 1) / 2048.0).r;
+		}
+	}
+	
+	float lightFactor = 1.0;
+	objectNearestLight /= 9.0;
+	float diff = pass_ShadowCoords.z - objectNearestLight;
+	if(diff > 0.001) {
+		lightFactor = 1.0 - min(diff * 100.0 - 0.1, 0.4);
+	}
+	
+	return lightFactor;
+}
+
 void main() {
 	vec2 uv = calculateUv();
 	
@@ -45,11 +63,7 @@ void main() {
 	vec4 asg = texture2D(asg_tex, uv);
 	vec4 nor = 2.0 * texture(nor_tex, uv, -1.0) - 1.0;
 	
-	float objectNearestLight = texture(shadowMap, pass_ShadowCoords.xy).r;
-	float lightFactor = 1.0;
-	if(pass_ShadowCoords.z - objectNearestLight > 0.001) {
-		lightFactor = 1.0 - 0.4;
-	}
+	float lightFactor = calcLightFactor();
 	vec3 unitNormal = normalize(nor.rgb);
 	
 	// Apply the color to the transparent part of the diffuse
@@ -60,8 +74,7 @@ void main() {
 	
 	//out_Color = vec4(diffuse, 1);
 	
-	vec3 lightDir = normalize(vec3(0, 0, -1));
-	vec3 col = normalize(-unitNormal * pass_toTangentSpace);
-	float col_dot = min(max(dot(col, lightDir), 0.7), 2) * lightFactor;
+	vec3 col = normalize(-unitNormal);
+	float col_dot = min(max(dot(col, pass_lightDirection), 0.7), 2) * lightFactor;
 	out_Color = vec4(diffuse.rgb * col_dot, 1.0);
 }

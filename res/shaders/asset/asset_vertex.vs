@@ -9,14 +9,15 @@ in vec3 in_Tangent;
 out vec2 pass_Uv;
 out vec4 pass_ShadowCoords;
 out vec3 pass_lightVector[MAX_LIGHTS];
-out mat3 pass_toTangentSpace;
+out vec3 pass_lightDirection;
 
 uniform mat4 projectionView;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
 
 uniform mat4 toShadowMapSpace;
-uniform vec3 lightPositionEyeSpace[MAX_LIGHTS];
+uniform mat4 lightDirection;
+uniform vec3 lightPositionViewSpace[MAX_LIGHTS];
 
 void main() {
 	gl_Position = projectionView * modelMatrix * in_Position;
@@ -33,8 +34,6 @@ void main() {
 		tang.z, bitang.z, norm.z
 	);
 	
-	pass_toTangentSpace = toTangentSpace;
-	
-	//mat4 test = projectionView * modelMatrix;
-	//pass_Cam = normalize(vec3(-test[0][2], -test[1][2], -test[2][2]));
+	//pass_lightDirection = normalize(lightDirection * toTangentSpace);
+	pass_lightDirection = normalize(vec3(0, 0, -1) * toTangentSpace);// * mat3(viewMatrix));
 }

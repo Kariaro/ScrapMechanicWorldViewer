@@ -19,10 +19,12 @@ import org.lwjgl.assimp.*;
 public class StaticMeshLoaderAsync {
 	public static AsyncMesh[] load(String resourcePath) throws Exception {
 		return load(resourcePath,
-			aiProcess_JoinIdenticalVertices |
-			aiProcess_Triangulate |
-			aiProcess_FixInfacingNormals |
-			aiProcess_CalcTangentSpace
+			aiProcessPreset_TargetRealtime_MaxQuality
+//			aiProcess_OptimizeMeshes |
+//			aiProcess_JoinIdenticalVertices |
+//			aiProcess_Triangulate |
+//			aiProcess_FixInfacingNormals |
+//			aiProcess_CalcTangentSpace
 		);
 	}
 	
