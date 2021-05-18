@@ -47,13 +47,26 @@ vec4 calculateColor(vec4 color, vec2 uv, vec4 mat_0, vec4 mat_1) {
 	return result;
 }
 
-void main() {
-	float objectNearestLight = texture(shadowMap, pass_ShadowCoords.xy).r;
-	float lightFactor = 1.0;
-	if(pass_ShadowCoords.z - objectNearestLight > 0.001) {
-		lightFactor = 1.0 - 0.4;
+float calcLightFactor() {
+	float objectNearestLight = 0.0;
+	for(int y = 0; y < 3; y++) {
+		for(int x = 0; x < 3; x++) {
+			objectNearestLight += texture(shadowMap, pass_ShadowCoords.xy + vec2(x - 1, y - 1) / 2048.0).r;
+		}
 	}
 	
+	float lightFactor = 1.0;
+	objectNearestLight /= 9.0;
+	float diff = pass_ShadowCoords.z - objectNearestLight;
+	if(diff > 0.001) {
+		lightFactor = 1.0 - min(diff * 100.0 - 0.1, 0.4);
+	}
+	
+	return lightFactor;
+}
+
+void main() {
+	float lightFactor = calcLightFactor();
 	
 	vec2 uv = pass_Pos.xy / 4.0;
 	vec4 t0 = texture2D(tex_0, uv);

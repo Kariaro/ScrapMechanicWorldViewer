@@ -3,9 +3,7 @@ package com.hardcoded.lwjgl.shader;
 import java.util.List;
 import java.util.Map;
 
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 
 import com.hardcoded.lwjgl.LwjglOptions;
 import com.hardcoded.lwjgl.shadow.Light;
@@ -19,11 +17,12 @@ import com.hardcoded.lwjgl.shadow.Light;
 public abstract class ShaderObjectImpl extends Shader {
 	protected static final Vector3f DEFAULT_EMPTY = new Vector3f();
 	
-	protected int[] load_lightPositionEyeSpace;
+	protected int[] load_lightPositionViewSpace;
 	protected int[] load_lightColor;
 	protected int load_toShadowMapSpace;
 	protected int load_transformationMatrix;
 	protected int load_projectionView;
+	protected int load_lightDirection;
 	protected int load_modelMatrix;
 	protected int load_viewMatrix;
 	
@@ -37,20 +36,26 @@ public abstract class ShaderObjectImpl extends Shader {
 	protected void loadUniforms() {
 		load_toShadowMapSpace = getUniformLocation("toShadowMapSpace");
 		load_projectionView = getUniformLocation("projectionView");
+		load_lightDirection = getUniformLocation("lightDirection");
 		load_modelMatrix = getUniformLocation("modelMatrix");
 		load_viewMatrix = getUniformLocation("viewMatrix");
 		
 		
-		load_lightPositionEyeSpace = new int[LwjglOptions.MAX_LIGHTS];
+		load_lightPositionViewSpace = new int[LwjglOptions.MAX_LIGHTS];
 		//load_lightColor = new int[LwjglOptions.MAX_LIGHTS];
 		for(int i = 0; i < LwjglOptions.MAX_LIGHTS; i++) {
-			load_lightPositionEyeSpace[i] = getUniformLocation("load_lightPositionEyeSpace[" + i + "]");
+			load_lightPositionViewSpace[i] = getUniformLocation("load_lightPositionViewSpace[" + i + "]");
 			//load_lightColor[i] = getUniformLocation("load_lightColor[" + i + "]");
 		}
 	}
 	
 	public void setProjectionView(Matrix4f projectionView) {
 		setMatrix4f(load_projectionView, projectionView);
+	}
+	
+	public void setLightDirection(Matrix4f lightDirection) {
+		setMatrix4f(load_lightDirection, lightDirection);
+		// setVector3f(load_lightDirection, lightDirection);
 	}
 	
 	public void setModelMatrix(Matrix4f modelMatrix) {
@@ -70,16 +75,16 @@ public abstract class ShaderObjectImpl extends Shader {
 		for(int i = 0; i < LwjglOptions.MAX_LIGHTS; i++) {
 			if(i < lightCount) {
 				Light light = lights.get(i);
-				setVector3f(load_lightPositionEyeSpace[i], calculateLightEyePosition(viewMatrix, light.getPosition()));
+				setVector3f(load_lightPositionViewSpace[i], calculateLightViewPosition(viewMatrix, light.getPosition()));
 				//setVector3f(load_lightColor[i], light.getColor());
 			} else {
-				setVector3f(load_lightPositionEyeSpace[i], DEFAULT_EMPTY);
+				setVector3f(load_lightPositionViewSpace[i], DEFAULT_EMPTY);
 				//setVector3f(load_lightColor[i], DEFAULT_EMPTY);
 			}
 		}
 	}
 	
-	private Vector3f calculateLightEyePosition(Matrix4f viewMatrix, Vector3f pos) {
+	private Vector3f calculateLightViewPosition(Matrix4f viewMatrix, Vector3f pos) {
 		Vector4f result = viewMatrix.transform(pos.x, pos.y, pos.z, 0.0f, new Vector4f());
 		return new  Vector3f(result.x, result.y, result.z);
 	}

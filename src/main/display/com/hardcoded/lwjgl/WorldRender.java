@@ -6,12 +6,14 @@ import static org.lwjgl.opengl.GL11.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 
@@ -24,6 +26,7 @@ import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
 import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
 import com.hardcoded.lwjgl.shadow.ShadowShader;
+import com.hardcoded.lwjgl.util.MathUtils;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
 import com.hardcoded.world.utils.ShapeUtils;
@@ -322,6 +325,14 @@ public class WorldRender {
 			tryRenderShadows(projectionView, mvpMatrix);
 			GL11.glPopMatrix();
 		}
+		GL11.glEnable(GL_CULL_FACE);
+		
+		Matrix4f lightDirection = new Matrix4f();
+		{
+			float angle = (float)Math.toRadians((System.currentTimeMillis() % 7200L) / 20.0f);
+			lightDirection.rotateX(angle);
+		}
+		//System.out.println(lightDirection.toString(NumberFormat.getInstance()));
 		
 //		Light light_test = new Light();
 //		light_test.setColor(1, 1, 1);
@@ -334,8 +345,8 @@ public class WorldRender {
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
 		}
 		
-		tileTestRender.set(toShadowSpace, viewMatrix, projectionView);
-		tileTestRender.render(camera.getPosition(), 3);
+		tileTestRender.set(toShadowSpace, viewMatrix, projectionView, lightDirection);
+		tileTestRender.render(camera.getPosition(), 6);
 		
 //		{
 //			int ss = 3;
@@ -358,6 +369,7 @@ public class WorldRender {
 		partShader.setViewMatrix(viewMatrix);
 		partShader.setModelMatrix(new Matrix4f());
 		partShader.setShadowMapSpace(toShadowSpace);
+		partShader.setLightDirection(lightDirection);
 		for(RigidBody body : bodies) {
 			for(ChildShape shape : body.shapes) {
 				WorldPartRender mesh = getPartRender(shape.uuid);
@@ -370,6 +382,7 @@ public class WorldRender {
 		partShader.unbind();
 		
 		blockShader.bind();
+		blockShader.setLightDirection(lightDirection);
 		blockShader.setProjectionView(projectionView);
 		blockShader.setViewMatrix(viewMatrix);
 		blockShader.setModelMatrix(new Matrix4f());

@@ -51,10 +51,12 @@ public class TileTestRender {
 	private Matrix4f toShadowSpace = new Matrix4f();
 	private Matrix4f viewMatrix = new Matrix4f();
 	private Matrix4f projectionView = new Matrix4f();
-	public void set(Matrix4f toShadowSpace, Matrix4f viewMatrix, Matrix4f projectionView) {
+	private Matrix4f lightDirection = new Matrix4f();
+	public void set(Matrix4f toShadowSpace, Matrix4f viewMatrix, Matrix4f projectionView, Matrix4f lightDirection) {
 		this.toShadowSpace = toShadowSpace;
 		this.viewMatrix = viewMatrix;
 		this.projectionView = projectionView;
+		this.lightDirection = lightDirection;
 	}
 
 	public void render(Vector3f position, int radius) {
@@ -89,6 +91,7 @@ public class TileTestRender {
 		tileShader.setProjectionView(projectionView);
 		tileShader.setViewMatrix(viewMatrix);
 		tileShader.setShadowMapSpace(toShadowSpace);
+		tileShader.setLightDirection(lightDirection);
 		
 		final int textures = TileShader.textures.length;
 		for(int i = 0; i < textures; i++) TileShader.textures[i].bind();
@@ -109,6 +112,7 @@ public class TileTestRender {
 		assetShader.setProjectionView(projectionView);
 		assetShader.setViewMatrix(viewMatrix);
 		assetShader.setShadowMapSpace(toShadowSpace);
+		assetShader.setLightDirection(lightDirection);
 		
 		for(TileTest tile : list) {
 			for(WorldAssetRender render : tile.assets.keySet()) {

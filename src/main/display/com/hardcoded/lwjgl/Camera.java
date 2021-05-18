@@ -138,10 +138,10 @@ public class Camera {
 		Matrix4f projectionMatrix = new Matrix4f();
 		projectionMatrix.setPerspective((float)Math.toRadians(fov), width / height, 0.5f, 10000000);
 		return projectionMatrix
-				.rotate(MathUtils.toRadians(ry), 1, 0, 0)
-				.rotate(MathUtils.toRadians(rx), 0, 0, 1)
-				.rotate(MathUtils.toRadians(rz), 0, 1, 0)
-				.translate(-x, -y, -z);
+			.rotate(MathUtils.toRadians(ry), 1, 0, 0)
+			.rotate(MathUtils.toRadians(rx), 0, 0, 1)
+			.rotate(MathUtils.toRadians(rz), 0, 1, 0)
+			.translate(-x, -y, -z);
 	}
 	
 	public Vector3f getViewDirection() {

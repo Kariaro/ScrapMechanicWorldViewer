@@ -27,7 +27,7 @@ public class MeshMaterial {
 		if(sm == null) return;
 		
 		if(sm.hasDefined(Types.FLIP_BACKFACE_NORMALS)) {
-			GL11.glDisable(GL11.GL_CULL_FACE);
+			//GL11.glDisable(GL11.GL_CULL_FACE);
 		}
 		
 		if(sm.hasDefined(Types.ALPHA)) {
@@ -41,7 +41,7 @@ public class MeshMaterial {
 		if(sm == null) return;
 		
 		if(sm.hasDefined(Types.FLIP_BACKFACE_NORMALS)) {
-			GL11.glEnable(GL11.GL_CULL_FACE);
+			//GL11.glEnable(GL11.GL_CULL_FACE);
 		}
 		
 		if(sm.hasDefined(Types.ALPHA)) {
