@@ -69,7 +69,7 @@ public class WorldAssetRender implements WorldObjectRender {
 	}
 	
 	public void render(Asset asset) {
-		if(LwjglOptions.LOD_OBJECTS && !meshes.isEmpty()) {
+		if(LwjglOptions.LOD_OBJECTS) {
 			AssetMesh mesh = meshes.get(meshes.size() - 1);
 			mesh.render(asset);
 			return;
@@ -83,7 +83,7 @@ public class WorldAssetRender implements WorldObjectRender {
 	
 	@Override
 	public void renderShadows() {
-		if(!meshes.isEmpty()) {
+		if(LwjglOptions.LOD_OBJECTS) {
 			AssetMesh mesh = meshes.get(meshes.size() - 1);
 			mesh.renderShadows();
 			return;

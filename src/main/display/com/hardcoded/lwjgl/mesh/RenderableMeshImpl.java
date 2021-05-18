@@ -25,8 +25,6 @@ import com.hardcoded.util.ValueUtils;
  * 
  * @author HardCoded
  * @since v0.2
- * 
- * TODO: Animations
  */
 public abstract class RenderableMeshImpl implements RenderableMesh {
 	protected final Lod lod;
@@ -34,10 +32,9 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 	public final double minViewSize;
 	
 	protected boolean isLoaded;
-	//protected Mesh[][] animations;
-	protected Mesh[] meshes;
-	protected List<Texture>[] textures;
-	protected MeshMaterial[] mats;
+	public Mesh[] meshes;
+	public List<Texture>[] textures;
+	public MeshMaterial[] mats;
 	
 	protected RenderableMeshImpl(Lod lod) {
 		this.lod = lod;
@@ -52,24 +49,15 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 		initialize();
 	}
 	
+	public boolean isLoaded() {
+		return isLoaded;
+	}
+	
 	/**
 	 * Initialize this mesh
 	 */
 	@SuppressWarnings("unchecked")
 	private void initialize() {
-//		if(lod.animationList != null) {
-//			//animations = null;
-//			/*animations = new Mesh[1][];
-//			Animation anim = lod.animationList.get(0);
-//			System.out.println("Loading animation: " + anim.name);
-//			System.out.println("                 : " + anim.file);
-//			String animPath = ScrapMechanicAssets.resolvePath(anim.file);
-//			animations[0] = StaticMeshLoader.load(animPath);
-//			*/
-//		} else {
-//			//animations = null;
-//		}
-		
 		String path = ScrapMechanicAssetHandler.resolvePath(lod.mesh);
 		AsyncMesh[] loaded = new AsyncMesh[0];
 		

@@ -14,12 +14,12 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL20;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.game.World;
 import com.hardcoded.logger.Log;
 import com.hardcoded.lwjgl.gui.Gui;
+import com.hardcoded.lwjgl.meshrender.TileTestRender;
 import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
 import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
@@ -55,6 +55,8 @@ public class WorldRender {
 	private World world;
 	private Gui gui;
 	
+	private TileTestRender tileTestRender;
+	
 	public WorldRender(LwjglWorldViewer parent, long window, int width, int height) {
 		this.parent = parent;
 		this.window = window;
@@ -64,6 +66,8 @@ public class WorldRender {
 		setViewport(width, height);
 		
 		worldHandler = new WorldContentHandler();
+		tileTestRender = new TileTestRender(worldHandler, camera);
+		
 		camera.x = -1750;
 		camera.y = -1660;
 		camera.z = 10;
@@ -184,6 +188,7 @@ public class WorldRender {
 	
 	private void init() {
 		worldHandler.init();
+		tileTestRender.init();
 		
 		blockShader = worldHandler.blockShader;
 		assetShader = worldHandler.assetShader;
@@ -191,6 +196,8 @@ public class WorldRender {
 		tileShader = worldHandler.tileShader;
 		shadowShader = worldHandler.shadowShader;
 		frameBuffer = worldHandler.frameBuffer;
+		
+		checkWorldUpdate();
 	}
 	
 	public int getFps() {
@@ -291,7 +298,7 @@ public class WorldRender {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0.369f, 0.784f, 0.886f, 1);
 		
-		worldHandler.setLoadLimit(1000);
+		worldHandler.setLoadLimit(-1);
 		
 		Matrix4f projectionView = camera.getProjectionMatrix(FOV, width, height);
 		Matrix4f viewMatrix = camera.getViewMatrix();
@@ -305,8 +312,6 @@ public class WorldRender {
 		GL11.glEnable(GL_DEPTH_TEST);
 		GL11.glEnable(GL_CULL_FACE);
 		GL11.glEnable(GL_TEXTURE_2D);
-		
-		checkWorldUpdate();
 		
 		// We only need to calculate the shadows when we move
 		if(last_mvp_x != mvp_x || last_mvp_y != mvp_y) {
@@ -329,21 +334,24 @@ public class WorldRender {
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
 		}
 		
-		{
-			int ss = 3;
-			
-			Vector3f cam_pos = camera.getPosition();
-			int xx = (int)(cam_pos.x / 64);
-			int yy = (int)(cam_pos.y / 64);
-			for(int y = yy - ss - 1; y < yy + ss; y++) {
-				for(int x = xx - ss - 1; x < xx + ss; x++) {
-					WorldTileRender render = getTileRender(x, y);
-					if(render != null) {
-						render.render(x, y, toShadowSpace, viewMatrix, projectionView, camera);
-					}
-				}
-			}
-		}
+		tileTestRender.set(toShadowSpace, viewMatrix, projectionView);
+		tileTestRender.render(camera.getPosition(), 3);
+		
+//		{
+//			int ss = 3;
+//			
+//			Vector3f cam_pos = camera.getPosition();
+//			int xx = (int)(cam_pos.x / 64);
+//			int yy = (int)(cam_pos.y / 64);
+//			for(int y = yy - ss - 1; y < yy + ss; y++) {
+//				for(int x = xx - ss - 1; x < xx + ss; x++) {
+//					WorldTileRender render = getTileRender(x, y);
+//					if(render != null) {
+//						render.render(x, y, toShadowSpace, viewMatrix, projectionView, camera);
+//					}
+//				}
+//			}
+//		}
 		
 		partShader.bind();
 		partShader.setProjectionView(projectionView);
@@ -379,7 +387,7 @@ public class WorldRender {
 		
 		GL11.glPushMatrix();
 		GL11.glLoadMatrixf(projectionView.get(new float[16]));
-		debugRenders();
+		//debugRenders();
 		
 		// Center of world
 		renderCube(

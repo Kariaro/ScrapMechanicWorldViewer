@@ -27,7 +27,7 @@ public class AssetMesh extends RenderableMeshImpl {
 		this.defaultColors = defaultColors;
 	}
 	
-	private void bindColor(Asset asset, MeshMaterial mat) {
+	public void bindColor(Asset asset, MeshMaterial mat) {
 		float r = 1;
 		float g = 1;
 		float b = 1;

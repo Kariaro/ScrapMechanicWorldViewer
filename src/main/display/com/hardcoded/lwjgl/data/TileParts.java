@@ -1,4 +1,4 @@
-package com.hardcoded.lwjgl;
+package com.hardcoded.lwjgl.data;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,12 @@ import com.hardcoded.lwjgl.mesh.TileMesh;
 import com.hardcoded.tile.Tile;
 import com.hardcoded.tile.impl.TilePart;
 
+/**
+ * A tile container.
+ * 
+ * @author HardCoded
+ * @since v0.2
+ */
 public class TileParts {
 	private Tile tile;
 	private Map<Long, TilePart> parts;

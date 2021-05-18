@@ -19,6 +19,7 @@ import org.lwjgl.assimp.Assimp;
 
 import com.hardcoded.lwjgl.mesh.Mesh;
 
+@Deprecated(forRemoval = true)
 public class StaticMeshLoader {
 	public static Mesh[] load(String resourcePath) throws Exception {
 		return load(resourcePath,
@@ -100,13 +101,14 @@ public class StaticMeshLoader {
 		processTangents(aiMesh, tangents);
 		processIndices(aiMesh, indices);
 		
-		Mesh mesh = new Mesh(
-			listToArray(vertices),
-			listToArray(textures),
-			listToArray(normals),
-			listToArray(tangents),
-			listIntToArray(indices)
-		);
+		Mesh mesh = null;
+//		new Mesh(
+//			listToArray(vertices),
+//			listToArray(textures),
+//			listToArray(normals),
+//			listToArray(tangents),
+//			listIntToArray(indices)
+//		);
 		
 		LoadedMaterial material;
 		int materialIdx = aiMesh.mMaterialIndex();

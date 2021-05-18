@@ -15,5 +15,6 @@ public interface RenderableMesh {
 	
 	List<Texture> loadTextures(MeshMaterial meshMat);
 	
+	void render();
 	void renderShadows();
 }

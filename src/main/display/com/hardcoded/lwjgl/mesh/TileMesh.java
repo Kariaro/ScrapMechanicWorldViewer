@@ -314,7 +314,6 @@ public class TileMesh {
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, texturesBuffer, GL15.GL_STATIC_DRAW);
 			GL20.glVertexAttribPointer(2, 2, GL11.GL_FLOAT, false, 0, 0L);
 			
-			
 			vboMaterial = GL15.glGenBuffers();
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboMaterial);
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, materialsBuffer, GL15.GL_STATIC_DRAW);
@@ -372,6 +371,28 @@ public class TileMesh {
 		GL20.glDisableVertexAttribArray(5);
 		GL20.glDisableVertexAttribArray(6);
 		GL30.glBindVertexArray(0);
+	}
+	
+	public void renderDirect() {
+		GL30.glBindVertexArray(vaoId);
+		GL20.glEnableVertexAttribArray(0);
+		GL20.glEnableVertexAttribArray(1);
+		GL20.glEnableVertexAttribArray(2);
+		GL20.glEnableVertexAttribArray(3);
+		GL20.glEnableVertexAttribArray(4);
+		GL20.glEnableVertexAttribArray(5);
+		GL20.glEnableVertexAttribArray(6);
+		
+		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
+		
+		GL20.glDisableVertexAttribArray(0);
+		GL20.glDisableVertexAttribArray(1);
+		GL20.glDisableVertexAttribArray(2);
+		GL20.glDisableVertexAttribArray(3);
+		GL20.glDisableVertexAttribArray(4);
+		GL20.glDisableVertexAttribArray(5);
+		GL20.glDisableVertexAttribArray(6);
+//		GL30.glBindVertexArray(0);
 	}
 	
 	public void renderShadows() {
