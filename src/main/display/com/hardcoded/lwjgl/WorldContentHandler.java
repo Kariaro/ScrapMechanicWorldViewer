@@ -143,7 +143,7 @@ public class WorldContentHandler {
 		
 		if(!loadCheck()) return null;
 		
-		LOGGER.info("Init asdfasdfasdfasdfasdfasfasdf: %s", path);
+		LOGGER.info("Init: %s", path);
 		render = new WorldPrefabRender(this, path);
 		prefabs.put(path, render);
 		return render;
@@ -174,7 +174,7 @@ public class WorldContentHandler {
 		}
 		
 		LOGGER.info("Init: '%s'", path);
-		WorldTileRender render = new WorldTileRender(this, x, y, parts, tileShader, assetShader);
+		WorldTileRender render = new WorldTileRender(this, x, y, parts);
 		tiles.put(index, render);
 		return render;
 	}

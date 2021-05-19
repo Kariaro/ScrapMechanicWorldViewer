@@ -20,12 +20,12 @@ import com.hardcoded.sm.objects.BodyList.RigidBody;
  * TODO: Transparency
  */
 public class WorldBlockRender implements WorldObjectRender {
-	private static BlockMesh mesh;
-	private final SMBlock block;
-	private final Texture dif;
-	private final Texture asg;
-	private final Texture nor;
-	private final BlockShader shader;
+	public static BlockMesh mesh;
+	public final SMBlock block;
+	public final Texture dif;
+	public final Texture asg;
+	public final Texture nor;
+	public final BlockShader shader;
 	
 	public WorldBlockRender(SMBlock block, BlockShader shader) {
 		this.shader = shader;
@@ -52,9 +52,30 @@ public class WorldBlockRender implements WorldObjectRender {
 		this.nor = block_nor;
 	}
 	
-	public static StringBuilder last;
-	public static String last_str;
-	public static byte[] dif_bytes;
+	public Matrix4f calculateMatrix(ChildShape shape) {
+		float x = shape.xPos;
+		float y = shape.yPos;
+		float z = shape.zPos;
+		
+		RigidBody body = shape.body;
+
+		Matrix4f matrix = new Matrix4f();
+		
+		{
+			if(shape.body.isGridLocked_0_2 == 2) {
+				matrix.rotate(body.quat);
+			} else {
+				if(body.staticFlags < -1) {
+					matrix.rotate(body.quat);
+				}
+			}
+			matrix.translateLocal(body.xWorld, body.yWorld, body.zWorld);
+			matrix.scale(1 / 4.0f);
+			matrix.translate(x, y, z);
+		}
+		
+		return matrix;
+	}
 	
 	public void render(ChildShape shape) {
 		float x = shape.xPos;

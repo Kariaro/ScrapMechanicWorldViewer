@@ -67,6 +67,36 @@ public class AssetMesh extends RenderableMeshImpl {
 		shader.setColor(r, g, b, a);
 	}
 	
+	public int getColor(Asset asset, int index) {
+		MeshMaterial mat = mats[index];
+		if(mat == null) {
+			return 0xffffff;
+		}
+		
+		Map<String, Integer> map = asset.getMaterials();
+		if(map.containsKey(mat.key)) {
+			return map.get(mat.key);
+		} else if(mat.map != null) {
+			Map<String, Object> custom = mat.map.custom;
+			if(custom != null && custom.containsKey("color")) {
+				String value = (String)custom.get("color");
+				
+				if(defaultColors.containsKey(value)) {
+					int[] array = defaultColors.get(value);
+					
+					//int index = (int)(System.currentTimeMillis() % 100000L) / 1000;
+					if(index >= array.length) {
+						return array[0];
+					} else {
+						return array[index];
+					}
+				}
+			}
+		}
+		
+		return 0xff00ffff;
+	}
+	
 	public void render(Asset asset) {
 		if(!isLoaded) return;
 		

@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL20;
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.Renderable.MeshMap;
+import com.hardcoded.db.types.SMMaterial.Types;
 import com.hardcoded.db.types.SMMaterial;
 import com.hardcoded.lwjgl.LwjglWorldViewer;
 import com.hardcoded.lwjgl.async.LwjglAsyncThread;
@@ -35,6 +36,11 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 	public Mesh[] meshes;
 	public List<Texture>[] textures;
 	public MeshMaterial[] mats;
+	
+	public Texture DIF_TEX = Texture.NONE;
+	public Texture ASG_TEX = Texture.NONE;
+	public Texture NOR_TEX = Texture.NONE;
+	public Texture AO_TEX = Texture.NONE;
 	
 	protected RenderableMeshImpl(Lod lod) {
 		this.lod = lod;
@@ -122,7 +128,7 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 		material.sm = sm_mat;
 		
 		// Load the textures
-		int len = material.map.textureList.size();
+		final int len = material.map.textureList.size();
 		for(int i = 0; i < len; i++) {
 			String texturePath = ScrapMechanicAssetHandler.resolvePath(material.map.textureList.get(i));
 			
@@ -132,6 +138,17 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 				e.printStackTrace();
 			}
 		}
+		
+//		setUniform("dif_tex", 0);
+//		setUniform("asg_tex", 1);
+//		setUniform("nor_tex", 2);
+//		setUniform("ao_tex", 3);
+		
+		int index = 0;
+		if(index <= len) DIF_TEX = textures.get(index++);
+		if(index <= index && sm_mat.hasDefined(Types.ASG_TEX)) ASG_TEX = textures.get(index++);
+		if(index <= index && sm_mat.hasDefined(Types.NOR_TEX)) NOR_TEX = textures.get(index++);
+		if(index <= index && sm_mat.hasDefined(Types.AO_TEX)) AO_TEX = textures.get(index++);
 		
 		return textures;
 	}

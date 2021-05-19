@@ -19,6 +19,7 @@ import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.game.World;
 import com.hardcoded.logger.Log;
 import com.hardcoded.lwjgl.gui.Gui;
+import com.hardcoded.lwjgl.meshrender.RenderPipeline;
 import com.hardcoded.lwjgl.meshrender.TileTestRender;
 import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
@@ -56,7 +57,7 @@ public class WorldRender {
 	private Gui gui;
 	
 	private TileTestRender tileTestRender;
-	
+	private RenderPipeline renderPipeline;
 	public WorldRender(LwjglWorldViewer parent, long window, int width, int height) {
 		this.parent = parent;
 		this.window = window;
@@ -66,7 +67,9 @@ public class WorldRender {
 		setViewport(width, height);
 		
 		worldHandler = new WorldContentHandler();
-		tileTestRender = new TileTestRender(worldHandler, camera);
+		this.tileTestRender = new TileTestRender(worldHandler, camera);
+		
+		this.renderPipeline = new RenderPipeline(worldHandler, camera);
 		
 		camera.x = -1750;
 		camera.y = -1660;
@@ -158,6 +161,8 @@ public class WorldRender {
 				bodies = world.getBodyList().getAllRigidBodies();
 				
 				world.close();
+				
+				renderPipeline.loadWorld(world);
 			} catch(Exception e) {
 				LOGGER.error("Failed to load world file");
 				LOGGER.throwing(e);
@@ -180,7 +185,7 @@ public class WorldRender {
 	}
 	
 	protected BlockShader blockShader;
-	protected AssetShader assetShader;
+	//protected AssetShader assetShader;
 	protected PartShader partShader;
 	protected TileShader tileShader;
 	protected ShadowShader shadowShader;
@@ -189,9 +194,11 @@ public class WorldRender {
 	private void init() {
 		worldHandler.init();
 		tileTestRender.init();
+		renderPipeline.init();
+		renderPipeline.loadPipelines();
 		
 		blockShader = worldHandler.blockShader;
-		assetShader = worldHandler.assetShader;
+		//assetShader = worldHandler.assetShader;
 		partShader = worldHandler.partShader;
 		tileShader = worldHandler.tileShader;
 		shadowShader = worldHandler.shadowShader;
@@ -299,11 +306,11 @@ public class WorldRender {
 		GL11.glClearColor(0.369f, 0.784f, 0.886f, 1);
 		
 		worldHandler.setLoadLimit(-1);
-		
 		Matrix4f projectionView = camera.getProjectionMatrix(FOV, width, height);
 		Matrix4f viewMatrix = camera.getViewMatrix();
 		
 		Matrix4f mvpMatrix = getOrthoProjectionMatrix(500, 500, 400);
+		Matrix4f orgMatrix = new Matrix4f(mvpMatrix);
 		int mvp_x = -((int)(camera.x / 64)) * 64;
 		int mvp_y = -((int)(camera.y / 64)) * 64;
 		
@@ -325,7 +332,7 @@ public class WorldRender {
 			last_mvp_y = mvp_y;
 			
 			GL11.glPushMatrix();
-			tryRenderShadows(projectionView, mvpMatrix);
+			tryRenderShadows(projectionView, mvpMatrix, orgMatrix);
 			GL11.glPopMatrix();
 		}
 		GL11.glEnable(GL_CULL_FACE);
@@ -347,54 +354,77 @@ public class WorldRender {
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
 		}
 		
-		tileTestRender.set(toShadowSpace, viewMatrix, projectionView, lightDirection);
-		tileTestRender.render(camera.getPosition(), 3);
+//		tileTestRender.set(toShadowSpace, viewMatrix, projectionView, lightDirection);
+//		tileTestRender.render(camera.getPosition(), 3);
 		
-		partShader.bind();
-		partShader.setProjectionView(projectionView);
-		partShader.setViewMatrix(viewMatrix);
-		partShader.setModelMatrix(new Matrix4f());
-		partShader.setShadowMapSpace(toShadowSpace);
-		partShader.setLightDirection(lightDirection);
-		for(RigidBody body : bodies) {
-			for(ChildShape shape : body.shapes) {
-				WorldPartRender mesh = getPartRender(shape.uuid);
-				
-				if(mesh != null) {
-					mesh.render(shape);
-				}
-			}
-		}
-		partShader.unbind();
+
+		renderPipeline.load(viewMatrix, projectionView, toShadowSpace);
+		renderPipeline.render();
 		
-		blockShader.bind();
-		blockShader.setLightDirection(lightDirection);
-		blockShader.setProjectionView(projectionView);
-		blockShader.setViewMatrix(viewMatrix);
-		blockShader.setModelMatrix(new Matrix4f());
-		blockShader.setShadowMapSpace(toShadowSpace);
-		for(RigidBody body : bodies) {
-			for(ChildShape shape : body.shapes) {
-				WorldBlockRender mesh = getBlockRender(shape.uuid);
-				
-				if(mesh != null) {
-					mesh.render(shape);
-				}
-			}
-		}
-		blockShader.unbind();
-		
-		GL11.glPushMatrix();
-		GL11.glLoadMatrixf(projectionView.get(new float[16]));
-		//debugRenders();
-		
-		// Center of world
-		renderCube(
-			0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
-			0x20ffffff
-		);
-		
-		GL11.glPopMatrix();
+//		if(false) {
+//			
+//			
+//			{
+//				int ss = 3;
+//				Vector3f cam_pos = camera.getPosition();
+//				int xx = (int)(cam_pos.x / 64);
+//				int yy = (int)(cam_pos.y / 64);
+//				
+//				for(int y = yy - ss - 1; y < yy + ss; y++) {
+//					for(int x = xx - ss - 1; x < xx + ss; x++) {
+//						WorldTileRender render = getTileRender(x, y);
+//						if(render != null) {
+//							render.render(x, y, toShadowSpace, viewMatrix, projectionView, camera);
+//						}
+//					}
+//				}
+//			}
+//			partShader.bind();
+//			partShader.setProjectionView(projectionView);
+//			partShader.setViewMatrix(viewMatrix);
+//			partShader.setModelMatrix(new Matrix4f());
+//			partShader.setShadowMapSpace(toShadowSpace);
+//			partShader.setLightDirection(lightDirection);
+//			for(RigidBody body : bodies) {
+//				for(ChildShape shape : body.shapes) {
+//					WorldPartRender mesh = getPartRender(shape.uuid);
+//					
+//					if(mesh != null) {
+//						mesh.render(shape);
+//					}
+//				}
+//			}
+//			partShader.unbind();
+//			
+//			blockShader.bind();
+//			blockShader.setLightDirection(lightDirection);
+//			blockShader.setProjectionView(projectionView);
+//			blockShader.setViewMatrix(viewMatrix);
+//			blockShader.setModelMatrix(new Matrix4f());
+//			blockShader.setShadowMapSpace(toShadowSpace);
+//			for(RigidBody body : bodies) {
+//				for(ChildShape shape : body.shapes) {
+//					WorldBlockRender mesh = getBlockRender(shape.uuid);
+//					
+//					if(mesh != null) {
+//						mesh.render(shape);
+//					}
+//				}
+//			}
+//			blockShader.unbind();
+//			
+//			GL11.glPushMatrix();
+//			GL11.glLoadMatrixf(projectionView.get(new float[16]));
+//			//debugRenders();
+//			
+//			// Center of world
+//			renderCube(
+//				0.25f, 0.25f, 0.25f, 0.5f, 0.5f, 0.5f,
+//				0x20ffffff
+//			);
+//			
+//			GL11.glPopMatrix();
+//		}
 		
 		GL11.glDisable(GL_DEPTH_TEST);
 		GL11.glDisable(GL_CULL_FACE);
@@ -556,7 +586,7 @@ public class WorldRender {
 		}
 	}
 	
-	public void tryRenderShadows(Matrix4f projectionTran, Matrix4f mvpMatrix) {
+	public void tryRenderShadows(Matrix4f projectionTran, Matrix4f mvpMatrix, Matrix4f unmovedMvp) {
 		frameBuffer.bindFrameBuffer();
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);

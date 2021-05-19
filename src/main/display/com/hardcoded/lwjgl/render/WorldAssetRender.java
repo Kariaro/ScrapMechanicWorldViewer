@@ -20,7 +20,7 @@ public class WorldAssetRender implements WorldObjectRender {
 	public final List<AssetMesh> meshes;
 	public final AssetShader shader;
 	
-	private final Map<String, int[]> defaultColors;
+	public final Map<String, int[]> defaultColors;
 	
 	public WorldAssetRender(SMAsset asset, AssetShader shader) {
 		this.defaultColors = new HashMap<>();
