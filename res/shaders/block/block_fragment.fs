@@ -27,11 +27,11 @@ vec2 calculateUv() {
 	float test_a = pos.x - floor(pos.x);
 	float test_b = pos.y - floor(pos.y);
 	float test_c = pos.z - floor(pos.z);
+	// TODO: Use the normal instead of 
 	if(test_a == 0) uv = pos.yz;
 	if(test_b == 0) uv = pos.xz;
 	if(test_c == 0) uv = pos.xy;
 	
-	// TODO: Flip y when loading the texture!
 	uv.x =  uv.x / (tiling + 0.0);
 	uv.y = -uv.y / (tiling + 0.0);
 	
@@ -39,21 +39,18 @@ vec2 calculateUv() {
 }
 
 float calcLightFactor() {
-	float objectNearestLight = 0.0;
-	for(int y = 0; y < 3; y++) {
-		for(int x = 0; x < 3; x++) {
-			objectNearestLight += texture(shadowMap, pass_ShadowCoords.xy + vec2(x - 1, y - 1) / 2048.0).r;
+	const float bias = 0.001;
+	const float shadow = 0.6;
+	
+	float level = 0.0;
+	for(int y = -1; y <= 1; y++) {
+		for(int x = -1; x <= 1; x++) {
+			float t = pass_ShadowCoords.z - texture(shadowMap, pass_ShadowCoords.xy + vec2(x, y) / 4096.0).r;
+			level += (t > bias) ? shadow:1;
 		}
 	}
 	
-	float lightFactor = 1.0;
-	objectNearestLight /= 9.0;
-	float diff = pass_ShadowCoords.z - objectNearestLight;
-	if(diff > 0.001) {
-		lightFactor = 1.0 - min(diff * 100.0 - 0.1, 0.4);
-	}
-	
-	return lightFactor;
+	return level / 9.0;
 }
 
 void main() {

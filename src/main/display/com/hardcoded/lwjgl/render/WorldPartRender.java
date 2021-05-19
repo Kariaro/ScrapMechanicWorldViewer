@@ -8,7 +8,7 @@ import org.joml.Matrix4f;
 import com.hardcoded.db.types.Renderable;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.SMPart;
-import com.hardcoded.lwjgl.LwjglOptions;
+import com.hardcoded.lwjgl.LwjglSettings;
 import com.hardcoded.lwjgl.mesh.PartMesh;
 import com.hardcoded.lwjgl.shader.PartShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
@@ -92,7 +92,7 @@ public class WorldPartRender implements WorldObjectRender {
 			shader.setColor(r, g, b, a);
 		}
 		
-		if(LwjglOptions.LOD_OBJECTS && !meshes.isEmpty()) {
+		if(LwjglSettings.LOD_OBJECTS && !meshes.isEmpty()) {
 			PartMesh mesh = meshes.get(meshes.size() - 1);
 			mesh.render();
 			return;

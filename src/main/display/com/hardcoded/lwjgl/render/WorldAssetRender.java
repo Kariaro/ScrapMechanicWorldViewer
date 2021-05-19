@@ -5,7 +5,7 @@ import java.util.*;
 import com.hardcoded.db.types.Renderable;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.SMAsset;
-import com.hardcoded.lwjgl.LwjglOptions;
+import com.hardcoded.lwjgl.LwjglSettings;
 import com.hardcoded.lwjgl.mesh.AssetMesh;
 import com.hardcoded.lwjgl.shader.AssetShader;
 import com.hardcoded.tile.object.Asset;
@@ -69,7 +69,7 @@ public class WorldAssetRender implements WorldObjectRender {
 	}
 	
 	public void render(Asset asset) {
-		if(LwjglOptions.LOD_OBJECTS) {
+		if(LwjglSettings.LOD_OBJECTS) {
 			AssetMesh mesh = meshes.get(meshes.size() - 1);
 			mesh.render(asset);
 			return;
@@ -83,7 +83,7 @@ public class WorldAssetRender implements WorldObjectRender {
 	
 	@Override
 	public void renderShadows() {
-		if(LwjglOptions.LOD_OBJECTS) {
+		if(LwjglSettings.LOD_OBJECTS) {
 			AssetMesh mesh = meshes.get(meshes.size() - 1);
 			mesh.renderShadows();
 			return;

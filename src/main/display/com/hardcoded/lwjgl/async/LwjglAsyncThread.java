@@ -5,6 +5,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.WGL;
 
+import com.hardcoded.lwjgl.LwjglWorldViewer;
+
 /**
  * This class is an asynchronious running GL context.
  * This class is used to multithread the object loading.
@@ -17,21 +19,25 @@ public class LwjglAsyncThread implements Runnable {
 	
 	protected final ConcurrentLinkedDeque<Runnable> tasks;
 	protected Thread thread;
+	
+	private final boolean success;
 	private final long context;
 	private final long dc;
 	
-	public LwjglAsyncThread(long dc, long context) {
+	public LwjglAsyncThread(long dc, long context, boolean success) {
 		if(INSTANCE != null) throw new RuntimeException("LwjglAsyncThread was already instantiated");
 		INSTANCE = this;
 		
 		this.tasks = new ConcurrentLinkedDeque<>();
 		this.dc = dc;
 		this.context = context;
+		this.success = success;
 	}
 	
 	@Override
 	public void run() {
 		thread = Thread.currentThread();
+		if(!success) return;
 		
 		// Add context to this thread
 		WGL.wglMakeCurrent(dc, context);
@@ -64,6 +70,12 @@ public class LwjglAsyncThread implements Runnable {
 	 * @param runnable a task
 	 */
 	public static void runAsync(Runnable runnable) {
+		// If we failed to share the lists we load everything on the main thread
+		if(!INSTANCE.success) {
+			LwjglWorldViewer.runLater(runnable);
+			return;
+		}
+		
 		INSTANCE.tasks.add(runnable);
 	}
 }

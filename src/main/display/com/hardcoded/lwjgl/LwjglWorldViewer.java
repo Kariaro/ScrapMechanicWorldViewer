@@ -14,6 +14,7 @@ import org.lwjgl.system.windows.User32;
 import com.hardcoded.lwjgl.async.LwjglAsyncThread;
 import com.hardcoded.lwjgl.data.Texture;
 import com.hardcoded.lwjgl.input.Input;
+import com.hardcoded.lwjgl.util.LoadingException;
 
 /**
  * This is the main thread of the lwjgl application.
@@ -76,7 +77,7 @@ public class LwjglWorldViewer implements Runnable {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		window = glfwCreateWindow(width, height, "ScrapMechanic - viewer", NULL, NULL);
 		if(window == NULL) {
-			throw new NullPointerException("Failed to initialize the window");
+			throw new LoadingException("Failed to initialize the window: window == NULL");
 		}
 		
 		GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -107,12 +108,15 @@ public class LwjglWorldViewer implements Runnable {
 		
 		long context_1 = WGL.wglCreateContext(dc);
 		long context_2 = WGL.wglCreateContext(dc);
+		
+		boolean success = true;
 		if(!WGL.wglShareLists(context_1, context_2)) {
 			System.err.println("Failed to create shared list!");
 			WGL.wglDeleteContext(context_2);
+			success = false;
 		}
 		
-		asyncThread = new Thread(new LwjglAsyncThread(dc, context_2), "Async Thread");
+		asyncThread = new Thread(new LwjglAsyncThread(dc, context_2, success), "Async Thread");
 		asyncThread.setDaemon(true);
 		asyncThread.start();
 		

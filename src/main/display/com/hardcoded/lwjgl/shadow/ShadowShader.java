@@ -27,7 +27,7 @@ public class ShadowShader extends Shader {
 	
 	@Override
 	protected void loadUniforms() {
-		load_mvpMatrix = createUniform("mvpMatrix");
+		load_mvpMatrix = getUniformLocation("mvpMatrix");
 	}
 	
 	public void setMvpMatrix(Matrix4f mvpMatrix) {

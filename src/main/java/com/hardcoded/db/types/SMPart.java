@@ -38,6 +38,9 @@ public class SMPart {
 	public UUID baseUuid;
 	public Object scripted;
 	
+	// ???
+	public Object otationSet;
+	
 	@JsonIgnore
 	private BoxBounds bounds;
 	

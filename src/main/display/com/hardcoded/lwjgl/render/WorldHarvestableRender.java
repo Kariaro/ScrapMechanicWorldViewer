@@ -6,7 +6,7 @@ import java.util.List;
 import com.hardcoded.db.types.Renderable;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.SMHarvestable;
-import com.hardcoded.lwjgl.LwjglOptions;
+import com.hardcoded.lwjgl.LwjglSettings;
 import com.hardcoded.lwjgl.mesh.HarvestableMesh;
 import com.hardcoded.lwjgl.shader.AssetShader;
 import com.hardcoded.tile.object.Harvestable;
@@ -59,7 +59,7 @@ public class WorldHarvestableRender implements WorldObjectRender {
 	
 	@Override
 	public void renderShadows() {
-		if(LwjglOptions.LOD_OBJECTS) {
+		if(LwjglSettings.LOD_OBJECTS) {
 			HarvestableMesh mesh = meshes.get(meshes.size() - 1);
 			mesh.renderShadows();
 			return;

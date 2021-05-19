@@ -2,7 +2,6 @@ package com.hardcoded.sm.objects;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 
 import com.hardcoded.data.Memory;
 import com.hardcoded.lua.LuaDeserializer;
