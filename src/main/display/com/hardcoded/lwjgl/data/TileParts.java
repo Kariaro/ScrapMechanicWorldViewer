@@ -32,6 +32,14 @@ public class TileParts {
 		}
 	}
 	
+	public int getWidth() {
+		return tile.getWidth();
+	}
+	
+	public int getHeight() {
+		return tile.getHeight();
+	}
+	
 	public Tile getTile() {
 		return tile;
 	}

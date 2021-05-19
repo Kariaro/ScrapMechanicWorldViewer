@@ -2,13 +2,15 @@ package com.hardcoded.game;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.logger.Log;
 import com.hardcoded.sm.api.WorldHeader;
 import com.hardcoded.sm.objects.BodyList;
-import com.hardcoded.sm.objects.WorldHeaderImpl;
+import com.hardcoded.sm.objects.BodyList.RigidBody;
 import com.hardcoded.sm.objects.ScriptData;
+import com.hardcoded.sm.objects.WorldHeaderImpl;
 import com.hardcoded.sm.sqlite.SQLite;
 
 /**
@@ -27,6 +29,7 @@ public class World implements AutoCloseable {
 	private BodyList bodyList;
 	private ScriptData scriptData;
 	
+	private List<RigidBody> rigidBodies;
 	private World(File path) throws Exception {
 		this.sqlite = new SQLite(path);
 		this.path = path;
@@ -36,6 +39,8 @@ public class World implements AutoCloseable {
 		scriptData = new ScriptData(sqlite);
 		scriptData.test();
 		scriptData.test2();
+		
+		rigidBodies = bodyList.getAllRigidBodies();
 	}
 	
 	
@@ -61,6 +66,13 @@ public class World implements AutoCloseable {
 	 */
 	public BodyList getBodyList() {
 		return bodyList;
+	}
+	
+	/**
+	 * Returns a list of rigid bodies
+	 */
+	public List<RigidBody> getRigidBodies() {
+		return rigidBodies;
 	}
 	
 	@Override

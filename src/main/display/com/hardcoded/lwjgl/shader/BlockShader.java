@@ -1,5 +1,7 @@
 package com.hardcoded.lwjgl.shader;
 
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL20;
 
 /**
@@ -48,6 +50,10 @@ public class BlockShader extends ShaderObjectImpl {
 		GL20.glUniform3f(load_localTransform, x, y, z);
 	}
 	
+	public void setLocalTransform(Vector3f localTransform) {
+		GL20.glUniform3f(load_localTransform, localTransform.x, localTransform.y, localTransform.z);
+	}
+	
 	public void setTiling(int value) {
 		GL20.glUniform1i(load_tiling, value);
 	}
@@ -56,7 +62,15 @@ public class BlockShader extends ShaderObjectImpl {
 		GL20.glUniform3f(load_scale, x, y, z);
 	}
 	
+	public void setScale(Vector3f scale) {
+		GL20.glUniform3f(load_scale, scale.x, scale.y, scale.z);
+	}
+	
 	public void setColor(float r, float g, float b, float a) {
 		GL20.glUniform4f(load_color, r, g, b, a);
+	}
+	
+	public void setColor(Vector4f color) {
+		GL20.glUniform4f(load_color, color.x, color.y, color.z, color.w);
 	}
 }

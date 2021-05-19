@@ -120,6 +120,14 @@ public class BlockMesh {
 		}
 	}
 	
+	public int getVaoId() {
+		return vaoId;
+	}
+	
+	public int getVertexCount() {
+		return vertexCount;
+	}
+	
 	public void render() {
 		GL30.glBindVertexArray(vaoId);
 		GL20.glEnableVertexAttribArray(0);
