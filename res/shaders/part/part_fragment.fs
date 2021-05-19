@@ -45,12 +45,12 @@ void main() {
 	
 	vec3 col_a = dif.rgb * dif.a;
 	vec3 col_b = color.rgb * (1 - dif.a);
-	vec4 diffuse = vec4(col_a + col_b, asg.r);
+	vec4 diffuse = vec4(col_a + col_b, 1);
 	
 	if(hasAlpha > 0 && asg.r < 0.1) {
 		discard;
 	}
 	
-	float col_dot = min(max(dot(unitNormal, pass_lightDirection), 0.7), 2) * lightFactor;
+	float col_dot = min(max(dot(-unitNormal, pass_lightDirection), 0.7), 2) * lightFactor;
 	out_Color = vec4(diffuse.rgb * col_dot, 1.0);
 }
