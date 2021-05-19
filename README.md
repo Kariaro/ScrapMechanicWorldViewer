@@ -10,10 +10,10 @@ This is a try to create a independant sqlite library for scrap mechanic with a r
 
 ## Features
 * The viewer can display survival worlds and knows how to load tile files
+* Prefabs can now be loaded into the viewer
 
 ## Progression
-The next step with the viewer is to fix the asset shader and allow for colors instead of white textures.
-And loading BlueprintList and Prefabs from the `.TILE` files.
+Adding diffuse lighting, fixing minor color issues and loading blueprints is currently being worked on.
 
 ## Screenshot
-![Viewer](.github/assets/screenshots/image_1.png)
+![Viewer](.github/assets/screenshots/image_2.png)
