@@ -19,6 +19,7 @@ import com.hardcoded.sm.objects.TileData;
 import com.hardcoded.tile.impl.TilePart;
 import com.hardcoded.tile.object.Asset;
 import com.hardcoded.tile.object.Harvestable;
+import com.hardcoded.tile.object.Prefab;
 
 /**
  * A tile renderer.
@@ -164,7 +165,6 @@ public class WorldTileRender {
 				WorldAssetRender mesh = handler.getAssetRender(uuid);
 				if(mesh != null) {
 					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
-					//float dist = camera.getPosition().distance(pos);
 					
 					Matrix4f matrix = new Matrix4f(mvpMatrix)
 						.translate(vec_pos)
@@ -185,7 +185,6 @@ public class WorldTileRender {
 				WorldHarvestableRender mesh = handler.getHarvestableRender(uuid);
 				if(mesh != null) {
 					Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
-					//float dist = camera.getPosition().distance(pos);
 					
 					Matrix4f matrix = new Matrix4f(mvpMatrix)
 						.translate(vec_pos)
@@ -195,6 +194,24 @@ public class WorldTileRender {
 					shader.setMvpMatrix(matrix);
 					mesh.renderShadows();
 				}
+			}
+		}
+		
+		for(Prefab prefab : part.prefabs) {
+			Vec3 apos = prefab.getPosition();
+			Quat arot = prefab.getRotation();
+			Vec3 _size = prefab.getSize();
+			
+			WorldPrefabRender rend = handler.getPrefabRender(prefab.getPath());
+			if(rend != null) {
+				Vector3f vec_pos = new Vector3f(apos.toArray()).add(-32, -32, 0).rotateZ(rot_offset).add(32, 32, 0).add(part_offset);
+				
+				Matrix4f matrix = new Matrix4f(mvpMatrix)
+					.translate(vec_pos)
+					.rotate(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW()).rotateLocalZ(rot_offset))
+					.scale(_size.getX(), _size.getY(), _size.getZ());
+				
+				rend.renderShadows(shader, matrix);
 			}
 		}
 	}

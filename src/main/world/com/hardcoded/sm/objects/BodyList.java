@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
-import com.hardcoded.sm.sqlite.SQLiteObject;
 import com.hardcoded.sm.sqlite.SQLite;
+import com.hardcoded.sm.sqlite.SQLiteObject;
 import com.hardcoded.util.Util;
 
 /**

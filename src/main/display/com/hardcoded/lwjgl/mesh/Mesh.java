@@ -187,12 +187,34 @@ public class Mesh {
 		GL11.glDrawElements(GL11.GL_TRIANGLES, vertexCount, GL11.GL_UNSIGNED_INT, 0);
 		
 		// Restore state
-//		GL20.glDisableVertexAttribArray(3);
-//		GL20.glDisableVertexAttribArray(2);
-//		GL20.glDisableVertexAttribArray(1);
-//		GL20.glDisableVertexAttribArray(0);
-//		GL30.glBindVertexArray(0);
+		GL20.glDisableVertexAttribArray(3);
+		GL20.glDisableVertexAttribArray(2);
+		GL20.glDisableVertexAttribArray(1);
+		GL20.glDisableVertexAttribArray(0);
+		GL30.glBindVertexArray(0);
 	}
+	
+	public void startRender() {
+		GL30.glBindVertexArray(vaoId);
+		GL20.glEnableVertexAttribArray(0);
+		GL20.glEnableVertexAttribArray(1);
+		GL20.glEnableVertexAttribArray(2);
+		GL20.glEnableVertexAttribArray(3);
+	}
+	
+	public void renderDirect() {
+		GL11.glDrawElements(GL11.GL_TRIANGLES, vertexCount, GL11.GL_UNSIGNED_INT, 0);
+	}
+	
+	public void endRender() {
+		GL20.glDisableVertexAttribArray(3);
+		GL20.glDisableVertexAttribArray(2);
+		GL20.glDisableVertexAttribArray(1);
+		GL20.glDisableVertexAttribArray(0);
+		GL30.glBindVertexArray(0);
+	}
+	
+	
 	
 	public void cleanUp() {
 		GL20.glDisableVertexAttribArray(0);

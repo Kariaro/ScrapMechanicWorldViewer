@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.joml.*;
 
-import com.hardcoded.lwjgl.LwjglOptions;
+import com.hardcoded.lwjgl.LwjglSettings;
 import com.hardcoded.lwjgl.shadow.Light;
 
 /**
@@ -28,7 +28,7 @@ public abstract class ShaderObjectImpl extends Shader {
 	
 	protected ShaderObjectImpl(String vertex, String fragment) {
 		super(vertex, fragment, Map.of(
-			"MAX_LIGHTS", LwjglOptions.MAX_LIGHTS
+			"MAX_LIGHTS", LwjglSettings.MAX_LIGHTS
 		));
 	}
 	
@@ -41,9 +41,9 @@ public abstract class ShaderObjectImpl extends Shader {
 		load_viewMatrix = getUniformLocation("viewMatrix");
 		
 		
-		load_lightPositionViewSpace = new int[LwjglOptions.MAX_LIGHTS];
+		load_lightPositionViewSpace = new int[LwjglSettings.MAX_LIGHTS];
 		//load_lightColor = new int[LwjglOptions.MAX_LIGHTS];
-		for(int i = 0; i < LwjglOptions.MAX_LIGHTS; i++) {
+		for(int i = 0; i < LwjglSettings.MAX_LIGHTS; i++) {
 			load_lightPositionViewSpace[i] = getUniformLocation("load_lightPositionViewSpace[" + i + "]");
 			//load_lightColor[i] = getUniformLocation("load_lightColor[" + i + "]");
 		}
@@ -72,7 +72,7 @@ public abstract class ShaderObjectImpl extends Shader {
 	
 	public void loadLights(List<Light> lights, Matrix4f viewMatrix) {
 		final int lightCount = lights.size();
-		for(int i = 0; i < LwjglOptions.MAX_LIGHTS; i++) {
+		for(int i = 0; i < LwjglSettings.MAX_LIGHTS; i++) {
 			if(i < lightCount) {
 				Light light = lights.get(i);
 				setVector3f(load_lightPositionViewSpace[i], calculateLightViewPosition(viewMatrix, light.getPosition()));

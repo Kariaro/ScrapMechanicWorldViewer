@@ -29,6 +29,7 @@ public class WorldContentHandler {
 	private static final Log LOGGER = Log.getLogger();
 	
 	private final Map<UUID, WorldHarvestableRender> harvestables;
+	private final Map<String, WorldPrefabRender> prefabs;
 	private final Map<UUID, WorldAssetRender> assets;
 	private final Map<UUID, WorldBlockRender> blocks;
 	private final Map<UUID, WorldPartRender> parts;
@@ -47,6 +48,7 @@ public class WorldContentHandler {
 	
 	protected WorldContentHandler() {
 		harvestables = new HashMap<>();
+		prefabs = new HashMap<>();
 		assets = new HashMap<>();
 		blocks = new HashMap<>();
 		parts = new HashMap<>();
@@ -64,6 +66,10 @@ public class WorldContentHandler {
 		frameBuffer = new ShadowFrameBuffer(2048, 2048);
 		
 		context = new GameContext(ScrapMechanicAssetHandler.getGamePath());
+	}
+	
+	public GameContext getContext() {
+		return context;
 	}
 	
 	protected void setLoadLimit(int limit) {
@@ -128,6 +134,18 @@ public class WorldContentHandler {
 		LOGGER.info("Init: %s", harvestable);
 		render = new WorldHarvestableRender(harvestable, assetShader);
 		harvestables.put(harvestable.uuid, render);
+		return render;
+	}
+	
+	public WorldPrefabRender getPrefabRender(String path) {
+		WorldPrefabRender render = prefabs.get(path);
+		if(render != null) return render;
+		
+		if(!loadCheck()) return null;
+		
+		LOGGER.info("Init asdfasdfasdfasdfasdfasfasdf: %s", path);
+		render = new WorldPrefabRender(this, path);
+		prefabs.put(path, render);
 		return render;
 	}
 	

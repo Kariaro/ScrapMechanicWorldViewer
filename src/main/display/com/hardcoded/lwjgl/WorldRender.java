@@ -6,14 +6,12 @@ import static org.lwjgl.opengl.GL11.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 
@@ -26,7 +24,6 @@ import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
 import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
 import com.hardcoded.lwjgl.shadow.ShadowShader;
-import com.hardcoded.lwjgl.util.MathUtils;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
 import com.hardcoded.world.utils.ShapeUtils;
@@ -309,12 +306,18 @@ public class WorldRender {
 		Matrix4f mvpMatrix = getOrthoProjectionMatrix(500, 500, 400);
 		int mvp_x = -((int)(camera.x / 64)) * 64;
 		int mvp_y = -((int)(camera.y / 64)) * 64;
-		mvpMatrix.translate(mvp_x, mvp_y, -70);
 		
 		//projectionView = new Matrix4f(mvpMatrix).translate(0, 0, -camera.z);
 		GL11.glEnable(GL_DEPTH_TEST);
 		GL11.glEnable(GL_CULL_FACE);
 		GL11.glEnable(GL_TEXTURE_2D);
+		
+		{
+			float angle = (float)Math.toRadians((System.currentTimeMillis() % 7200L) / 20.0f);
+			mvpMatrix.rotateLocalX(1.0f);
+			//mvpMatrix.rotateZ(angle);
+			mvpMatrix.translate(mvp_x, mvp_y, -70);
+		}
 		
 		// We only need to calculate the shadows when we move
 		if(last_mvp_x != mvp_x || last_mvp_y != mvp_y) {
@@ -332,7 +335,6 @@ public class WorldRender {
 			float angle = (float)Math.toRadians((System.currentTimeMillis() % 7200L) / 20.0f);
 			lightDirection.rotateX(angle);
 		}
-		//System.out.println(lightDirection.toString(NumberFormat.getInstance()));
 		
 //		Light light_test = new Light();
 //		light_test.setColor(1, 1, 1);
@@ -346,23 +348,7 @@ public class WorldRender {
 		}
 		
 		tileTestRender.set(toShadowSpace, viewMatrix, projectionView, lightDirection);
-		tileTestRender.render(camera.getPosition(), 6);
-		
-//		{
-//			int ss = 3;
-//			
-//			Vector3f cam_pos = camera.getPosition();
-//			int xx = (int)(cam_pos.x / 64);
-//			int yy = (int)(cam_pos.y / 64);
-//			for(int y = yy - ss - 1; y < yy + ss; y++) {
-//				for(int x = xx - ss - 1; x < xx + ss; x++) {
-//					WorldTileRender render = getTileRender(x, y);
-//					if(render != null) {
-//						render.render(x, y, toShadowSpace, viewMatrix, projectionView, camera);
-//					}
-//				}
-//			}
-//		}
+		tileTestRender.render(camera.getPosition(), 3);
 		
 		partShader.bind();
 		partShader.setProjectionView(projectionView);
@@ -578,7 +564,6 @@ public class WorldRender {
 		
 		shadowShader.bind();
 		shadowShader.setMvpMatrix(mvpMatrix);
-		
 		{
 			int ss = 4;
 			
@@ -650,8 +635,8 @@ public class WorldRender {
 		frameBuffer.unbindFrameBuffer();
 		
 		GL11.glEnable(GL_TEXTURE_2D);
-//		GL11.glDisable(GL_CULL_FACE);
-//		
+		GL11.glDisable(GL_CULL_FACE);
+		
 //		GL11.glPushMatrix();
 //		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
 //		GL11.glTranslatef(0, 0, 100f);
