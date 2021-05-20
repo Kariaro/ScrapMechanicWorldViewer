@@ -1,8 +1,12 @@
 package com.hardcoded.lwjgl.util;
 
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import java.lang.Math;
+
+import org.joml.*;
+
+import com.hardcoded.math.Quat;
+import com.hardcoded.math.Vec3;
+import com.hardcoded.tile.object.TileEntity;
 
 public class MathUtils {
 	public static final float deg2Rad = (float)Math.PI / 180.0f;
@@ -104,5 +108,16 @@ public class MathUtils {
 			}
 		}
 		return dest;
+	}
+	
+	public static Matrix4f getModelMatrix(TileEntity entity) {
+		Vec3 apos = entity.getPosition();
+		Quat arot = entity.getRotation();
+		Vec3 size = entity.getSize();
+		
+		return new Matrix4f()
+			.translate(new Vector3f(apos.toArray()))
+			.rotate(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW()))
+			.scale(size.getX(), size.getY(), size.getZ());
 	}
 }

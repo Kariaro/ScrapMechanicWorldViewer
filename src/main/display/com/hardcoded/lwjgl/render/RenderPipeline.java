@@ -1,4 +1,4 @@
-package com.hardcoded.lwjgl.meshrender;
+package com.hardcoded.lwjgl.render;
 
 import java.util.*;
 
@@ -8,10 +8,13 @@ import org.joml.Vector4f;
 import org.lwjgl.opengl.*;
 
 import com.hardcoded.game.World;
+import com.hardcoded.logger.Log;
 import com.hardcoded.lwjgl.Camera;
 import com.hardcoded.lwjgl.WorldContentHandler;
 import com.hardcoded.lwjgl.data.Texture;
 import com.hardcoded.lwjgl.shader.*;
+import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
+import com.hardcoded.lwjgl.shadow.ShadowShader;
 
 /**
  * This class is the rendering pipe line for all the models
@@ -20,6 +23,8 @@ import com.hardcoded.lwjgl.shader.*;
  * @since v0.3
  */
 public class RenderPipeline {
+	protected static final Log LOGGER = Log.getLogger();
+	
 	protected final WorldContentHandler handler;
 	private final List<RenderPipe> pipelines;
 	
@@ -28,8 +33,11 @@ public class RenderPipeline {
 	
 	protected Matrix4f viewMatrix;
 	protected Matrix4f projectionView;
+	protected Matrix4f mvpMatrix;
 	protected Matrix4f toShadowMapMatrix;
 	
+	protected ShadowFrameBuffer frameBuffer;
+	protected ShadowShader shadowShader;
 	protected AssetShader assetShader;
 	protected BlockShader blockShader;
 	protected TileShader tileShader;
@@ -42,6 +50,11 @@ public class RenderPipeline {
 	}
 	
 	public void init() {
+		// Shadows
+		this.shadowShader = handler.shadowShader;
+		this.frameBuffer = handler.frameBuffer;
+		
+		// Renders
 		this.assetShader = handler.assetShader;
 		this.blockShader = handler.blockShader;
 		this.tileShader = handler.tileShader;
@@ -50,8 +63,8 @@ public class RenderPipeline {
 	
 	public void loadPipelines() {
 		pipelines.add(new TilePipeline(this));
-		pipelines.add(new PartPipeline(this));
-		pipelines.add(new BlockPipeline(this));
+		//pipelines.add(new PartPipeline(this));
+		//pipelines.add(new BlockPipeline(this));
 	}
 	
 	public void cleanUp() {
@@ -98,7 +111,8 @@ public class RenderPipeline {
 		return world;
 	}
 	
-	public void load(Matrix4f viewMatrix, Matrix4f projectionView, Matrix4f toShadowMapMatrix) {
+	public void load(Matrix4f mvpMatrix, Matrix4f viewMatrix, Matrix4f projectionView, Matrix4f toShadowMapMatrix) {
+		this.mvpMatrix = mvpMatrix;
 		this.viewMatrix = viewMatrix;
 		this.projectionView = projectionView;
 		this.toShadowMapMatrix = toShadowMapMatrix;
@@ -228,10 +242,11 @@ public class RenderPipeline {
 			GL11.glEnable(gl);
 	}
 	
+	
 	/**
-	 * Draw the render pipeline
+	 * This method resets the pipeline and rerenders all the screen objects.
 	 */
-	public void render() {
+	private void renderPipes() {
 		pushAssetShader.clear();
 		pushBlockShader.clear();
 		pushTileShader.clear();
@@ -245,14 +260,128 @@ public class RenderPipeline {
 			pipe.render();
 		}
 		
-//		System.out.println("Pushed assets: " + pushAssetShader.size());
-//		System.out.println("Pushed tiles: " + pushTileShader.size());
-//		System.out.println("Pushed parts: " + pushPartShader.size());
-//		System.out.println();
+//		LOGGER.info("Pushed vao assets: %d", pushAssetShader.size());
+//		LOGGER.info("Pushed vao tiles: %d", pushTileShader.size());
+//		LOGGER.info("Pushed vao parts: %d", pushPartShader.size());
+//		LOGGER.info();
 		
 		// Setup fields
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	private int last_mvp_x = Integer.MAX_VALUE;
+	private int last_mvp_y = Integer.MIN_VALUE;
+	private void renderShadows() {
+		int mvp_x = -(int)(camera.x / 64);
+		int mvp_y = -(int)(camera.y / 64);
+		if(last_mvp_x == mvp_x && last_mvp_y == mvp_y) return;
 		
+		last_mvp_x = mvp_x;
+		last_mvp_y = mvp_y;
+		
+		frameBuffer.bindFrameBuffer();
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		
+		shadowShader.bind();
+		shadowShader.setMvpMatrix(mvpMatrix);
+		current_shader = shadowShader;
+		
+		{
+			for(int vaoId : pushTileShader.keySet()) {
+				List<RenderObject.Tile> list = pushTileShader.get(vaoId);
+				
+				GL30.glBindVertexArray(vaoId);
+				GL20.glEnableVertexAttribArray(0);
+				
+				for(RenderObject.Tile rend : list) {
+					shadowShader.setMvpMatrix(new Matrix4f(mvpMatrix).mul(rend.modelMatrix));
+					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rend.vertexCount);
+				}
+				
+				GL20.glDisableVertexAttribArray(0);
+				GL30.glBindVertexArray(0);
+			}
+		}
+		
+		{
+			for(int vaoId : pushAssetShader.keySet()) {
+				List<RenderObject.Asset> list = pushAssetShader.get(vaoId);
+				
+				GL30.glBindVertexArray(vaoId);
+				GL20.glEnableVertexAttribArray(0);
+				
+				for(RenderObject.Asset rend : list) {
+					shadowShader.setMvpMatrix(new Matrix4f(mvpMatrix).mul(rend.modelMatrix));
+					bindFlags(rend.flags);
+					GL11.glDrawElements(GL11.GL_TRIANGLES, rend.vertexCount, GL11.GL_UNSIGNED_INT, 0);
+				}
+				
+				GL20.glDisableVertexAttribArray(0);
+				GL30.glBindVertexArray(0);
+			}
+		}
+		
+		{
+			for(int vaoId : pushPartShader.keySet()) {
+				List<RenderObject.Part> list = pushPartShader.get(vaoId);
+				
+				GL30.glBindVertexArray(vaoId);
+				GL20.glEnableVertexAttribArray(0);
+				
+				for(RenderObject.Part rend : list) {
+					shadowShader.setMvpMatrix(new Matrix4f(mvpMatrix).mul(rend.modelMatrix));
+					bindFlags(rend.flags);
+					GL11.glDrawElements(GL11.GL_TRIANGLES, rend.vertexCount, GL11.GL_UNSIGNED_INT, 0);
+				}
+				
+				GL20.glDisableVertexAttribArray(0);
+				GL30.glBindVertexArray(0);
+			}
+		}
+		
+		{
+			for(int vaoId : pushBlockShader.keySet()) {
+				List<RenderObject.Block> list = pushBlockShader.get(vaoId);
+				
+				GL30.glBindVertexArray(vaoId);
+				GL20.glEnableVertexAttribArray(0);
+				GL20.glEnableVertexAttribArray(1);
+				GL20.glEnableVertexAttribArray(2);
+				
+				for(RenderObject.Block rend : list) {
+					shadowShader.setMvpMatrix(new Matrix4f(mvpMatrix).mul(rend.modelMatrix.scale(rend.scale, new Matrix4f())));
+					bindFlags(rend.flags);
+					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rend.vertexCount);
+				}
+				
+				GL20.glDisableVertexAttribArray(0);
+				GL20.glDisableVertexAttribArray(1);
+				GL20.glDisableVertexAttribArray(2);
+				GL30.glBindVertexArray(0);
+			}
+		}
+		
+		shadowShader.unbind();
+		frameBuffer.unbindFrameBuffer();
+	}
+	
+	public void render() {
+		// Render the pipelines
+		renderPipes();
+		
+		// Apply shadows
+		renderShadows();
+		{
+			GL13.glActiveTexture(GL13.GL_TEXTURE9);
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
+		}
+
+		@SuppressWarnings("unused")
+		int renders = 0, polys = 0;
+		
+		// Render scene
 		{
 			current_shader = tileShader;
 			tileShader.bind();
@@ -278,6 +407,8 @@ public class RenderPipeline {
 				for(RenderObject.Tile rend : list) {
 					tileShader.setModelMatrix(rend.modelMatrix);
 					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rend.vertexCount);
+					renders++;
+					polys += rend.vertexCount;
 				}
 				
 				GL20.glDisableVertexAttribArray(0);
@@ -319,6 +450,8 @@ public class RenderPipeline {
 					bindFlags(rend.flags);
 					bind(rend.textures);
 					GL11.glDrawElements(GL11.GL_TRIANGLES, rend.vertexCount, GL11.GL_UNSIGNED_INT, 0);
+					renders++;
+					polys += rend.vertexCount;
 				}
 				
 				GL20.glDisableVertexAttribArray(0);
@@ -355,6 +488,8 @@ public class RenderPipeline {
 					bindFlags(rend.flags);
 					bind(rend.textures);
 					GL11.glDrawElements(GL11.GL_TRIANGLES, rend.vertexCount, GL11.GL_UNSIGNED_INT, 0);
+					renders++;
+					polys += rend.vertexCount;
 				}
 				
 				GL20.glDisableVertexAttribArray(0);
@@ -394,7 +529,8 @@ public class RenderPipeline {
 					bindFlags(rend.flags);
 					bind(rend.textures);
 					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rend.vertexCount);
-					//GL11.glDrawElements(GL11.GL_TRIANGLES, rend.vertexCount, GL11.GL_UNSIGNED_INT, 0);
+					renders++;
+					polys += rend.vertexCount;
 				}
 				
 				GL20.glDisableVertexAttribArray(0);
@@ -407,6 +543,9 @@ public class RenderPipeline {
 		}
 		
 		unbind();
+		
+//		LOGGER.info("Total drawn objects: %d", renders);
+//		LOGGER.info("Total drawn triangels: %d", polys / 3);
 	}
 	
 	/**
@@ -458,8 +597,24 @@ public class RenderPipeline {
 				return this;
 			}
 			
+			public Block setLocalTransform(Vector3f localTransform) {
+				if(localTransform != null) {
+					this.localTransform = localTransform.get(new Vector3f());
+				}
+				
+				return this;
+			}
+			
 			public Block setScale(float x, float y, float z) {
 				this.scale = new Vector3f(x, y, z);
+				return this;
+			}
+			
+			public Block setScale(Vector3f scale) {
+				if(scale != null) {
+					this.scale = scale.get(new Vector3f());
+				}
+				
 				return this;
 			}
 			
@@ -502,6 +657,14 @@ public class RenderPipeline {
 					((color >>  8) & 0xff) / 255.0f,
 					((color >>  0) & 0xff) / 255.0f
 				);
+			}
+			
+			return (T)this;
+		}
+		
+		public T setColor(Vector4f color) {
+			if(color != null) {
+				this.color = color.get(new Vector4f());
 			}
 			
 			return (T)this;

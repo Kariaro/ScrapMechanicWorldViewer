@@ -1,4 +1,4 @@
-package com.hardcoded.lwjgl.render;
+package com.hardcoded.lwjgl.cache;
 
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL20;
@@ -7,33 +7,32 @@ import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.db.types.SMBlock;
 import com.hardcoded.lwjgl.data.Texture;
 import com.hardcoded.lwjgl.mesh.BlockMesh;
-import com.hardcoded.lwjgl.shader.BlockShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
 
 /**
- * A block renderer.
+ * A block cache.
  * 
  * @author HardCoded
  * @since v0.1
  * 
  * TODO: Transparency
  */
-public class WorldBlockRender implements WorldObjectRender {
+public class WorldBlockCache implements WorldObjectCache {
+	/**
+	 * This field is instantiated from inside {@code WorldRender}
+	 * 
+	 * This is because this field needs to be effectivly loaded on
+	 * the gl thread but really early to prevent null checking
+	 */
 	public static BlockMesh mesh;
 	public final SMBlock block;
 	public final Texture dif;
 	public final Texture asg;
 	public final Texture nor;
-	public final BlockShader shader;
 	
-	public WorldBlockRender(SMBlock block, BlockShader shader) {
-		this.shader = shader;
+	public WorldBlockCache(SMBlock block) {
 		this.block = block;
-		
-		if(mesh == null) {
-			mesh = new BlockMesh();
-		}
 		
 		Texture block_dif = Texture.NONE,
 				block_asg = Texture.NONE,
@@ -75,57 +74,5 @@ public class WorldBlockRender implements WorldObjectRender {
 		}
 		
 		return matrix;
-	}
-	
-	public void render(ChildShape shape) {
-		float x = shape.xPos;
-		float y = shape.yPos;
-		float z = shape.zPos;
-		
-		RigidBody body = shape.body;
-
-		Matrix4f matrix = new Matrix4f();
-		
-		{
-			if(shape.body.isGridLocked_0_2 == 2) {
-				matrix.rotate(body.quat);
-			} else {
-				if(body.staticFlags < -1) {
-					matrix.rotate(body.quat);
-				}
-			}
-			matrix.translateLocal(body.xWorld, body.yWorld, body.zWorld);
-			matrix.scale(1 / 4.0f);
-			matrix.translate(x, y, z);
-		}
-		
-		shader.setModelMatrix(matrix);
-		shader.setLocalTransform(x, y, z);
-		shader.setTiling(block.tiling);
-		shader.setScale(shape.xSize, shape.ySize, shape.zSize);
-		
-		{
-			int rgba = shape.colorRGBA;
-			float r = ((rgba >> 24) & 0xff) / 255.0f;
-			float g = ((rgba >> 16) & 0xff) / 255.0f;
-			float b = ((rgba >>  8) & 0xff) / 255.0f;
-			float a = ((rgba      ) & 0xff) / 255.0f;
-			shader.setColor(r, g, b, a);
-		}
-		
-		dif.bind();
-		asg.bind();
-		nor.bind();
-		
-		mesh.render();
-		
-		dif.unbind();
-		asg.unbind();
-		nor.unbind();
-	}
-	
-	@Override
-	public void renderShadows() {
-		mesh.render();
 	}
 }

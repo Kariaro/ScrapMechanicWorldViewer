@@ -1,7 +1,8 @@
 package com.hardcoded.util;
 
 /**
- * A simple value utils class for converting objects.
+ * This class provides safe methods for converting objects into types.
+ * If the type is not castable it will not return an error but a default type of that object.
  * 
  * @author HardCoded
  * @since v0.1

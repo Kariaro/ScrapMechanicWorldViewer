@@ -36,4 +36,9 @@ public class BoxBounds {
 	public float getDepth() {
 		return depth;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("{ %.4f, %.4f, %.4f }", width, height, depth);
+	}
 }

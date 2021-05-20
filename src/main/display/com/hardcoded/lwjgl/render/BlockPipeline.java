@@ -1,14 +1,14 @@
-package com.hardcoded.lwjgl.meshrender;
+package com.hardcoded.lwjgl.render;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.hardcoded.game.World;
+import com.hardcoded.lwjgl.cache.WorldBlockCache;
+import com.hardcoded.lwjgl.cache.WorldPartCache;
 import com.hardcoded.lwjgl.mesh.BlockMesh;
 import com.hardcoded.lwjgl.mesh.PartMesh;
-import com.hardcoded.lwjgl.meshrender.RenderPipeline.RenderObject;
-import com.hardcoded.lwjgl.render.WorldBlockRender;
-import com.hardcoded.lwjgl.render.WorldPartRender;
+import com.hardcoded.lwjgl.render.RenderPipeline.RenderObject;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
 
@@ -41,9 +41,9 @@ public class BlockPipeline extends RenderPipe {
 			boolean loaded = true;
 			for(RigidBody body : list) {
 				for(ChildShape shape : body.shapes) {
-					WorldPartRender rend = handler.getPartRender(shape.uuid);
-					if(rend != null) {
-						PartMesh part_mesh = rend.meshes.get(0);
+					WorldPartCache cache = handler.getPartCache(shape.uuid);
+					if(cache != null) {
+						PartMesh part_mesh = cache.meshes.get(0);
 						if(!part_mesh.isLoaded()) {
 							loaded = false;
 						}
@@ -57,21 +57,22 @@ public class BlockPipeline extends RenderPipe {
 			
 			this.blocks = new ArrayList<>();
 			
+			// TODO: Sort blocks by their texture id
 			for(RigidBody body : list) {
 				for(ChildShape shape : body.shapes) {
-					WorldBlockRender rend = handler.getBlockRender(shape.uuid);
-					if(rend != null) {
-						BlockMesh block_mesh = WorldBlockRender.mesh;
+					WorldBlockCache cache = handler.getBlockCache(shape.uuid);
+					if(cache != null) {
+						BlockMesh block_mesh = WorldBlockCache.mesh;
 						
 						blocks.add(RenderObject.Block.get()
 							.setVao(block_mesh.getVaoId())
 							.setColor(shape.colorRGBA)
-							.setTextures(List.of(rend.dif, rend.asg, rend.nor))
+							.setTextures(List.of(cache.dif, cache.asg, cache.nor))
 							.setVertexCount(block_mesh.getVertexCount())
-							.setModelMatrix(rend.calculateMatrix(shape))
+							.setModelMatrix(cache.calculateMatrix(shape))
 							
 							// Block specific
-							.setTiling(rend.block.tiling)
+							.setTiling(cache.block.tiling)
 							.setLocalTransform(shape.xPos, shape.yPos, shape.zPos)
 							.setScale(shape.xSize, shape.ySize, shape.zSize)
 						);

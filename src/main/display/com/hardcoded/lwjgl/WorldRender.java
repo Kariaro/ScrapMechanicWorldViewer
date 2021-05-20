@@ -13,16 +13,16 @@ import java.util.UUID;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
 
 import com.hardcoded.asset.ScrapMechanicAssetHandler;
 import com.hardcoded.game.World;
 import com.hardcoded.logger.Log;
+import com.hardcoded.lwjgl.cache.*;
 import com.hardcoded.lwjgl.gui.Gui;
-import com.hardcoded.lwjgl.meshrender.RenderPipeline;
-import com.hardcoded.lwjgl.meshrender.TileTestRender;
-import com.hardcoded.lwjgl.render.*;
-import com.hardcoded.lwjgl.shader.*;
+import com.hardcoded.lwjgl.mesh.BlockMesh;
+import com.hardcoded.lwjgl.render.RenderPipeline;
+import com.hardcoded.lwjgl.shader.BlockShader;
+import com.hardcoded.lwjgl.shader.TileShader;
 import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
 import com.hardcoded.lwjgl.shadow.ShadowShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
@@ -56,8 +56,8 @@ public class WorldRender {
 	private World world;
 	private Gui gui;
 	
-	private TileTestRender tileTestRender;
 	private RenderPipeline renderPipeline;
+	
 	public WorldRender(LwjglWorldViewer parent, long window, int width, int height) {
 		this.parent = parent;
 		this.window = window;
@@ -67,7 +67,6 @@ public class WorldRender {
 		setViewport(width, height);
 		
 		worldHandler = new WorldContentHandler();
-		this.tileTestRender = new TileTestRender(worldHandler, camera);
 		
 		this.renderPipeline = new RenderPipeline(worldHandler, camera);
 		
@@ -94,24 +93,24 @@ public class WorldRender {
 		}
 	}
 	
-	public WorldAssetRender getAssetRender(UUID uuid) {
-		return worldHandler.getAssetRender(uuid);
+	public WorldAssetCache getAssetRender(UUID uuid) {
+		return worldHandler.getAssetCache(uuid);
 	}
 	
-	public WorldHarvestableRender getHarvestableRender(UUID uuid) {
-		return worldHandler.getHarvestableRender(uuid);
+	public WorldHarvestableCache getHarvestableRender(UUID uuid) {
+		return worldHandler.getHarvestableCache(uuid);
 	}
 	
-	public WorldPartRender getPartRender(UUID uuid) {
-		return worldHandler.getPartRender(uuid);
+	public WorldPartCache getPartRender(UUID uuid) {
+		return worldHandler.getPartCache(uuid);
 	}
 	
-	public WorldBlockRender getBlockRender(UUID uuid) {
-		return worldHandler.getBlockRender(uuid);
+	public WorldBlockCache getBlockRender(UUID uuid) {
+		return worldHandler.getBlockCache(uuid);
 	}
 	
-	public WorldTileRender getTileRender(int x, int y) {
-		return worldHandler.getTileRender(x, y);
+	public WorldTileCache getTileRender(int x, int y) {
+		return worldHandler.getTileCache(x, y);
 	}
 	
 	public static int updates = 0;
@@ -185,21 +184,19 @@ public class WorldRender {
 	}
 	
 	protected BlockShader blockShader;
-	//protected AssetShader assetShader;
-	protected PartShader partShader;
 	protected TileShader tileShader;
 	protected ShadowShader shadowShader;
 	protected ShadowFrameBuffer frameBuffer;
 	
 	private void init() {
+		// Instantiate the block model
+		WorldBlockCache.mesh = new BlockMesh();
+		
 		worldHandler.init();
-		tileTestRender.init();
 		renderPipeline.init();
 		renderPipeline.loadPipelines();
 		
 		blockShader = worldHandler.blockShader;
-		//assetShader = worldHandler.assetShader;
-		partShader = worldHandler.partShader;
 		tileShader = worldHandler.tileShader;
 		shadowShader = worldHandler.shadowShader;
 		frameBuffer = worldHandler.frameBuffer;
@@ -299,8 +296,6 @@ public class WorldRender {
 		return matrix;
 	}
 	
-	private int last_mvp_x;
-	private int last_mvp_y;
 	public void render() {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0.369f, 0.784f, 0.886f, 1);
@@ -310,7 +305,7 @@ public class WorldRender {
 		Matrix4f viewMatrix = camera.getViewMatrix();
 		
 		Matrix4f mvpMatrix = getOrthoProjectionMatrix(500, 500, 400);
-		Matrix4f orgMatrix = new Matrix4f(mvpMatrix);
+		//Matrix4f orgMatrix = new Matrix4f(mvpMatrix);
 		int mvp_x = -((int)(camera.x / 64)) * 64;
 		int mvp_y = -((int)(camera.y / 64)) * 64;
 		
@@ -320,21 +315,13 @@ public class WorldRender {
 		GL11.glEnable(GL_TEXTURE_2D);
 		
 		{
+			@SuppressWarnings("unused")
 			float angle = (float)Math.toRadians((System.currentTimeMillis() % 7200L) / 20.0f);
 			mvpMatrix.rotateLocalX(1.0f);
 			//mvpMatrix.rotateZ(angle);
 			mvpMatrix.translate(mvp_x, mvp_y, -70);
 		}
 		
-		// We only need to calculate the shadows when we move
-		if(last_mvp_x != mvp_x || last_mvp_y != mvp_y) {
-			last_mvp_x = mvp_x;
-			last_mvp_y = mvp_y;
-			
-			GL11.glPushMatrix();
-			tryRenderShadows(projectionView, mvpMatrix, orgMatrix);
-			GL11.glPopMatrix();
-		}
 		GL11.glEnable(GL_CULL_FACE);
 		
 		Matrix4f lightDirection = new Matrix4f();
@@ -349,70 +336,15 @@ public class WorldRender {
 //		partShader.loadLights(List.of(light_test), viewMatrix);
 		
 		Matrix4f toShadowSpace = createOffset().mul(mvpMatrix);
-		{
-			GL13.glActiveTexture(GL13.GL_TEXTURE9);
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
-		}
+//		{
+//			GL13.glActiveTexture(GL13.GL_TEXTURE9);
+//			GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
+//		}
 		
-//		tileTestRender.set(toShadowSpace, viewMatrix, projectionView, lightDirection);
-//		tileTestRender.render(camera.getPosition(), 3);
-		
-
-		renderPipeline.load(viewMatrix, projectionView, toShadowSpace);
+		renderPipeline.load(mvpMatrix, viewMatrix, projectionView, toShadowSpace);
 		renderPipeline.render();
 		
 //		if(false) {
-//			
-//			
-//			{
-//				int ss = 3;
-//				Vector3f cam_pos = camera.getPosition();
-//				int xx = (int)(cam_pos.x / 64);
-//				int yy = (int)(cam_pos.y / 64);
-//				
-//				for(int y = yy - ss - 1; y < yy + ss; y++) {
-//					for(int x = xx - ss - 1; x < xx + ss; x++) {
-//						WorldTileRender render = getTileRender(x, y);
-//						if(render != null) {
-//							render.render(x, y, toShadowSpace, viewMatrix, projectionView, camera);
-//						}
-//					}
-//				}
-//			}
-//			partShader.bind();
-//			partShader.setProjectionView(projectionView);
-//			partShader.setViewMatrix(viewMatrix);
-//			partShader.setModelMatrix(new Matrix4f());
-//			partShader.setShadowMapSpace(toShadowSpace);
-//			partShader.setLightDirection(lightDirection);
-//			for(RigidBody body : bodies) {
-//				for(ChildShape shape : body.shapes) {
-//					WorldPartRender mesh = getPartRender(shape.uuid);
-//					
-//					if(mesh != null) {
-//						mesh.render(shape);
-//					}
-//				}
-//			}
-//			partShader.unbind();
-//			
-//			blockShader.bind();
-//			blockShader.setLightDirection(lightDirection);
-//			blockShader.setProjectionView(projectionView);
-//			blockShader.setViewMatrix(viewMatrix);
-//			blockShader.setModelMatrix(new Matrix4f());
-//			blockShader.setShadowMapSpace(toShadowSpace);
-//			for(RigidBody body : bodies) {
-//				for(ChildShape shape : body.shapes) {
-//					WorldBlockRender mesh = getBlockRender(shape.uuid);
-//					
-//					if(mesh != null) {
-//						mesh.render(shape);
-//					}
-//				}
-//			}
-//			blockShader.unbind();
-//			
 //			GL11.glPushMatrix();
 //			GL11.glLoadMatrixf(projectionView.get(new float[16]));
 //			//debugRenders();
@@ -584,106 +516,6 @@ public class WorldRender {
 				);
 			}
 		}
-	}
-	
-	public void tryRenderShadows(Matrix4f projectionTran, Matrix4f mvpMatrix, Matrix4f unmovedMvp) {
-		frameBuffer.bindFrameBuffer();
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		
-		shadowShader.bind();
-		shadowShader.setMvpMatrix(mvpMatrix);
-		{
-			int ss = 4;
-			
-			Vector3f cam_pos = camera.getPosition();
-			int xx = (int)(cam_pos.x / 64);
-			int yy = (int)(cam_pos.y / 64);
-			
-			for(int y = yy - ss - 1; y < yy + ss; y++) {
-				for(int x = xx - ss - 1; x < xx + ss; x++) {
-					WorldTileRender render = getTileRender(x, y);
-					if(render != null) {
-						render.renderShadows(shadowShader, x, y, mvpMatrix);
-					}
-				}
-			}
-			
-			{
-				for(RigidBody body : bodies) {
-					for(ChildShape shape : body.shapes) {
-						WorldPartRender part_mesh = getPartRender(shape.uuid);
-						if(part_mesh == null) continue;
-						Matrix4f matrix = new Matrix4f(mvpMatrix);
-						
-						Matrix4f mat = part_mesh.calculateMatrix(shape);
-						matrix.mul(mat);
-						
-						shadowShader.setMvpMatrix(matrix);
-						// TODO: It's important to apply the material. LIGHT_PASS etc
-						part_mesh.render(shape);
-					}
-					
-					for(ChildShape shape : body.shapes) {
-						WorldBlockRender block_mesh = getBlockRender(shape.uuid);
-						if(block_mesh == null) continue;
-						
-						Matrix4f matrix = new Matrix4f(mvpMatrix);
-						
-						{
-							float x = shape.xPos;
-							float y = shape.yPos;
-							float z = shape.zPos;
-							Matrix4f mat = new Matrix4f();
-							
-							{
-								if(shape.body.isGridLocked_0_2 == 2) {
-									mat.rotate(body.quat);
-								} else {
-									if(body.staticFlags < -1) {
-										mat.rotate(body.quat);
-									}
-								}
-								mat.translateLocal(body.xWorld, body.yWorld, body.zWorld);
-								mat.scale(1 / 4.0f);
-								mat.translate(x, y, z);
-								mat.scale(shape.xSize, shape.ySize, shape.zSize);
-							}
-							
-							matrix.mul(mat);
-						}
-
-						shadowShader.setMvpMatrix(matrix);
-						block_mesh.renderShadows();
-					}
-				}
-			}
-		}
-		
-		shadowShader.unbind();
-		frameBuffer.unbindFrameBuffer();
-		
-		GL11.glEnable(GL_TEXTURE_2D);
-		GL11.glDisable(GL_CULL_FACE);
-		
-//		GL11.glPushMatrix();
-//		GL11.glLoadMatrixf(projectionTran.get(new float[16]));
-//		GL11.glTranslatef(0, 0, 100f);
-//		GL11.glTranslatef((int)(camera.x / 64) * 64, (int)(camera.y / 64) * 64, 0);
-//		
-//		GL11.glColor4f(1, 1, 1, 1);
-//		GL20.glActiveTexture(GL20.GL_TEXTURE0);
-//		GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
-//		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-//			GL11.glTexCoord2f(0, 0); GL11.glVertex2f(-250, -250);
-//			GL11.glTexCoord2f(1, 0); GL11.glVertex2f( 250, -250);
-//			GL11.glTexCoord2f(1, 1); GL11.glVertex2f( 250,  250);
-//			GL11.glTexCoord2f(0, 1); GL11.glVertex2f(-250,  250);
-//		GL11.glEnd();
-//		GL11.glPopMatrix();
-		
-		GL11.glEnable(GL_CULL_FACE);
 	}
 	
 	public static Matrix4f createOffset() {

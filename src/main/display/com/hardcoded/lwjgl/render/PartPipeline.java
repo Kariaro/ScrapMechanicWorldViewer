@@ -1,13 +1,13 @@
-package com.hardcoded.lwjgl.meshrender;
+package com.hardcoded.lwjgl.render;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.hardcoded.game.World;
+import com.hardcoded.lwjgl.cache.WorldPartCache;
 import com.hardcoded.lwjgl.mesh.Mesh;
 import com.hardcoded.lwjgl.mesh.PartMesh;
-import com.hardcoded.lwjgl.meshrender.RenderPipeline.RenderObject;
-import com.hardcoded.lwjgl.render.WorldPartRender;
+import com.hardcoded.lwjgl.render.RenderPipeline.RenderObject;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
 import com.hardcoded.sm.objects.BodyList.RigidBody;
 
@@ -40,9 +40,9 @@ public class PartPipeline extends RenderPipe {
 			boolean loaded = true;
 			for(RigidBody body : list) {
 				for(ChildShape shape : body.shapes) {
-					WorldPartRender rend = handler.getPartRender(shape.uuid);
-					if(rend != null) {
-						PartMesh part_mesh = rend.meshes.get(0);
+					WorldPartCache cache = handler.getPartCache(shape.uuid);
+					if(cache != null) {
+						PartMesh part_mesh = cache.meshes.get(0);
 						if(!part_mesh.isLoaded()) {
 							loaded = false;
 						}
@@ -58,9 +58,9 @@ public class PartPipeline extends RenderPipe {
 			
 			for(RigidBody body : list) {
 				for(ChildShape shape : body.shapes) {
-					WorldPartRender rend = handler.getPartRender(shape.uuid);
-					if(rend != null) {
-						PartMesh part_mesh = rend.meshes.get(0);
+					WorldPartCache cache = handler.getPartCache(shape.uuid);
+					if(cache != null) {
+						PartMesh part_mesh = cache.meshes.get(0);
 						
 						for(int i = 0; i < part_mesh.meshes.length; i++) {
 							Mesh mesh = part_mesh.meshes[i];
@@ -71,7 +71,7 @@ public class PartPipeline extends RenderPipe {
 								.setFlags(part_mesh.mats[i].getPipeFlags())
 								.setTextures(part_mesh.textures[i])
 								.setVertexCount(mesh.getVertexCount())
-								.setModelMatrix(rend.calculateMatrix(shape))
+								.setModelMatrix(cache.calculateMatrix(shape))
 							);
 						}
 					}

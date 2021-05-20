@@ -1,4 +1,4 @@
-package com.hardcoded.lwjgl.render;
+package com.hardcoded.lwjgl.cache;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,6 @@ import org.joml.Matrix4f;
 import com.hardcoded.db.types.Renderable;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.SMPart;
-import com.hardcoded.lwjgl.LwjglSettings;
 import com.hardcoded.lwjgl.mesh.PartMesh;
 import com.hardcoded.lwjgl.shader.PartShader;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
@@ -17,17 +16,17 @@ import com.hardcoded.world.utils.BoxBounds;
 import com.hardcoded.world.utils.PartRotation;
 
 /**
- * A part renderer.
+ * A part cahe.
  * 
  * @author HardCoded
  * @since v0.1
  */
-public class WorldPartRender implements WorldObjectRender {
+public class WorldPartCache implements WorldObjectCache {
 	public final List<PartMesh> meshes;
 	public final PartShader shader;
 	public final SMPart part;
 	
-	public WorldPartRender(SMPart part, PartShader shader) {
+	public WorldPartCache(SMPart part, PartShader shader) {
 		this.meshes = new ArrayList<>();
 		this.shader = shader;
 		this.part = part;
@@ -80,41 +79,24 @@ public class WorldPartRender implements WorldObjectRender {
 		return matrix;
 	}
 	
-	public void render(ChildShape shape) {
-		Matrix4f mat = calculateMatrix(shape);
-		shader.setModelMatrix(mat);
-		{
-			int rgba = shape.colorRGBA;
-			float r = ((rgba >> 24) & 0xff) / 255.0f;
-			float g = ((rgba >> 16) & 0xff) / 255.0f;
-			float b = ((rgba >>  8) & 0xff) / 255.0f;
-			float a = ((rgba      ) & 0xff) / 255.0f;
-			shader.setColor(r, g, b, a);
-		}
+	public Matrix4f calculateMatrix(WorldBlueprintCache.BodyChild shape) {
+		float x = shape.xPos - 0.5f;
+		float y = shape.yPos - 0.5f;
+		float z = shape.zPos - 0.5f;
 		
-		if(LwjglSettings.LOD_OBJECTS && !meshes.isEmpty()) {
-			PartMesh mesh = meshes.get(meshes.size() - 1);
-			mesh.render();
-			return;
-		}
+		Matrix4f matrix = new Matrix4f();
+		matrix.scale(1 / 4.0f);
+		matrix.translate(x, y, z);
 		
-		for(PartMesh mesh : meshes) {
-			mesh.render();
-			break;
-		}
-	}
-	
-	@Override
-	public void renderShadows() {
-		if(!meshes.isEmpty()) {
-			PartMesh mesh = meshes.get(meshes.size() - 1);
-			mesh.renderShadows();
-			return;
-		}
+		BoxBounds bounds = part.getBounds();
+		Matrix4f mat1 = PartRotation.getAxisRotation(shape.xaxis, shape.zaxis);
+		mat1.translate(
+			(bounds.getWidth() - 1) / 2.0f,
+			(bounds.getHeight() - 1) / 2.0f,
+			(bounds.getDepth() - 1) / 2.0f
+		);
+		matrix.mul(mat1);
 		
-		for(PartMesh mesh : meshes) {
-			mesh.renderShadows();
-			break;
-		}
+		return matrix;
 	}
 }

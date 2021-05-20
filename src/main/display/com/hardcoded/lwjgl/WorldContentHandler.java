@@ -10,14 +10,17 @@ import com.hardcoded.db.types.*;
 import com.hardcoded.error.TileException;
 import com.hardcoded.game.GameContext;
 import com.hardcoded.logger.Log;
+import com.hardcoded.lwjgl.cache.*;
 import com.hardcoded.lwjgl.data.TileParts;
-import com.hardcoded.lwjgl.render.*;
 import com.hardcoded.lwjgl.shader.*;
 import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
 import com.hardcoded.lwjgl.shadow.ShadowShader;
+import com.hardcoded.prefab.readers.PrefabFileReader;
 import com.hardcoded.sm.objects.TileData;
 import com.hardcoded.tile.Tile;
 import com.hardcoded.tile.TileReader;
+import com.hardcoded.tile.object.Blueprint;
+import com.hardcoded.tile.object.Prefab;
 
 /**
  * This class contains all the asset types for the game
@@ -28,13 +31,15 @@ import com.hardcoded.tile.TileReader;
 public class WorldContentHandler {
 	private static final Log LOGGER = Log.getLogger();
 	
-	private final Map<UUID, WorldHarvestableRender> harvestables;
-	private final Map<String, WorldPrefabRender> prefabs;
-	private final Map<UUID, WorldAssetRender> assets;
-	private final Map<UUID, WorldBlockRender> blocks;
-	private final Map<UUID, WorldPartRender> parts;
-	private final Map<Long, WorldTileRender> tiles;
+	private final Map<UUID, WorldHarvestableCache> harvestables;
+	private final Map<UUID, WorldAssetCache> assets;
+	private final Map<UUID, WorldBlockCache> blocks;
+	private final Map<UUID, WorldPartCache> parts;
+	private final Map<Long, WorldTileCache> tiles;
 	private final Map<String, TileParts> tile_data;
+	
+	private final Map<String, WorldBlueprintCache> blueprints;
+	private final Map<String, Prefab> prefabs;
 	
 	public BlockShader blockShader;
 	public AssetShader assetShader;
@@ -48,6 +53,7 @@ public class WorldContentHandler {
 	
 	protected WorldContentHandler() {
 		harvestables = new HashMap<>();
+		blueprints = new HashMap<>();
 		prefabs = new HashMap<>();
 		assets = new HashMap<>();
 		blocks = new HashMap<>();
@@ -86,70 +92,88 @@ public class WorldContentHandler {
 		return false;
 	}
 	
-	public WorldBlockRender getBlockRender(UUID uuid) {
-		WorldBlockRender render = blocks.get(uuid);
-		if(render != null) return render;
+	public WorldBlockCache getBlockCache(UUID uuid) {
+		WorldBlockCache cache = blocks.get(uuid);
+		if(cache != null) return cache;
 		
 		SMBlock block = ScrapMechanicAssetHandler.getBlock(uuid);
 		if(block == null || !loadCheck()) return null;
 		
-		render = new WorldBlockRender(block, blockShader);
-		blocks.put(block.uuid, render);
-		return render;
+		cache = new WorldBlockCache(block);
+		blocks.put(block.uuid, cache);
+		return cache;
 	}
 	
-	public WorldPartRender getPartRender(UUID uuid) {
-		WorldPartRender render = parts.get(uuid);
-		if(render != null) return render;
+	public WorldPartCache getPartCache(UUID uuid) {
+		WorldPartCache cache = parts.get(uuid);
+		if(cache != null) return cache;
 		
 		SMPart part = ScrapMechanicAssetHandler.getPart(uuid);
 		if(part == null || !loadCheck()) return null;
 		
 		LOGGER.info("Init: %s", part);
-		render = new WorldPartRender(part, partShader);
-		parts.put(part.uuid, render);
-		return render;
+		cache = new WorldPartCache(part, partShader);
+		parts.put(part.uuid, cache);
+		return cache;
 	}
 	
-	public WorldAssetRender getAssetRender(UUID uuid) {
-		WorldAssetRender render = assets.get(uuid);
-		if(render != null) return render;
+	public WorldAssetCache getAssetCache(UUID uuid) {
+		WorldAssetCache cache = assets.get(uuid);
+		if(cache != null) return cache;
 		
 		SMAsset asset = ScrapMechanicAssetHandler.getAsset(uuid);
 		if(asset == null || !loadCheck()) return null;
 		
 		LOGGER.info("Init: %s", asset);
-		render = new WorldAssetRender(asset, assetShader);
-		assets.put(asset.uuid, render);
-		return render;
+		cache = new WorldAssetCache(asset, assetShader);
+		assets.put(asset.uuid, cache);
+		return cache;
 	}
 	
-	public WorldHarvestableRender getHarvestableRender(UUID uuid) {
-		WorldHarvestableRender render = harvestables.get(uuid);
-		if(render != null) return render;
+	public WorldHarvestableCache getHarvestableCache(UUID uuid) {
+		WorldHarvestableCache cache = harvestables.get(uuid);
+		if(cache != null) return cache;
 		
 		SMHarvestable harvestable = ScrapMechanicAssetHandler.getHarvestable(uuid);
 		if(harvestable == null || !loadCheck()) return null;
 		
 		LOGGER.info("Init: %s", harvestable);
-		render = new WorldHarvestableRender(harvestable, assetShader);
-		harvestables.put(harvestable.uuid, render);
-		return render;
+		cache = new WorldHarvestableCache(harvestable, assetShader);
+		harvestables.put(harvestable.uuid, cache);
+		return cache;
 	}
 	
-	public WorldPrefabRender getPrefabRender(String path) {
-		WorldPrefabRender render = prefabs.get(path);
-		if(render != null) return render;
+	public Prefab getPrefabCache(String path) {
+		Prefab cache = prefabs.get(path);
+		if(cache != null) return cache;
 		
 		if(!loadCheck()) return null;
 		
-		LOGGER.info("Init: %s", path);
-		render = new WorldPrefabRender(this, path);
-		prefabs.put(path, render);
-		return render;
+		try {
+			cache = PrefabFileReader.readPrefab(context.resolve(path));
+			LOGGER.info("Init: %s", path);
+			prefabs.put(path, cache);
+			return cache;
+		} catch(TileException | IOException e) {
+			LOGGER.throwing(e);
+			return null;
+		}
 	}
 	
-	public WorldTileRender getTileRender(int x, int y) {
+	public WorldBlueprintCache getBlueprintCache(Blueprint blueprint) {
+		String value = blueprint.getValue();
+		WorldBlueprintCache cache = blueprints.get(value);
+		if(cache != null) return cache;
+		
+		if(!loadCheck()) return null;
+		
+		cache = new WorldBlueprintCache(this, blueprint);
+		LOGGER.info("Init: %s", cache);
+		blueprints.put(value, cache);
+		return cache;
+	}
+	
+	public WorldTileCache getTileCache(int x, int y) {
 		if(!TileData.hasTile(x, y)) return null;
 		
 		long index = TileData.getTileId(x, y);
@@ -174,7 +198,7 @@ public class WorldContentHandler {
 		}
 		
 		LOGGER.info("Init: '%s'", path);
-		WorldTileRender render = new WorldTileRender(this, x, y, parts);
+		WorldTileCache render = new WorldTileCache(this, x, y, parts);
 		tiles.put(index, render);
 		return render;
 	}
