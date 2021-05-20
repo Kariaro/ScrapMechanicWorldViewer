@@ -38,13 +38,13 @@ public class ScriptData extends SQLiteObject {
 		int flags_7_1 = Byte.toUnsignedInt(data[7]);
 		int unk_8_4 = Util.getInt(data, 8, true);
 		
-		System.out.println(nows);
-		System.out.println("id_0_4: " + id_0_4);
-		System.out.println("worldId_4_2: " + worldId_4_2);
-		System.out.println("channel_6_1: " + channel_6_1);
-		System.out.println("flags_7_1: " + flags_7_1);
-		System.out.println("unk_8_4: " + unk_8_4);
-		System.out.println();
+//		System.out.println(nows);
+//		System.out.println("id_0_4: " + id_0_4);
+//		System.out.println("worldId_4_2: " + worldId_4_2);
+//		System.out.println("channel_6_1: " + channel_6_1);
+//		System.out.println("flags_7_1: " + flags_7_1);
+//		System.out.println("unk_8_4: " + unk_8_4);
+//		System.out.println();
 	}
 	
 	public void test2() throws SQLException {

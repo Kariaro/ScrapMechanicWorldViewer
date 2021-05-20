@@ -1,15 +1,15 @@
-package com.hardcoded.lwjgl.meshrender;
+package com.hardcoded.lwjgl.render;
 
 import com.hardcoded.lwjgl.WorldContentHandler;
-import com.hardcoded.lwjgl.meshrender.RenderPipeline.RenderObject;
+import com.hardcoded.lwjgl.render.RenderPipeline.RenderObject;
 
 /**
- * A render pipe class.
+ * This abstract {@code RenderPipe} class is used to render objects to the render pipeline.
  * 
  * @author HardCoded
  * @since v0.3
  */
-public abstract class RenderPipe {
+abstract class RenderPipe {
 	protected final WorldContentHandler handler;
 	protected final RenderPipeline pipeline;
 	
@@ -39,5 +39,11 @@ public abstract class RenderPipe {
 	 */
 	public void onWorldReload() {}
 	
+	/**
+	 * This method is called when the {@code RenderPipeline} class
+	 * wants to push all objects to memory.
+	 * 
+	 * This is method is only called once per frame.
+	 */
 	public abstract void render();
 }

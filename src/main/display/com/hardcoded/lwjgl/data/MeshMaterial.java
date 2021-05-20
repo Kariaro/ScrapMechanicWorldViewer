@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.hardcoded.db.types.Renderable.MeshMap;
 import com.hardcoded.db.types.SMMaterial;
 import com.hardcoded.db.types.SMMaterial.Types;
-import com.hardcoded.lwjgl.meshrender.RenderPipeline;
+import com.hardcoded.lwjgl.render.RenderPipeline;
 import com.hardcoded.lwjgl.shader.Shader;
 
 /**

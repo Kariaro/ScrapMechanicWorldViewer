@@ -102,7 +102,13 @@ public final class PartRotation {
 	private static final Matrix4f[] PartRotationMultiplier;
 	
 	public static Matrix4f getRotationMultiplier(int rotation) {
-		return PartRotationIndex[rotation].get(new Matrix4f());
+		Matrix4f mat = PartRotationIndex[rotation];
+		if(mat == null) return new Matrix4f();
+		return mat.get(new Matrix4f());
+	}
+	
+	public static Matrix4f getAxisRotation(int xaxis, int zaxis) {
+		return getRotationMultiplier((((zaxis > 0 ? 4:0) | (zaxis & 3)) << 4) | ((xaxis > 0 ? 4:0) | (xaxis & 3)));
 	}
 	
 	static {

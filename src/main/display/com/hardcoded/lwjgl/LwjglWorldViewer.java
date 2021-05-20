@@ -26,7 +26,7 @@ public class LwjglWorldViewer implements Runnable {
 	private static LwjglWorldViewer INSTANCE;
 	
 	public static final BufferedImage ICON = null;
-	public static final int TARGET_FPS = 2400;
+	public static final int TARGET_FPS = 240;
 	
 	protected final ConcurrentLinkedDeque<Runnable> tasks;
 	private WorldRender render;
@@ -72,7 +72,7 @@ public class LwjglWorldViewer implements Runnable {
 		int height = (int)(540 * 1.5);
 		int width = (int)(960);
 		
-		glfwWindowHint(GLFW_SAMPLES, 4);
+		glfwWindowHint(GLFW_SAMPLES, 2);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		window = glfwCreateWindow(width, height, "ScrapMechanic - viewer", NULL, NULL);

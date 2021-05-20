@@ -3,6 +3,10 @@ package com.hardcoded.lwjgl.input;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
+/**
+ * @author HardCoded
+ * @since v0.1
+ */
 public class Input extends GLFWKeyCallback {
 	public static final boolean[] keys = new boolean[65536];
 	

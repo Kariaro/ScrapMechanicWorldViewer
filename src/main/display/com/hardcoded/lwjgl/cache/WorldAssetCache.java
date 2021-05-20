@@ -1,31 +1,27 @@
-package com.hardcoded.lwjgl.render;
+package com.hardcoded.lwjgl.cache;
 
 import java.util.*;
 
 import com.hardcoded.db.types.Renderable;
 import com.hardcoded.db.types.Renderable.Lod;
 import com.hardcoded.db.types.SMAsset;
-import com.hardcoded.lwjgl.LwjglSettings;
 import com.hardcoded.lwjgl.mesh.AssetMesh;
 import com.hardcoded.lwjgl.shader.AssetShader;
-import com.hardcoded.tile.object.Asset;
 
 /**
- * An asset renderer.
+ * An asset cache.
  * 
  * @author HardCoded
  * @since v0.1
  */
-public class WorldAssetRender implements WorldObjectRender {
+public class WorldAssetCache implements WorldObjectCache {
 	public final List<AssetMesh> meshes;
-	public final AssetShader shader;
 	
 	public final Map<String, int[]> defaultColors;
 	
-	public WorldAssetRender(SMAsset asset, AssetShader shader) {
+	public WorldAssetCache(SMAsset asset, AssetShader shader) {
 		this.defaultColors = new HashMap<>();
 		this.meshes = new ArrayList<>();
-		this.shader = shader;
 		
 		if(asset.defaultColors != null) {
 			Map<String, List<String>> def = asset.defaultColors;
@@ -65,33 +61,6 @@ public class WorldAssetRender implements WorldObjectRender {
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
-		}
-	}
-	
-	public void render(Asset asset) {
-		if(LwjglSettings.LOD_OBJECTS) {
-			AssetMesh mesh = meshes.get(meshes.size() - 1);
-			mesh.render(asset);
-			return;
-		}
-		
-		for(AssetMesh mesh : meshes) {
-			mesh.render(asset);
-			break;
-		}
-	}
-	
-	@Override
-	public void renderShadows() {
-		if(LwjglSettings.LOD_OBJECTS) {
-			AssetMesh mesh = meshes.get(meshes.size() - 1);
-			mesh.renderShadows();
-			return;
-		}
-		
-		for(AssetMesh mesh : meshes) {
-			mesh.renderShadows();
-			break;
 		}
 	}
 }
