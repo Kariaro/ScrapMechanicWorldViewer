@@ -4,8 +4,6 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -143,17 +141,33 @@ public class WorldRender {
 			updates ++;
 			*/
 			
+//			try {
+//				File targetPath = new File("res/clone/", fileName);
+//				
+//				// Copy world from game path to local path.
+//				if(!originPath.canRead()) {
+//					// Could not do this action
+//					return;
+//				}
+//				//copyPath.delete();
+//				
+//				Files.copy(originPath.toPath(), targetPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//				
+//				world = World.loadWorld(targetPath);
+//				bodies.clear();
+//				bodies = world.getBodyList().getAllRigidBodies();
+//				
+//				world.close();
+//				
+//				renderPipeline.loadWorld(world);
+//			} catch(Exception e) {
+//				LOGGER.error("Failed to load world file");
+//				LOGGER.throwing(e);
+//				//throw new Error("Failed to load world file");
+//			}
+			
 			try {
-				File targetPath = new File("res/clone/", fileName);
-				
-				// Copy world from game path to local path.
-				if(!originPath.canRead()) {
-					// Could not do this action
-					return;
-				}
-				//copyPath.delete();
-				
-				Files.copy(originPath.toPath(), targetPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				File targetPath = new File("res/backup/first-bup1.db");
 				
 				world = World.loadWorld(targetPath);
 				bodies.clear();
@@ -285,17 +299,6 @@ public class WorldRender {
 		GL11.glEnd();
 	}
 	
-	
-	private Matrix4f getOrthoProjectionMatrix(float width, float height, float length) {
-		Matrix4f matrix = new Matrix4f();
-		matrix.m00( 2f / width);
-		matrix.m11( 2f / height);
-		matrix.m22(-2f / length);
-		matrix.m33(1);
-		
-		return matrix;
-	}
-	
 	public void render() {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0.369f, 0.784f, 0.886f, 1);
@@ -304,44 +307,22 @@ public class WorldRender {
 		Matrix4f projectionView = camera.getProjectionMatrix(FOV, width, height);
 		Matrix4f viewMatrix = camera.getViewMatrix();
 		
-		Matrix4f mvpMatrix = getOrthoProjectionMatrix(500, 500, 400);
-		//Matrix4f orgMatrix = new Matrix4f(mvpMatrix);
-		int mvp_x = -((int)(camera.x / 64)) * 64;
-		int mvp_y = -((int)(camera.y / 64)) * 64;
-		
 		//projectionView = new Matrix4f(mvpMatrix).translate(0, 0, -camera.z);
 		GL11.glEnable(GL_DEPTH_TEST);
 		GL11.glEnable(GL_CULL_FACE);
 		GL11.glEnable(GL_TEXTURE_2D);
-		
-		{
-			@SuppressWarnings("unused")
-			float angle = (float)Math.toRadians((System.currentTimeMillis() % 7200L) / 20.0f);
-			mvpMatrix.rotateLocalX(1.0f);
-			//mvpMatrix.rotateZ(angle);
-			mvpMatrix.translate(mvp_x, mvp_y, -70);
-		}
-		
-		GL11.glEnable(GL_CULL_FACE);
-		
-		Matrix4f lightDirection = new Matrix4f();
-		{
-			float angle = (float)Math.toRadians((System.currentTimeMillis() % 7200L) / 20.0f);
-			lightDirection.rotateX(angle);
-		}
+//		Matrix4f lightDirection = new Matrix4f();
+//		{
+//			float angle = (float)Math.toRadians((System.currentTimeMillis() % 7200L) / 20.0f);
+//			lightDirection.rotateX(angle);
+//		}
 		
 //		Light light_test = new Light();
 //		light_test.setColor(1, 1, 1);
 //		light_test.setPosition(-1747, -1643, 10);
 //		partShader.loadLights(List.of(light_test), viewMatrix);
 		
-		Matrix4f toShadowSpace = createOffset().mul(mvpMatrix);
-//		{
-//			GL13.glActiveTexture(GL13.GL_TEXTURE9);
-//			GL11.glBindTexture(GL11.GL_TEXTURE_2D, frameBuffer.getShadowMap());
-//		}
-		
-		renderPipeline.load(mvpMatrix, viewMatrix, projectionView, toShadowSpace);
+		renderPipeline.load(viewMatrix, projectionView);
 		renderPipeline.render();
 		
 //		if(false) {
@@ -516,11 +497,5 @@ public class WorldRender {
 				);
 			}
 		}
-	}
-	
-	public static Matrix4f createOffset() {
-		return new Matrix4f()
-			.translate(0.5f, 0.5f, 0.5f)
-			.scale(0.5f, 0.5f, 0.5f);
 	}
 }

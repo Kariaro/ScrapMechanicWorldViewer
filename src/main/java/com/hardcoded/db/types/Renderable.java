@@ -1,14 +1,12 @@
 package com.hardcoded.db.types;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -51,10 +49,7 @@ public class Renderable {
 		public String pose2;
 		public List<String> includes;
 		
-		@JsonProperty(value = "subMeshMap")
-		private Map<String, MeshMap> hiddenMap = new HashMap<>();
-		@JsonIgnore
-		public Map<String, MeshMap> subMeshMap = Collections.unmodifiableMap(hiddenMap);
+		public Map<String, MeshMap> subMeshMap = new LinkedHashMap<>();
 		
 		@JsonIgnore
 		private boolean isMeshList;
@@ -65,13 +60,13 @@ public class Renderable {
 		private void setSubMeshList(List<MeshMap> list) {
 			isMeshList = true;
 			for(int i = 0; i < list.size(); i++) {
-				hiddenMap.put(String.valueOf(i), list.get(i));
+				subMeshMap.put(String.valueOf(i), list.get(i));
 			}
 		}
 		
 		@JsonSetter(value = "subMeshMap")
 		private void setSubMesMap(Map<String, MeshMap> map) {
-			hiddenMap.putAll(map);
+			subMeshMap.putAll(map);
 		}
 		
 		@JsonAnySetter

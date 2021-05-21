@@ -1,5 +1,7 @@
 package com.hardcoded.lwjgl.render;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.*;
 
 import org.joml.Matrix4f;
@@ -11,10 +13,13 @@ import com.hardcoded.game.World;
 import com.hardcoded.logger.Log;
 import com.hardcoded.lwjgl.Camera;
 import com.hardcoded.lwjgl.WorldContentHandler;
+import com.hardcoded.lwjgl.cache.WorldBlockCache;
 import com.hardcoded.lwjgl.data.Texture;
+import com.hardcoded.lwjgl.mesh.BlockMesh;
 import com.hardcoded.lwjgl.shader.*;
 import com.hardcoded.lwjgl.shadow.ShadowFrameBuffer;
 import com.hardcoded.lwjgl.shadow.ShadowShader;
+import com.hardcoded.lwjgl.util.MathUtils;
 
 /**
  * This class is the rendering pipe line for all the models
@@ -34,7 +39,7 @@ public class RenderPipeline {
 	protected Matrix4f viewMatrix;
 	protected Matrix4f projectionView;
 	protected Matrix4f mvpMatrix;
-	protected Matrix4f toShadowMapMatrix;
+	protected Matrix4f toShadowSpaceMatrix;
 	
 	protected ShadowFrameBuffer frameBuffer;
 	protected ShadowShader shadowShader;
@@ -63,8 +68,8 @@ public class RenderPipeline {
 	
 	public void loadPipelines() {
 		pipelines.add(new TilePipeline(this));
-		//pipelines.add(new PartPipeline(this));
-		//pipelines.add(new BlockPipeline(this));
+		pipelines.add(new PartPipeline(this));
+		pipelines.add(new BlockPipeline(this));
 	}
 	
 	public void cleanUp() {
@@ -96,11 +101,11 @@ public class RenderPipeline {
 	}
 	
 	/**
-	 * Returns the current shadowMap matrix.
-	 * @return the current shadowMap matrix
+	 * Returns the current shadowSpace matrix.
+	 * @return the current shadowSpace matrix
 	 */
-	public Matrix4f getShadowMapMatrix() {
-		return toShadowMapMatrix;
+	public Matrix4f getShadowSpaceMatrix() {
+		return toShadowSpaceMatrix;
 	}
 	
 	/**
@@ -111,11 +116,9 @@ public class RenderPipeline {
 		return world;
 	}
 	
-	public void load(Matrix4f mvpMatrix, Matrix4f viewMatrix, Matrix4f projectionView, Matrix4f toShadowMapMatrix) {
-		this.mvpMatrix = mvpMatrix;
+	public void load(Matrix4f viewMatrix, Matrix4f projectionView) {
 		this.viewMatrix = viewMatrix;
 		this.projectionView = projectionView;
-		this.toShadowMapMatrix = toShadowMapMatrix;
 	}
 	
 	public void loadWorld(World world) {
@@ -276,6 +279,16 @@ public class RenderPipeline {
 		int mvp_y = -(int)(camera.y / 64);
 		if(last_mvp_x == mvp_x && last_mvp_y == mvp_y) return;
 		
+		this.mvpMatrix = MathUtils.getOrthoProjectionMatrix(500, 500, 400);
+		{
+			@SuppressWarnings("unused")
+			float angle = (float)Math.toRadians((System.currentTimeMillis() % 7200L) / 20.0f);
+			mvpMatrix.rotateLocalX(1.0f);
+			//mvpMatrix.rotateZ(angle);
+			mvpMatrix.translate(mvp_x * 64, mvp_y * 64, -70);
+		}
+		this.toShadowSpaceMatrix = MathUtils.getShadowSpaceMatrix(mvpMatrix);
+		
 		last_mvp_x = mvp_x;
 		last_mvp_y = mvp_y;
 		
@@ -312,9 +325,15 @@ public class RenderPipeline {
 				GL30.glBindVertexArray(vaoId);
 				GL20.glEnableVertexAttribArray(0);
 				
+				// Because all vaos of the same id share the same stuff we can do this
+				if(!list.isEmpty()) {
+					RenderObject.Asset first = list.get(0);
+					bindFlags(first.flags);
+				}
+				
 				for(RenderObject.Asset rend : list) {
 					shadowShader.setMvpMatrix(new Matrix4f(mvpMatrix).mul(rend.modelMatrix));
-					bindFlags(rend.flags);
+//					bindFlags(rend.flags);
 					GL11.glDrawElements(GL11.GL_TRIANGLES, rend.vertexCount, GL11.GL_UNSIGNED_INT, 0);
 				}
 				
@@ -330,9 +349,15 @@ public class RenderPipeline {
 				GL30.glBindVertexArray(vaoId);
 				GL20.glEnableVertexAttribArray(0);
 				
+				// Because all vaos of the same id share the same stuff we can do this
+				if(!list.isEmpty()) {
+					RenderObject.Part first = list.get(0);
+					bindFlags(first.flags);
+				}
+				
 				for(RenderObject.Part rend : list) {
 					shadowShader.setMvpMatrix(new Matrix4f(mvpMatrix).mul(rend.modelMatrix));
-					bindFlags(rend.flags);
+//					bindFlags(rend.flags);
 					GL11.glDrawElements(GL11.GL_TRIANGLES, rend.vertexCount, GL11.GL_UNSIGNED_INT, 0);
 				}
 				
@@ -342,25 +367,23 @@ public class RenderPipeline {
 		}
 		
 		{
-			for(int vaoId : pushBlockShader.keySet()) {
-				List<RenderObject.Block> list = pushBlockShader.get(vaoId);
-				
-				GL30.glBindVertexArray(vaoId);
-				GL20.glEnableVertexAttribArray(0);
-				GL20.glEnableVertexAttribArray(1);
-				GL20.glEnableVertexAttribArray(2);
+			BlockMesh mesh = WorldBlockCache.mesh;
+			final int vertexCount = mesh.getVertexCount();
+			GL30.glBindVertexArray(mesh.getVaoId());
+			GL20.glEnableVertexAttribArray(0);
+			
+			for(int hash : pushBlockShader.keySet()) {
+				List<RenderObject.Block> list = pushBlockShader.get(hash);
 				
 				for(RenderObject.Block rend : list) {
 					shadowShader.setMvpMatrix(new Matrix4f(mvpMatrix).mul(rend.modelMatrix.scale(rend.scale, new Matrix4f())));
 					bindFlags(rend.flags);
-					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rend.vertexCount);
+					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
 				}
-				
-				GL20.glDisableVertexAttribArray(0);
-				GL20.glDisableVertexAttribArray(1);
-				GL20.glDisableVertexAttribArray(2);
-				GL30.glBindVertexArray(0);
 			}
+			
+			GL20.glDisableVertexAttribArray(0);
+			GL30.glBindVertexArray(0);
 		}
 		
 		shadowShader.unbind();
@@ -387,7 +410,7 @@ public class RenderPipeline {
 			tileShader.bind();
 			tileShader.setProjectionView(projectionView);
 			tileShader.setViewMatrix(viewMatrix);
-			tileShader.setShadowMapSpace(toShadowMapMatrix);
+			tileShader.setShadowMapSpace(toShadowSpaceMatrix);
 			
 			final int textures = TileShader.textures.length;
 			for(int i = 0; i < textures; i++) TileShader.textures[i].bind();
@@ -431,7 +454,7 @@ public class RenderPipeline {
 			assetShader.bind();
 			assetShader.setProjectionView(projectionView);
 			assetShader.setViewMatrix(viewMatrix);
-			assetShader.setShadowMapSpace(toShadowMapMatrix);
+			assetShader.setShadowMapSpace(toShadowSpaceMatrix);
 			
 			for(int vaoId : pushAssetShader.keySet()) {
 				List<RenderObject.Asset> list = pushAssetShader.get(vaoId);
@@ -442,13 +465,18 @@ public class RenderPipeline {
 				GL20.glEnableVertexAttribArray(2);
 				GL20.glEnableVertexAttribArray(3);
 				
+				// Because all vaos of the same id share the same stuff we can do this
+				if(!list.isEmpty()) {
+					RenderObject.Asset first = list.get(0);
+					bindFlags(first.flags);
+					bind(first.textures);
+				}
+				
 				for(RenderObject.Asset rend : list) {
 					assetShader.setModelMatrix(rend.modelMatrix);
 					if(rend.color != null)
 						assetShader.setColor(rend.color);
 					
-					bindFlags(rend.flags);
-					bind(rend.textures);
 					GL11.glDrawElements(GL11.GL_TRIANGLES, rend.vertexCount, GL11.GL_UNSIGNED_INT, 0);
 					renders++;
 					polys += rend.vertexCount;
@@ -469,7 +497,7 @@ public class RenderPipeline {
 			partShader.bind();
 			partShader.setProjectionView(projectionView);
 			partShader.setViewMatrix(viewMatrix);
-			partShader.setShadowMapSpace(toShadowMapMatrix);
+			partShader.setShadowMapSpace(toShadowSpaceMatrix);
 			
 			for(int vaoId : pushPartShader.keySet()) {
 				List<RenderObject.Part> list = pushPartShader.get(vaoId);
@@ -480,13 +508,18 @@ public class RenderPipeline {
 				GL20.glEnableVertexAttribArray(2);
 				GL20.glEnableVertexAttribArray(3);
 				
+				// Because all vaos of the same id share the same stuff we can do this
+				if(!list.isEmpty()) {
+					RenderObject.Part first = list.get(0);
+					bindFlags(first.flags);
+					bind(first.textures);
+				}
+				
 				for(RenderObject.Part rend : list) {
 					partShader.setModelMatrix(rend.modelMatrix);
 					if(rend.color != null)
 						partShader.setColor(rend.color);
 					
-					bindFlags(rend.flags);
-					bind(rend.textures);
 					GL11.glDrawElements(GL11.GL_TRIANGLES, rend.vertexCount, GL11.GL_UNSIGNED_INT, 0);
 					renders++;
 					polys += rend.vertexCount;
@@ -507,16 +540,25 @@ public class RenderPipeline {
 			blockShader.bind();
 			blockShader.setProjectionView(projectionView);
 			blockShader.setViewMatrix(viewMatrix);
-			blockShader.setShadowMapSpace(toShadowMapMatrix);
+			blockShader.setShadowMapSpace(toShadowSpaceMatrix);
 			
-			for(int vaoId : pushBlockShader.keySet()) {
-				List<RenderObject.Block> list = pushBlockShader.get(vaoId);
+			BlockMesh mesh = WorldBlockCache.mesh;
+			final int vertexCount = mesh.getVertexCount();
+			GL30.glBindVertexArray(mesh.getVaoId());
+			GL20.glEnableVertexAttribArray(0);
+			GL20.glEnableVertexAttribArray(1);
+			GL20.glEnableVertexAttribArray(2);
+			
+			for(int hash : pushBlockShader.keySet()) {
+				List<RenderObject.Block> list = pushBlockShader.get(hash);
 				
-				GL30.glBindVertexArray(vaoId);
-				GL20.glEnableVertexAttribArray(0);
-				GL20.glEnableVertexAttribArray(1);
-				GL20.glEnableVertexAttribArray(2);
-				
+				if(!list.isEmpty()) {
+					RenderObject.Block first = list.get(0);
+					bindFlags(first.flags);
+					bind(first.textures);
+					
+					blockShader.setTiling(first.tiling);
+				}
 				for(RenderObject.Block rend : list) {
 					blockShader.setModelMatrix(rend.modelMatrix);
 					if(rend.color != null)
@@ -524,28 +566,29 @@ public class RenderPipeline {
 					
 					blockShader.setLocalTransform(rend.localTransform);
 					blockShader.setScale(rend.scale);
-					blockShader.setTiling(rend.tiling);
+//					blockShader.setTiling(rend.tiling);
+//					bindFlags(rend.flags);
+//					bind(rend.textures);
 					
-					bindFlags(rend.flags);
-					bind(rend.textures);
-					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rend.vertexCount);
+					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
 					renders++;
 					polys += rend.vertexCount;
 				}
 				
-				GL20.glDisableVertexAttribArray(0);
-				GL20.glDisableVertexAttribArray(1);
-				GL20.glDisableVertexAttribArray(2);
-				GL30.glBindVertexArray(0);
 			}
+			
+			GL20.glDisableVertexAttribArray(0);
+			GL20.glDisableVertexAttribArray(1);
+			GL20.glDisableVertexAttribArray(2);
+			GL30.glBindVertexArray(0);
 			
 			blockShader.unbind();
 		}
 		
 		unbind();
 		
-//		LOGGER.info("Total drawn objects: %d", renders);
-//		LOGGER.info("Total drawn triangels: %d", polys / 3);
+		LOGGER.info("Total drawn objects: %d", renders);
+		LOGGER.info("Total drawn triangels: %d", polys / 3);
 	}
 	
 	/**

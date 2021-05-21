@@ -3,6 +3,8 @@ package com.hardcoded.lwjgl.render;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joml.Vector3f;
+
 import com.hardcoded.game.World;
 import com.hardcoded.lwjgl.cache.WorldPartCache;
 import com.hardcoded.lwjgl.mesh.Mesh;
@@ -83,8 +85,12 @@ public class PartPipeline extends RenderPipe {
 			System.out.println("Loaded parts: " + parts.size());
 		}
 		
+		Vector3f camera = pipeline.getCamera().getPosition();
 		for(RenderObject.Part object : parts) {
-			push(object);
+			float dist = object.modelMatrix.transformPosition(new Vector3f()).distance(camera);
+			if(dist < 1000) {
+				push(object);
+			}
 		}
 	}
 }

@@ -970,17 +970,23 @@ public class TileData {
 	private static Data data;
 	protected static void setWorldTileIds(Data data) {
 		TileData.tileIds = data.get("tileId");
-		TileData.data = data;
 		
-		Data bounds = data.get("bounds");
-		int xMin = bounds.get("xMin").getInt();
-		int xMax = bounds.get("xMax").getInt();
-		int yMin = bounds.get("yMin").getInt();
-		int yMax = bounds.get("yMax").getInt();
-		TileData.xMin = xMin;
-		TileData.xMax = xMax;
-		TileData.yMin = yMin;
-		TileData.yMax = yMax;
+		try {
+			Data bounds = data.get("bounds");
+			int xMin = bounds.get("xMin").getInt();
+			int xMax = bounds.get("xMax").getInt();
+			int yMin = bounds.get("yMin").getInt();
+			int yMax = bounds.get("yMax").getInt();
+			TileData.xMin = xMin;
+			TileData.xMax = xMax;
+			TileData.yMin = yMin;
+			TileData.yMax = yMax;
+			TileData.data = data;
+		} catch(Exception e) {
+			TileData.data = null;
+			
+			e.printStackTrace();
+		}
 	}
 	
 	public static void removeTile(int x, int y) {
