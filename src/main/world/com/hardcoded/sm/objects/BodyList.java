@@ -58,17 +58,17 @@ public class BodyList extends SQLiteObject {
 		
 		nows = nows.substring(8 * 2);
 		
-		if(!last.equals(nows)) {
-			System.out.println(nows);
-			System.out.println("unk_0_4: " + unk_0_4);
-			System.out.println("worldId_4_2: " + worldId_4_2);
-			System.out.println("channel_6_1: " + channel_6_1);
-			System.out.println("flags_7_1: " + flags_7_1);
-			System.out.println("unk_8_4: " + unk_8_4);
-			System.out.println();
-			
-			last = nows;
-		}
+//		if(!last.equals(nows)) {
+//			System.out.println(nows);
+//			System.out.println("unk_0_4: " + unk_0_4);
+//			System.out.println("worldId_4_2: " + worldId_4_2);
+//			System.out.println("channel_6_1: " + channel_6_1);
+//			System.out.println("flags_7_1: " + flags_7_1);
+//			System.out.println("unk_8_4: " + unk_8_4);
+//			System.out.println();
+//			
+//			last = nows;
+//		}
 	}
 	
 	// Only one per body

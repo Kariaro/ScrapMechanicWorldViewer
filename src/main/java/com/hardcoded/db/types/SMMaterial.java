@@ -56,7 +56,7 @@ public class SMMaterial {
 	/**
 	 * Returns {@code true} if this material contains the specified {@code type}.
 	 * @param ype the ype to check
-	 * @return {@code true} if this material contains the specified {@code ype}
+	 * @return {@code true} if this material contains the specified {@code type}
 	 */
 	public boolean hasDefined(Types type) {
 		if(type == null) return false;

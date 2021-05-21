@@ -120,4 +120,26 @@ public class MathUtils {
 			.rotate(new Quaternionf(arot.getX(), arot.getY(), arot.getZ(), arot.getW()))
 			.scale(size.getX(), size.getY(), size.getZ());
 	}
+	
+	public static Matrix4f getOrthoProjectionMatrix(float width, float height, float length) {
+		Matrix4f matrix = new Matrix4f();
+		matrix.m00( 2f / width);
+		matrix.m11( 2f / height);
+		matrix.m22(-2f / length);
+		matrix.m33(1);
+		
+		return matrix;
+	}
+	
+	public static Matrix4f getShadowSpaceMatrix(Matrix4f mvpMatrix) {
+		return new Matrix4f(new Matrix4f()
+			.translate(0.5f, 0.5f, 0.5f)
+			.scale(0.5f, 0.5f, 0.5f)).mul(mvpMatrix);
+	}
+	
+//	public static Matrix4f createOffset() {
+//		return new Matrix4f()
+//			.translate(0.5f, 0.5f, 0.5f)
+//			.scale(0.5f, 0.5f, 0.5f);
+//	}
 }

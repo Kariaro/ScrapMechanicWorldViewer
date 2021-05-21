@@ -3,10 +3,11 @@ package com.hardcoded.lwjgl.render;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joml.Vector3f;
+
 import com.hardcoded.game.World;
 import com.hardcoded.lwjgl.cache.WorldBlockCache;
 import com.hardcoded.lwjgl.cache.WorldPartCache;
-import com.hardcoded.lwjgl.mesh.BlockMesh;
 import com.hardcoded.lwjgl.mesh.PartMesh;
 import com.hardcoded.lwjgl.render.RenderPipeline.RenderObject;
 import com.hardcoded.sm.objects.BodyList.ChildShape;
@@ -57,18 +58,14 @@ public class BlockPipeline extends RenderPipe {
 			
 			this.blocks = new ArrayList<>();
 			
-			// TODO: Sort blocks by their texture id
 			for(RigidBody body : list) {
 				for(ChildShape shape : body.shapes) {
 					WorldBlockCache cache = handler.getBlockCache(shape.uuid);
 					if(cache != null) {
-						BlockMesh block_mesh = WorldBlockCache.mesh;
-						
 						blocks.add(RenderObject.Block.get()
-							.setVao(block_mesh.getVaoId())
+							.setVao(cache.hashCode()) // Set the id to the hashCode of the object. This will make sure some blocks are unique
 							.setColor(shape.colorRGBA)
 							.setTextures(List.of(cache.dif, cache.asg, cache.nor))
-							.setVertexCount(block_mesh.getVertexCount())
 							.setModelMatrix(cache.calculateMatrix(shape))
 							
 							// Block specific
@@ -83,8 +80,12 @@ public class BlockPipeline extends RenderPipe {
 			reload_cache = false;
 		}
 		
+		Vector3f camera = pipeline.getCamera().getPosition();
 		for(RenderObject.Block object : blocks) {
-			push(object);
+			float dist = object.modelMatrix.transformPosition(new Vector3f()).distance(camera);
+			if(dist < 100) {
+				push(object);
+			}
 		}
 	}
 }

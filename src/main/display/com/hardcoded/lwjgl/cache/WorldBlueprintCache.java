@@ -26,7 +26,7 @@ import com.hardcoded.util.ValueUtils;
  * @since v0.3
  */
 public class WorldBlueprintCache implements WorldObjectCache {
-	private static final Log LOGGER = Log.getLogger();
+	protected static final Log LOGGER = Log.getLogger();
 	
 	private final WorldContentHandler handler;
 	private final String print;
