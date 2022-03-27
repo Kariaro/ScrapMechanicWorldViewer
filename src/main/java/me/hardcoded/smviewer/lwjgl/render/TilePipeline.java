@@ -26,6 +26,8 @@ import me.hardcoded.smreader.tile.object.Harvestable;
  * @since v0.3
  */
 public class TilePipeline extends RenderPipe {
+	private static final int REGION = 4;
+	
 	public TilePipeline(RenderPipeline pipeline) {
 		super(pipeline);
 	}
@@ -34,7 +36,7 @@ public class TilePipeline extends RenderPipe {
 	public void render() {
 		Camera camera = pipeline.getCamera();
 		
-		int ss = 3;
+		int ss = REGION;
 		Vector3f cam_pos = camera.getPosition();
 		int xx = (int)(cam_pos.x / 64);
 		int yy = (int)(cam_pos.y / 64);
@@ -57,43 +59,66 @@ public class TilePipeline extends RenderPipe {
 			);
 			
 			for (WorldHarvestableCache cache : tile.harvestables.keySet()) {
-				HarvestableMesh harvestable_mesh = cache.meshes.get(0);
-				if (!harvestable_mesh.isLoaded()) continue;
-				
 				List<TileObject<Harvestable>> cache_list = tile.harvestables.get(cache);
 				for (TileObject<Harvestable> object : cache_list) {
-					for (int i = 0; i < harvestable_mesh.meshes.length; i++) {
-						Mesh mesh = harvestable_mesh.meshes[i];
-						
-						push(RenderObject.Asset.get()
-							.setVao(mesh.getVaoId())
-							.setColor(object.object.getColor())
-							.setFlags(harvestable_mesh.mats[i].getPipeFlags())
-							.setTextures(harvestable_mesh.textures[i])
-							.setVertexCount(mesh.getVertexCount())
-							.setModelMatrix(object.modelMatrix)
-						);
+					float dist = object.modelMatrix.transformPosition(new Vector3f()).distance(camera.getPosition());
+					
+					HarvestableMesh harvestableMesh = cache.meshes.get(0);
+					for (int j = 1; j < cache.meshes.size(); j++) {
+						harvestableMesh = cache.meshes.get(j);
+						if (harvestableMesh.maxViewDistance > dist) {
+							break;
+						}
+					}
+					
+					if (harvestableMesh.isLoaded()) {
+						for (int i = 0; i < harvestableMesh.meshes.length; i++) {
+							Mesh mesh = harvestableMesh.meshes[i];
+							
+							double meshSize = mesh.getMeshSize();
+							if (meshSize / dist > harvestableMesh.minViewSize) {
+								continue;
+							}
+							
+							push(RenderObject.Asset.get()
+								.setVao(mesh.getVaoId())
+								.setColor(object.object.getColor())
+								.setFlags(harvestableMesh.mats[i].getPipeFlags())
+								.setTextures(harvestableMesh.textures[i])
+								.setVertexCount(mesh.getVertexCount())
+								.setModelMatrix(object.modelMatrix)
+							);
+						}
 					}
 				}
 			}
 			
 			for (WorldAssetCache cache : tile.assets.keySet()) {
-				final AssetMesh asset_mesh = cache.meshes.get(0);
-				if (!asset_mesh.isLoaded()) continue;
-				
 				List<TileObject<Asset>> cache_list = tile.assets.get(cache);
 				for (TileObject<Asset> object : cache_list) {
-					for (int i = 0; i < asset_mesh.meshes.length; i++) {
-						Mesh mesh = asset_mesh.meshes[i];
-						
-						push(RenderObject.Asset.get()
-							.setVao(mesh.getVaoId())
-							.setColor(asset_mesh.getColor(object.object, i))
-							.setTextures(asset_mesh.textures[i])
-							.setFlags(asset_mesh.mats[i].getPipeFlags())
-							.setVertexCount(mesh.getVertexCount())
-							.setModelMatrix(object.modelMatrix)
-						);
+					float dist = object.modelMatrix.transformPosition(new Vector3f()).distance(camera.getPosition());
+					
+					AssetMesh assetMesh = cache.meshes.get(0);
+					for (int j = 1; j < cache.meshes.size(); j++) {
+						assetMesh = cache.meshes.get(j);
+						if (assetMesh.maxViewDistance > dist) {
+							break;
+						}
+					}
+					
+					if (assetMesh.isLoaded()) {
+						for (int i = 0; i < assetMesh.meshes.length; i++) {
+							Mesh mesh = assetMesh.meshes[i];
+							
+							push(RenderObject.Asset.get()
+								.setVao(mesh.getVaoId())
+								.setColor(assetMesh.getColor(object.object, i))
+								.setTextures(assetMesh.textures[i])
+								.setFlags(assetMesh.mats[i].getPipeFlags())
+								.setVertexCount(mesh.getVertexCount())
+								.setModelMatrix(object.modelMatrix)
+							);
+						}
 					}
 				}
 			}

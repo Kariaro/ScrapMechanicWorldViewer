@@ -45,7 +45,7 @@ public class AssetMesh extends RenderableMeshImpl {
 			r = ((color >> 24) & 0xff) / 255.0f;
 			g = ((color >> 16) & 0xff) / 255.0f;
 			b = ((color >>  8) & 0xff) / 255.0f;
-			a = ((color >>  0) & 0xff) / 255.0f;
+			a = ((color      ) & 0xff) / 255.0f;
 		} else if (mat.map != null) {
 			Map<String, Object> custom = mat.map.custom;
 			if (custom != null && custom.containsKey("color")) {
@@ -59,7 +59,7 @@ public class AssetMesh extends RenderableMeshImpl {
 					r = ((color >> 24) & 0xff) / 255.0f;
 					g = ((color >> 16) & 0xff) / 255.0f;
 					b = ((color >>  8) & 0xff) / 255.0f;
-					a = ((color >>  0) & 0xff) / 255.0f;
+					a = ((color      ) & 0xff) / 255.0f;
 				}
 			}
 		}

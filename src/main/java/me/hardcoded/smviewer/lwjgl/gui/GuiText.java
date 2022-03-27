@@ -48,26 +48,26 @@ public class GuiText extends GuiComponent {
 		
 		{
 			String CHARACTERS = GuiFont.CHARACTERS;
-			float ATTLAS_WIDTH = GuiFont.ATTLAS_WIDTH;
-			float ATTLAS_HEIGHT = GuiFont.ATTLAS_HEIGHT;
-			float ATTLAS_SPACE = GuiFont.ATTLAS_SPACE;
+			float ATLAS_WIDTH = GuiFont.ATLAS_WIDTH;
+			float ATLAS_HEIGHT = GuiFont.ATLAS_HEIGHT;
+			float ATLAS_SPACE = GuiFont.ATLAS_SPACE;
 			Rectangle2D box = GuiFont.box;
 			String chars = text;
 			
-			int max_width = (int)(ATTLAS_WIDTH / (box.getWidth() + ATTLAS_SPACE));
+			int max_width = (int)(ATLAS_WIDTH / (box.getWidth() + ATLAS_SPACE));
 			double scale = fontSize * (1 / box.getHeight());
 			
 			GL11.glBegin(GL11.GL_TRIANGLES);
 			for (int i = 0; i < chars.length(); i++) {
 				int index = CHARACTERS.indexOf(chars.charAt(i));
 				
-				double xx = (box.getWidth() + ATTLAS_SPACE) * (index % max_width);
-				double yy = (box.getHeight() + ATTLAS_SPACE) * (index / max_width);
+				double xx = (box.getWidth() + ATLAS_SPACE) * (index % max_width);
+				double yy = (box.getHeight() + ATLAS_SPACE) * (index / max_width);
 				
-				double x0 = ((int)xx) / (double)ATTLAS_WIDTH;
-				double y0 = ((int)yy) / (double)ATTLAS_HEIGHT;
-				double x1 = ((int)(xx + box.getWidth())) / (double)ATTLAS_WIDTH;
-				double y1 = ((int)(yy + box.getHeight())) / (double)ATTLAS_HEIGHT;
+				double x0 = ((int)xx) / (double)ATLAS_WIDTH;
+				double y0 = ((int)yy) / (double)ATLAS_HEIGHT;
+				double x1 = ((int)(xx + box.getWidth())) / (double)ATLAS_WIDTH;
+				double y1 = ((int)(yy + box.getHeight())) / (double)ATLAS_HEIGHT;
 				
 				double vx = scale * box.getWidth() * i + x;
 				double vy = y;
@@ -88,7 +88,6 @@ public class GuiText extends GuiComponent {
 				GL11.glVertex2d(vx + vw, vy + vh);
 				GL11.glTexCoord2d(x0, y1);
 				GL11.glVertex2d(vx     , vy + vh);
-				
 			}
 			GL11.glEnd();
 		}

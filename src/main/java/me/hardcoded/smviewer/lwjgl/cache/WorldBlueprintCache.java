@@ -97,7 +97,7 @@ public class WorldBlueprintCache implements WorldObjectCache {
 			list.add(obj);
 			
 			System.out.println("body: " + obj);
-			for (BodyChild shape : obj.childs) {
+			for (BodyChild shape : obj.children) {
 				System.out.println("    child: " + shape);
 			}
 		}
@@ -108,13 +108,11 @@ public class WorldBlueprintCache implements WorldObjectCache {
 	private void tryLoadCache() {
 		boolean loaded = true;
 		for (BP_Object obj : list) {
-			for (BodyChild shape : obj.childs) {
-				{
-					WorldPartCache cache = handler.getPartCache(shape.shapeId);
-					if (cache != null) {
-						PartMesh part_mesh = cache.meshes.get(0);
-						if (!part_mesh.isLoaded()) loaded = false;
-					}
+			for (BodyChild shape : obj.children) {
+				WorldPartCache cache = handler.getPartCache(shape.shapeId);
+				if (cache != null) {
+					PartMesh part_mesh = cache.meshes.get(0);
+					if (!part_mesh.isLoaded()) loaded = false;
 				}
 			}
 		}
@@ -130,7 +128,7 @@ public class WorldBlueprintCache implements WorldObjectCache {
 		
 		BlueprintCache blueprint_cache = new BlueprintCache();
 		for (BP_Object obj : list) {
-			for (BodyChild shape : obj.childs) {
+			for (BodyChild shape : obj.children) {
 				{
 					WorldBlockCache cache = handler.getBlockCache(shape.shapeId);
 					if (cache != null) {
@@ -200,11 +198,11 @@ public class WorldBlueprintCache implements WorldObjectCache {
 		public Boolean restricted = false;
 		public Boolean restricted_build = false;
 		public Integer type = 0;
-		public List<BodyChild> childs = List.of();
+		public List<BodyChild> children = List.of();
 		
 		@Override
 		public String toString() {
-			return String.format("Body [ restricted=%s, type=%s ]", restricted, type, childs);
+			return String.format("Body [ restricted=%s, type=%s ]", restricted, type);
 		}
 	}
 	

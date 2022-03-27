@@ -1,7 +1,7 @@
 package me.hardcoded.smviewer.db.types;
 
 /**
- * A enum containing the different path types.
+ * An enum containing the different path types.
  * 
  * @author HardCoded
  * @since v0.2

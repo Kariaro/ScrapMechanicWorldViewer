@@ -21,13 +21,13 @@ public class Camera {
 	public double y;
 	public double z;
 	
+	private double x_vel;
+	private double y_vel;
+	private double z_vel;
+	
 	public double rx;
 	public double ry;
 	public double rz;
-	
-	public double xa;
-	public double ya;
-	public double za;
 	
 	public Camera(long window) {
 		this.window = window;
@@ -53,8 +53,8 @@ public class Camera {
 		}
 		
 		if (isMouseCaptured) {
-			rx += Input.getMouseDeltaX() / 2.0f;
-			ry += Input.getMouseDeltaY() / 2.0f;
+			rx += Input.getMouseDeltaX() / 4.0f;
+			ry += Input.getMouseDeltaY() / 4.0f;
 		}
 		
 		if (ry < -180) ry = -180;
@@ -98,25 +98,31 @@ public class Camera {
 		double yy = xd * MathUtils.sinDeg(-rx) - yd * MathUtils.cosDeg(-rx);
 		double zz = zd;
 		
+//		double den = 1.0 / Math.sqrt(xx * xx + yy * yy);
+//		if (Double.isFinite(den)) {
+//			xx *= den;
+//			yy *= den;
+//		}
 		
 		double time_delta = LwjglWindowSetup.getDeltaTime();
-		double speed = 4 * getSpeedModifier() * time_delta;
+		double speed = 10 * getSpeedModifier();
 		
 		double lx = x;
 		double ly = y;
 		double lz = z;
 		
-		xa += xx * speed;
-		ya += yy * speed;
-		za += zz * speed;
+		x_vel += xx * speed * time_delta;
+		y_vel += yy * speed * time_delta;
+		z_vel += zz * speed * time_delta;
 		
-		x += xa;
-		y += ya;
-		z += za;
+		double dampening = Math.pow(0.001, time_delta);
+		x_vel *= dampening;
+		y_vel *= dampening;
+		z_vel *= dampening;
 		
-		xa *= 0.7;
-		ya *= 0.7;
-		za *= 0.7;
+		x += x_vel * time_delta;
+		y += y_vel * time_delta;
+		z += z_vel * time_delta;
 		
 		double dx = x - lx;
 		double dy = y - ly;

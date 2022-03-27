@@ -67,14 +67,14 @@ public final class ScrapMechanicAssetHandler {
 		}
 	}
 	
-	protected final Map<UUID, SMClutter> clutters;
-	protected final Map<UUID, SMHarvestable> harvestables;
-	protected final Map<UUID, SMBlock> blocks;
-	protected final Map<UUID, SMAsset> assets;
-	protected final Map<UUID, SMPart> parts;
+	final Map<UUID, SMClutter> clutters;
+	final Map<UUID, SMHarvestable> harvestables;
+	final Map<UUID, SMBlock> blocks;
+	final Map<UUID, SMAsset> assets;
+	final Map<UUID, SMPart> parts;
 	
 	
-	protected final Map<String, SMMaterial> materials;
+	final Map<String, SMMaterial> materials;
 	
 	private File basePath;
 	private File gameDataPath;
@@ -98,7 +98,7 @@ public final class ScrapMechanicAssetHandler {
 	
 	/**
 	 * Set's the base path for lookup purposes.
-	 * This function initlializes all paths
+	 * This function initializes all paths
 	 * 
 	 * @param path
 	 * @throws FileNotFoundException if the path does not exist or if it was not an directory
@@ -210,23 +210,23 @@ public final class ScrapMechanicAssetHandler {
 	}
 	
 	
-	public static Collection<SMPart> getAllParts() {
-		return Collections.unmodifiableCollection(INSTANCE.parts.values());
-	}
-	
-	public static Collection<SMAsset> getAllAssets() {
-		return Collections.unmodifiableCollection(INSTANCE.assets.values());
-	}
-	
-	public static Collection<SMHarvestable> getAllHarvestables() {
-		return Collections.unmodifiableCollection(INSTANCE.harvestables.values());
-	}
-	
-	public static Collection<SMBlock> getAllBlocks() {
-		return Collections.unmodifiableCollection(INSTANCE.blocks.values());
-	}
-	
-	public static Collection<SMClutter> getAllClutters() {
-		return Collections.unmodifiableCollection(INSTANCE.clutters.values());
-	}
+//	public static Collection<SMPart> getAllParts() {
+//		return Collections.unmodifiableCollection(INSTANCE.parts.values());
+//	}
+//
+//	public static Collection<SMAsset> getAllAssets() {
+//		return Collections.unmodifiableCollection(INSTANCE.assets.values());
+//	}
+//
+//	public static Collection<SMHarvestable> getAllHarvestables() {
+//		return Collections.unmodifiableCollection(INSTANCE.harvestables.values());
+//	}
+//
+//	public static Collection<SMBlock> getAllBlocks() {
+//		return Collections.unmodifiableCollection(INSTANCE.blocks.values());
+//	}
+//
+//	public static Collection<SMClutter> getAllClutters() {
+//		return Collections.unmodifiableCollection(INSTANCE.clutters.values());
+//	}
 }

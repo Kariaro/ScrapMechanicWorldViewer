@@ -204,7 +204,7 @@ public class WorldContentHandler {
 		}
 		
 		LOGGER.info("Init: '%s'", path);
-		WorldTileCache render = new WorldTileCache(this, x, y, parts);
+		WorldTileCache render = new WorldTileCache(this, parts);
 		tiles.put(index, render);
 		return render;
 	}

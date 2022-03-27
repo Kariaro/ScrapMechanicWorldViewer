@@ -22,7 +22,7 @@ public class WorldBlockCache implements WorldObjectCache {
 	/**
 	 * This field is instantiated from inside {@code WorldRender}
 	 * 
-	 * This is because this field needs to be effectivly loaded on
+	 * This is because this field needs to be effectively loaded on
 	 * the gl thread but really early to prevent null checking
 	 */
 	public static BlockMesh mesh;

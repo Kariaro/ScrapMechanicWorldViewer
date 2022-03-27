@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import me.hardcoded.smviewer.lwjgl.async.LwjglAsyncThread;
-import me.hardcoded.smviewer.lwjgl.data.Texture;
+import me.hardcoded.smviewer.lwjgl.data.ImageLoader;
 import me.hardcoded.smviewer.lwjgl.input.Input;
 import me.hardcoded.smviewer.lwjgl.util.LoadingException;
 import org.lwjgl.glfw.*;
@@ -25,7 +25,6 @@ public class LwjglWindowSetup implements Runnable {
 	private static LwjglWindowSetup INSTANCE;
 	private static double deltaTime;
 	
-	public static final BufferedImage ICON = null;
 	public static int TARGET_FPS = 60;
 	
 	protected final ConcurrentLinkedDeque<Runnable> tasks;
@@ -68,6 +67,25 @@ public class LwjglWindowSetup implements Runnable {
 		return fps;
 	}
 	
+	private GLFWImage.Buffer createIconBuffer() {
+		BufferedImage[] icons = {
+			ImageLoader.loadResourceImage("/icons/icon_16.png"),
+			ImageLoader.loadResourceImage("/icons/icon_32.png"),
+			ImageLoader.loadResourceImage("/icons/icon_64.png"),
+			ImageLoader.loadResourceImage("/icons/icon_256.png")
+		};
+		
+		GLFWImage.Buffer buffer = GLFWImage.malloc(icons.length);
+		for (int i = 0; i < icons.length; i++) {
+			BufferedImage bi = icons[i];
+			GLFWImage image = GLFWImage.malloc();
+			image.set(bi.getWidth(), bi.getHeight(), ImageLoader.createBuffer(bi));
+			buffer.put(i, image);
+		}
+		
+		return buffer;
+	}
+	
 	private boolean init() {
 		if (!glfwInit()) {
 			return false;
@@ -98,13 +116,7 @@ public class LwjglWindowSetup implements Runnable {
 		});
 		
 		glfwMakeContextCurrent(window);
-		if (ICON != null) {
-			GLFWImage image = GLFWImage.malloc();
-			GLFWImage.Buffer buffer = GLFWImage.malloc(1);
-			image.set(ICON.getWidth(), ICON.getHeight(), Texture.loadBuffer(ICON));
-			buffer.put(0, image);
-			glfwSetWindowIcon(window, buffer);
-		}
+		glfwSetWindowIcon(window, createIconBuffer());
 		
 		GL.createCapabilities();
 		GL.createCapabilitiesWGL();
@@ -145,59 +157,66 @@ public class LwjglWindowSetup implements Runnable {
 		int frames = 0;
 		long last = System.currentTimeMillis();
 		double next = System.currentTimeMillis();
-		try {
-			long lastFrame = System.nanoTime();
-			while (running) {
-				double SLEEP_TIME = 1000.0 / (double)TARGET_FPS;
-				
-				if (Input.pollKey(GLFW_KEY_U)) {
-					TARGET_FPS = (TARGET_FPS == 60) ? 15 : 60;
-				}
-				// Run tasks
-				while (!tasks.isEmpty()) {
-					tasks.poll().run();
-				}
-				
-				{
-					long currentTime = System.currentTimeMillis();
-					if (currentTime < next) {
-						Thread.sleep((long)(next - currentTime));
-					}
-					
-					next += SLEEP_TIME;
-					if (currentTime > next + SLEEP_TIME) {
-						next += (long)((currentTime - next) / SLEEP_TIME) * SLEEP_TIME;
-						// Target fps not reached!
-						// Fps is lower than TARGET_FPS
-					}
-				}
-				
-				
+		
+		long lastFrame = System.nanoTime();
+		while (running) {
+			double SLEEP_TIME = 1000.0 / (double)TARGET_FPS;
+			
+			if (Input.pollKey(GLFW_KEY_U)) {
+				TARGET_FPS = (TARGET_FPS == 60) ? 15 : 60;
+			}
+			// Run tasks
+			while (!tasks.isEmpty()) {
+				tasks.poll().run();
+			}
+			
+			while (System.currentTimeMillis() < next) {
 				try {
-					long currentFrame = System.nanoTime();
-					deltaTime = (currentFrame - lastFrame) / 1000000000.0;
-					lastFrame = currentFrame;
-					
-					render.render();
-					render.update();
-					frames++;
-				} catch (Exception e) {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
 					e.printStackTrace();
-				}
-				
-				long now = System.currentTimeMillis();
-				if (now - last > 1000) {
-					fps = frames;
-					frames = 0;
-					last += 1000;
-				}
-				
-				if (glfwWindowShouldClose(window)) {
+					
+					// Stop the running loop
 					running = false;
+					break;
 				}
 			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			
+			{
+				long currentTime = System.currentTimeMillis();
+				next += SLEEP_TIME;
+				if (currentTime > next + SLEEP_TIME) {
+					next += (long)((currentTime - next) / SLEEP_TIME) * SLEEP_TIME;
+					
+					// Target fps not reached!
+					// Fps is lower than TARGET_FPS
+//					System.out.println("Target fps not reached");
+				}
+			}
+			
+			try {
+				long currentFrame = System.nanoTime();
+				deltaTime = (currentFrame - lastFrame) / 1000000000.0;
+				lastFrame = currentFrame;
+				
+				render.render();
+				render.update();
+				frames++;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			long now = System.currentTimeMillis();
+			if (now - last > 1000) {
+				fps = frames;
+				frames = 0;
+				last += 1000;
+				System.gc();
+			}
+			
+			if (glfwWindowShouldClose(window)) {
+				running = false;
+			}
 		}
 		
 		glfwDestroyWindow(window);

@@ -29,15 +29,13 @@ class ScrapMechanicLoader {
 	public static final String TERRAINMATERIALS = "Terrain/Materials/terrainmaterials.json";
 	public static final String PARTMATERIALS    = "Objects/Materials/partmaterials.json";
 	
-	// Harvestables
-	public static final String HARVESTABLE_SETS = "Harvestables/Database/harvestablesets.json";
-	
 	// Database
-	public static final String SHAPE_SETS = "Objects/Database/shapesets.json";
-	public static final String ASSET_SETS = "Terrain/Database/assetsets.json";
-	public static final String CLUTTER    = "Terrain/Database/clutter.json";
+	public static final String HARVESTABLE_SETS = "Harvestables/Database/harvestablesets.json";
+	public static final String SHAPE_SETS       = "Objects/Database/shapesets.json";
+	public static final String ASSET_SETS       = "Terrain/Database/assetsets.json";
+	public static final String CLUTTER          = "Terrain/Database/clutter.json";
 	
-	private ScrapMechanicAssetHandler handler;
+	private final ScrapMechanicAssetHandler handler;
 	public ScrapMechanicLoader(ScrapMechanicAssetHandler handler) {
 		this.handler = handler;
 	}
@@ -52,17 +50,17 @@ class ScrapMechanicLoader {
 		
 		loadAllShapeSets();
 		loadAllAssetSets();
+		loadAllHarvestableSets();
 		loadAllClutter();
-		loadAllHarvestables();
 		loadAllMaterials();
 		
 //		Set<String> set = new LinkedHashSet<>();
 //		for (String key : handler.materials.keySet()) {
 //			SMMaterial mat = handler.materials.get(key);
-//			
+//
 //			set.addAll(mat.flags);
 //		}
-//		
+//
 //		System.out.println(set);
 //		System.in.read();
 	}
@@ -81,16 +79,16 @@ class ScrapMechanicLoader {
 		}
 	}
 	
-	private void loadAllClutter() throws Exception {
-		for (String path : paths) {
-			loadClutter(new File(path, CLUTTER));
-		}
-	}
-	
-	private void loadAllHarvestables() throws Exception {
+	private void loadAllHarvestableSets() throws Exception {
 		Set<String> set = new HashSet<>();
 		for (String path : paths) {
 			loadHarvestableSets(new File(path, HARVESTABLE_SETS), set);
+		}
+	}
+	
+	private void loadAllClutter() throws Exception {
+		for (String path : paths) {
+			loadClutter(new File(path, CLUTTER));
 		}
 	}
 	
@@ -105,11 +103,11 @@ class ScrapMechanicLoader {
 		}
 	}
 	
-	private void loadPartMaterials(File partmaterials, Set<String> loaded) throws Exception {
-		if (!partmaterials.exists()) return;
-		LOGGER.debug("Reading path: %s", partmaterials);
+	private void loadPartMaterials(File partMaterials, Set<String> loaded) throws Exception {
+		if (!partMaterials.exists()) return;
+		LOGGER.debug("Reading path: %s", partMaterials);
 		
-		String content = FileUtils.readFile(partmaterials);
+		String content = FileUtils.readFile(partMaterials);
 		JsonFactory factory = new JsonFactory();
 		JsonParser parser = factory.createParser(StringUtils.removeComments(content));
 		
@@ -131,11 +129,11 @@ class ScrapMechanicLoader {
 		}
 	}
 	
-	private void loadShapeSets(File shapesets, Set<String> loaded) throws Exception {
-		if (!shapesets.exists()) return;
-		LOGGER.debug("Reading path: %s", shapesets);
+	private void loadShapeSets(File shapeSets, Set<String> loaded) throws Exception {
+		if (!shapeSets.exists()) return;
+		LOGGER.debug("Reading path: %s", shapeSets);
 		
-		String content = FileUtils.readFile(shapesets);
+		String content = FileUtils.readFile(shapeSets);
 		String[] values;
 		{
 			JsonFactory factory = new JsonFactory();
@@ -163,11 +161,11 @@ class ScrapMechanicLoader {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private void loadHarvestableSets(File harvestablesets, Set<String> loaded) throws Exception {
-		if (!harvestablesets.exists()) return;
-		LOGGER.debug("Reading path: %s", harvestablesets);
+	private void loadHarvestableSets(File harvestableSets, Set<String> loaded) throws Exception {
+		if (!harvestableSets.exists()) return;
+		LOGGER.debug("Reading path: %s", harvestableSets);
 		
-		String content = FileUtils.readFile(harvestablesets);
+		String content = FileUtils.readFile(harvestableSets);
 		List<String> values = new ArrayList<>();
 		{
 			JsonFactory factory = new JsonFactory();
@@ -201,11 +199,11 @@ class ScrapMechanicLoader {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private void loadAssetSets(File assetsets, Set<String> loaded) throws Exception {
-		if (!assetsets.exists()) return;
-		LOGGER.debug("Reading path: %s", assetsets);
+	private void loadAssetSets(File assetSets, Set<String> loaded) throws Exception {
+		if (!assetSets.exists()) return;
+		LOGGER.debug("Reading path: %s", assetSets);
 		
-		String content = FileUtils.readFile(assetsets);
+		String content = FileUtils.readFile(assetSets);
 		List<String> values = new ArrayList<>();
 		{
 			JsonFactory factory = new JsonFactory();
@@ -244,21 +242,11 @@ class ScrapMechanicLoader {
 		parser.nextValue();
 		
 		switch (typeName) {
-			case "partList":
-				loadParts(parser);
-				break;
-			case "blockList":
-				loadBlocks(parser);
-				break;
-			case "assetListRenderable":
-				loadAssets(parser);
-				break;
-			case "harvestableList": {
-				loadHarvestables(parser);
-				break;
-			}
-			default:
-				LOGGER.warn("Unsupported type '%s'", typeName);
+			case "partList" -> loadParts(parser);
+			case "blockList" -> loadBlocks(parser);
+			case "assetListRenderable" -> loadAssets(parser);
+			case "harvestableList" -> loadHarvestables(parser);
+			default -> LOGGER.warn("Unsupported type '%s'", typeName);
 		}
 	}
 	

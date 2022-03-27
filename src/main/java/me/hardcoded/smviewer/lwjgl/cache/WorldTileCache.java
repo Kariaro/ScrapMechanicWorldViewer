@@ -27,7 +27,7 @@ public class WorldTileCache {
 	// DEBUG
 	public TileParts parts;
 	
-	public WorldTileCache(WorldContentHandler handler, int x, int y, TileParts parts) {
+	public WorldTileCache(WorldContentHandler handler, TileParts parts) {
 		this.handler = handler;
 		this.parts = parts;
 	}

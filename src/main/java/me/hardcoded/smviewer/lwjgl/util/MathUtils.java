@@ -24,22 +24,27 @@ public class MathUtils {
 		return (float)(deg * deg2Rad);
 	}
 	
+	@Deprecated(forRemoval = true)
 	public static float[] toFloatArray(Vector4f[][] src, int depth) {
 		return toFloatArray(src, depth, new float[src.length * 4 * depth]);
 	}
 	
+	@Deprecated(forRemoval = true)
 	public static float[] toFloatArray(Vector3f[][] src, int depth) {
 		return toFloatArray(src, depth, new float[src.length * 3 * depth]);
 	}
 	
+	@Deprecated(forRemoval = true)
 	public static float[] toFloatArray(Vector2f[][] src, int depth) {
 		return toFloatArray(src, depth, new float[src.length * 2 * depth]);
 	}
 	
+	@Deprecated(forRemoval = true)
 	public static float[] toFloatArray(Vector4f[] src) {
 		return toFloatArray(src, new float[src.length * 4]);
 	}
 	
+	@Deprecated(forRemoval = true)
 	public static float[] toFloatArray(Vector3f[] src) {
 		return toFloatArray(src, new float[src.length * 3]);
 	}

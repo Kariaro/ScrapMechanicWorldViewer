@@ -127,49 +127,25 @@ public class RenderPipeline {
 		}
 	}
 	
-	private Map<Integer, List<RenderObject.Asset>> pushAssetShader = new HashMap<>();
-	private Map<Integer, List<RenderObject.Block>> pushBlockShader = new HashMap<>();
-	private Map<Integer, List<RenderObject.Tile>> pushTileShader = new HashMap<>();
-	private Map<Integer, List<RenderObject.Part>> pushPartShader = new HashMap<>();
+	private final Map<Integer, List<RenderObject.Asset>> pushAssetShader = new HashMap<>();
+	private final Map<Integer, List<RenderObject.Block>> pushBlockShader = new HashMap<>();
+	private final Map<Integer, List<RenderObject.Tile>> pushTileShader = new HashMap<>();
+	private final Map<Integer, List<RenderObject.Part>> pushPartShader = new HashMap<>();
 	
 	protected void push(RenderObject.Asset object) {
-		List<RenderObject.Asset> list = pushAssetShader.get(object.vao);
-		if (list == null) {
-			list = new ArrayList<>();
-			pushAssetShader.put(object.vao, list);
-		}
-		
-		list.add(object);
+		pushAssetShader.computeIfAbsent(object.vao, vao -> new ArrayList<>()).add(object);
 	}
 	
 	protected void push(RenderObject.Tile object) {
-		List<RenderObject.Tile> list = pushTileShader.get(object.vao);
-		if (list == null) {
-			list = new ArrayList<>();
-			pushTileShader.put(object.vao, list);
-		}
-		
-		list.add(object);
+		pushTileShader.computeIfAbsent(object.vao, vao -> new ArrayList<>()).add(object);
 	}
 	
 	protected void push(RenderObject.Part object) {
-		List<RenderObject.Part> list = pushPartShader.get(object.vao);
-		if (list == null) {
-			list = new ArrayList<>();
-			pushPartShader.put(object.vao, list);
-		}
-		
-		list.add(object);
+		pushPartShader.computeIfAbsent(object.vao, vao -> new ArrayList<>()).add(object);
 	}
 	
 	protected void push(RenderObject.Block object) {
-		List<RenderObject.Block> list = pushBlockShader.get(object.vao);
-		if (list == null) {
-			list = new ArrayList<>();
-			pushBlockShader.put(object.vao, list);
-		}
-		
-		list.add(object);
+		pushBlockShader.computeIfAbsent(object.vao, vao -> new ArrayList<>()).add(object);
 	}
 	
 	
@@ -246,17 +222,14 @@ public class RenderPipeline {
 	
 	
 	/**
-	 * This method resets the pipeline and rerenders all the screen objects.
+	 * This method resets the pipeline and re-renders all the screen objects.
 	 */
 	private void renderPipes() {
 		pushAssetShader.clear();
 		pushBlockShader.clear();
 		pushTileShader.clear();
 		pushPartShader.clear();
-		
-		for (int i = 0; i < loaded.length; i++) {
-			loaded[i] = null;
-		}
+		Arrays.fill(loaded, null);
 		
 		for (RenderPipe pipe : pipelines) {
 			pipe.render();
@@ -507,7 +480,7 @@ public class RenderPipeline {
 				GL20.glEnableVertexAttribArray(2);
 				GL20.glEnableVertexAttribArray(3);
 				
-				// Because all vaos of the same id share the same stuff we can do this
+				// Because all vaos of the same id share the same flags and textures we can do this
 				if (!list.isEmpty()) {
 					RenderObject.Part first = list.get(0);
 					bindFlags(first.flags);

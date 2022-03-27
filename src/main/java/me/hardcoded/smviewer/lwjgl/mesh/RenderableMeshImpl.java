@@ -64,7 +64,7 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 	@SuppressWarnings("unchecked")
 	private void initialize() {
 		String path = ScrapMechanicAssetHandler.resolvePath(lod.mesh);
-		StaticMeshLoaderAsync.AsyncMesh[] loaded = new StaticMeshLoaderAsync.AsyncMesh[0];
+		StaticMeshLoaderAsync.AsyncMesh[] loaded;
 		
 		try {
 			loaded = StaticMeshLoaderAsync.load(path);
@@ -143,11 +143,12 @@ public abstract class RenderableMeshImpl implements RenderableMesh {
 //		setUniform("nor_tex", 2);
 //		setUniform("ao_tex", 3);
 		
+		// TODO: Make this more defined
 		int index = 0;
 		if (index <= len) DIF_TEX = textures.get(index++);
-		if (index <= index && sm_mat.hasDefined(Types.ASG_TEX)) ASG_TEX = textures.get(index++);
-		if (index <= index && sm_mat.hasDefined(Types.NOR_TEX)) NOR_TEX = textures.get(index++);
-		if (index <= index && sm_mat.hasDefined(Types.AO_TEX)) AO_TEX = textures.get(index++);
+		if (index <= len && sm_mat.hasDefined(Types.ASG_TEX)) ASG_TEX = textures.get(index++);
+		if (index <= len && sm_mat.hasDefined(Types.NOR_TEX)) NOR_TEX = textures.get(index++);
+		if (index <= len && sm_mat.hasDefined(Types.AO_TEX)) AO_TEX = textures.get(index++);
 		
 		return textures;
 	}

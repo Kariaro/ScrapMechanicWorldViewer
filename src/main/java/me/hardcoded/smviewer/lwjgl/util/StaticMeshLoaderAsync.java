@@ -11,7 +11,7 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 
 /**
- * This is an asynchronious mesh loader
+ * This is an asynchronous mesh loader
  * 
  * @author HardCoded
  * @since v0.2

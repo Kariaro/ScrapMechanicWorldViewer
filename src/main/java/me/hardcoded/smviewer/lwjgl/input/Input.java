@@ -15,8 +15,8 @@ public class Input {
 	private static double scrollDeltaY;
 	private static double mousePositionX;
 	private static double mousePositionY;
-	private static double lastMousePositionX;
-	private static double lastMousePositionY;
+	private static double mouseDeltaX;
+	private static double mouseDeltaY;
 	
 	public static class Keyboard extends GLFWKeyCallback {
 		@Override
@@ -29,6 +29,9 @@ public class Input {
 	public static class MousePosition extends GLFWCursorPosCallback {
 		@Override
 		public void invoke(long window, double xpos, double ypos) {
+			mouseDeltaX += (xpos - mousePositionX);
+			mouseDeltaY += (ypos - mousePositionY);
+			
 			mousePositionX = xpos;
 			mousePositionY = ypos;
 		}
@@ -48,11 +51,8 @@ public class Input {
 	public static void process() {
 		scrollDeltaX = 0;
 		scrollDeltaY = 0;
-		
-		// TODO: In some instances this has created a "glitch" where the cursor is
-		//       moved when toggling between capture and non capture modes
-		lastMousePositionX = mousePositionX;
-		lastMousePositionY = mousePositionY;
+		mouseDeltaX = 0;
+		mouseDeltaY = 0;
 	}
 	
 	public static boolean pollKey(int key) {
@@ -79,10 +79,10 @@ public class Input {
 	}
 	
 	public static double getMouseDeltaX() {
-		return mousePositionX - lastMousePositionX;
+		return mouseDeltaX;
 	}
 	
 	public static double getMouseDeltaY() {
-		return mousePositionY - lastMousePositionY;
+		return mouseDeltaY;
 	}
 }

@@ -1,6 +1,7 @@
 package me.hardcoded.smviewer.lwjgl.gui;
 
 import me.hardcoded.smviewer.lwjgl.LwjglWindowSetup;
+import me.hardcoded.smviewer.lwjgl.util.Average;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
@@ -46,6 +47,7 @@ public class Gui {
 		guiRender.add(label_speed);
 	}
 	
+	private Average dta = new Average(10);
 	public void render() {
 		label_world.setText(String.format("World: '%s'", WorldRender.fileName));
 		label_fps.setText(String.format("Fps: '%d'", worldRender.getFps()));
@@ -58,7 +60,8 @@ public class Gui {
 		label_mouse.setText("(Alt) Mouse " + (cam.isMouseCaptured() ? "" : "Not ") + "Captured");
 		
 		label_speed.setLocation(0, WorldRender.height - 44);
-		label_speed.setText(String.format("%.2f", cam.average.getAverage()));
+		dta.add(LwjglWindowSetup.getDeltaTime());
+		label_speed.setText(String.format("%.2f", cam.average.getAverage() / dta.getAverage()));
 		guiRender.render();
 		
 //		defaultFont.drawText("World: '" + WorldRender.fileName + "'", 0, 0, 24);

@@ -10,6 +10,7 @@ import java.util.List;
 
 import me.hardcoded.smviewer.lwjgl.async.LwjglAsyncThread;
 import me.hardcoded.smviewer.lwjgl.util.StaticMeshLoaderAsync;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
 
@@ -29,6 +30,10 @@ public class Mesh {
 	private LoadedMaterial material;
 	private String name;
 	
+	// Used for view size culling
+	private Vector3f center;
+	private double radius;
+	
 	public Mesh(StaticMeshLoaderAsync.AsyncMesh mesh) {
 		this(
 			mesh.vertexs,
@@ -43,6 +48,35 @@ public class Mesh {
 	protected Mesh(float[] positions, float[] textCoords, float[] normals, float[] tangents, int[] indices) { // int[] jointIndices, float[] weights) {
 		if (LwjglAsyncThread.isCurrentThread()) {
 			throw new RuntimeException("Meshes can only be loaded on the main thread");
+		}
+		
+		{
+			double cx = 0;
+			double cy = 0;
+			double cz = 0;
+			int length = positions.length;
+			if (length > 2) {
+				for (int i = 0; i < length; i += 3) {
+					cx += positions[i];
+					cy += positions[i + 1];
+					cz += positions[i + 2];
+				}
+				
+				int verts = length / 3;
+				center = new Vector3f(
+					(float)(cx / (float)verts),
+					(float)(cy / (float)verts),
+					(float)(cz / (float)verts)
+				);
+				
+				for (int i = 0; i < length; i += 3) {
+					float d = center.distance(positions[i], positions[i + 1], positions[i + 2]);
+					
+					if (d > radius) {
+						radius = d;
+					}
+				}
+			}
 		}
 		
 		FloatBuffer posBuffer = null;
@@ -157,6 +191,10 @@ public class Mesh {
 	
 	public LoadedMaterial getMaterial() {
 		return material;
+	}
+	
+	public double getMeshSize() {
+		return radius;
 	}
 	
 	public void setMaterial(LoadedMaterial material) {
