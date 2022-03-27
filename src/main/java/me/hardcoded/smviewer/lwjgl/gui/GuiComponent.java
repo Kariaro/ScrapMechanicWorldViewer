@@ -48,7 +48,7 @@ public abstract class GuiComponent {
 	}
 	
 	public void setFont(GuiFont font) {
-		if(font == null) return;
+		if (font == null) return;
 		this.font = font;
 	}
 	

@@ -55,7 +55,7 @@ public class WorldTileCache {
 		long index = ((long)(x) & 0xffffffffL) | (((long)y) << 32L);
 		{
 			TileCache tile_cache = cache.get(index);
-			if(tile_cache != null) return tile_cache;
+			if (tile_cache != null) return tile_cache;
 		}
 		
 		int ox = TileData.getTileOffsetX(x, y);
@@ -83,16 +83,16 @@ public class WorldTileCache {
 		tile_cache.mesh = parts.getMesh(ox, oy);
 		tile_cache.mesh_modelMatrix = transform;
 		
-		for(int i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			List<Asset> assets = part.assets[i];
-			for(Asset asset : assets) {
+			for (Asset asset : assets) {
 				WorldAssetCache cache = handler.getAssetCache(asset.getUuid());
-				if(cache != null) {
+				if (cache != null) {
 					Matrix4f modelMatrix = new Matrix4f(transform)
 						.mul(MathUtils.getModelMatrix(asset));
 					
 					List<TileObject<Asset>> list = tile_cache.assets.get(cache);
-					if(list == null) {
+					if (list == null) {
 						list = new ArrayList<>();
 						tile_cache.assets.put(cache, list);
 					}
@@ -102,14 +102,14 @@ public class WorldTileCache {
 			}
 			
 			List<Harvestable> harvestables = part.harvestables[i];
-			for(Harvestable harvestable : harvestables) {
+			for (Harvestable harvestable : harvestables) {
 				WorldHarvestableCache cache = handler.getHarvestableCache(harvestable.getUuid());
-				if(cache != null) {
+				if (cache != null) {
 					Matrix4f modelMatrix = new Matrix4f(transform)
 						.mul(MathUtils.getModelMatrix(harvestable));
 					
 					List<TileObject<Harvestable>> list = tile_cache.harvestables.get(cache);
-					if(list == null) {
+					if (list == null) {
 						list = new ArrayList<>();
 						tile_cache.harvestables.put(cache, list);
 					}
@@ -119,14 +119,14 @@ public class WorldTileCache {
 			}
 		}
 		
-		for(Blueprint blueprint : part.blueprints) {
+		for (Blueprint blueprint : part.blueprints) {
 			WorldBlueprintCache cache = handler.getBlueprintCache(blueprint);
-			if(cache != null) {
+			if (cache != null) {
 				Matrix4f modelMatrix = new Matrix4f(transform)
 					.mul(MathUtils.getModelMatrix(blueprint));
 				
 				List<TileObject<Blueprint>> list = tile_cache.blueprints.get(cache);
-				if(list == null) {
+				if (list == null) {
 					list = new ArrayList<>();
 					tile_cache.blueprints.put(cache, list);
 				}
@@ -136,13 +136,13 @@ public class WorldTileCache {
 		}
 		
 		try {
-			for(Prefab pref : part.prefabs) {
+			for (Prefab pref : part.prefabs) {
 				Matrix4f modelMatrix = new Matrix4f(transform)
 					.mul(MathUtils.getModelMatrix(pref));
 				
 				cacheWritePrefab(tile_cache, modelMatrix, pref);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -152,14 +152,14 @@ public class WorldTileCache {
 	private void cacheWritePrefab(TileCache tile_cache, Matrix4f transform, Prefab unloaded) throws Exception {
 		Prefab prefab = PrefabFileReader.readPrefab(handler.getContext().resolve(unloaded.getPath()));
 		
-		for(Asset asset : prefab.getAssets()) {
+		for (Asset asset : prefab.getAssets()) {
 			WorldAssetCache cache = handler.getAssetCache(asset.getUuid());
-			if(cache != null) {
+			if (cache != null) {
 				Matrix4f modelMatrix = new Matrix4f(transform)
 					.mul(MathUtils.getModelMatrix(asset));
 				
 				List<TileObject<Asset>> list = tile_cache.assets.get(cache);
-				if(list == null) {
+				if (list == null) {
 					list = new ArrayList<>();
 					tile_cache.assets.put(cache, list);
 				}
@@ -168,14 +168,14 @@ public class WorldTileCache {
 			}
 		}
 		
-		for(Harvestable harvestable : prefab.getHarvestables()) {
+		for (Harvestable harvestable : prefab.getHarvestables()) {
 			WorldHarvestableCache cache = handler.getHarvestableCache(harvestable.getUuid());
-			if(cache != null) {
+			if (cache != null) {
 				Matrix4f modelMatrix = new Matrix4f(transform)
 					.mul(MathUtils.getModelMatrix(harvestable));
 				
 				List<TileObject<Harvestable>> list = tile_cache.harvestables.get(cache);
-				if(list == null) {
+				if (list == null) {
 					list = new ArrayList<>();
 					tile_cache.harvestables.put(cache, list);
 				}
@@ -184,14 +184,14 @@ public class WorldTileCache {
 			}
 		}
 		
-		for(Blueprint blueprint : prefab.getBlueprints()) {
+		for (Blueprint blueprint : prefab.getBlueprints()) {
 			WorldBlueprintCache cache = handler.getBlueprintCache(blueprint);
-			if(cache != null) {
+			if (cache != null) {
 				Matrix4f modelMatrix = new Matrix4f(transform)
 					.mul(MathUtils.getModelMatrix(blueprint));
 				
 				List<TileObject<Blueprint>> list = tile_cache.blueprints.get(cache);
-				if(list == null) {
+				if (list == null) {
 					list = new ArrayList<>();
 					tile_cache.blueprints.put(cache, list);
 				}
@@ -202,7 +202,7 @@ public class WorldTileCache {
 		
 		// TODO: Nodes / Decals
 		
-		for(Prefab pref : prefab.getPrefabs()) {
+		for (Prefab pref : prefab.getPrefabs()) {
 			Matrix4f modelMatrix = new Matrix4f(transform)
 				.mul(MathUtils.getModelMatrix(pref));
 			

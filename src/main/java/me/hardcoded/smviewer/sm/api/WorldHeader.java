@@ -108,7 +108,7 @@ public interface WorldHeader {
 		
 		@Override
 		public boolean equals(Object obj) {
-			if(obj instanceof Mod) return obj.hashCode() == fileId;
+			if (obj instanceof Mod) return obj.hashCode() == fileId;
 			return false;
 		}
 	}

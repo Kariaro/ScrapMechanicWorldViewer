@@ -22,12 +22,12 @@ public class ScriptData extends SQLiteObject {
 	public void test() throws SQLException {
 		ResultSet set = sqlite.execute("SELECT data FROM ScriptData WHERE channel = 1");
 		
-		if(set.getFetchSize() < 1) return;
+		if (set.getFetchSize() < 1) return;
 		byte[] data = set.getBytes("data");
 		
 		StringBuilder sb = new StringBuilder();
 		int a = 1;
-		for(byte b : data) {
+		for (byte b : data) {
 			sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
 		}
 		String nows = sb.toString();
@@ -54,7 +54,7 @@ public class ScriptData extends SQLiteObject {
 		set = sqlite.execute("SELECT data FROM ScriptData WHERE worldId = 65534");
 		set = sqlite.execute("SELECT data FROM ScriptData WHERE id = 49 AND channel = 48 AND worldId = 1 AND flags = 3");
 		
-		if(set.isClosed()) return;
+		if (set.isClosed()) return;
 		byte[] data = set.getBytes(1);
 		Memory mem = new Memory(data);
 		// System.out.println(StringUtils.getHexString(data, 4096, 64));
@@ -79,7 +79,7 @@ public class ScriptData extends SQLiteObject {
 	
 	private void loadTileData() throws SQLException {
 		ResultSet set = sqlite.execute("SELECT data FROM ScriptData WHERE channel = 1");
-		if(set.isClosed()) return;
+		if (set.isClosed()) return;
 		
 		byte[] data = set.getBytes(1);
 		Memory mem = new Memory(data);
@@ -104,7 +104,7 @@ public class ScriptData extends SQLiteObject {
 			TileData.setWorldTileIds(obj);
 			
 //			System.out.println("{");
-//			for(Object key : obj.keySet()) {
+//			for (Object key : obj.keySet()) {
 //				System.out.printf("    key=(%s)\n", key);
 //			}
 //			System.out.println("}");

@@ -10,6 +10,8 @@ public class TileData {
 	private static Map<Integer, String> map = new HashMap<>();
 	
 	static {
+		// TODO: This should be parsed from the LUA file and not hardcoded!
+		
 		map.put(1000101, "$SURVIVAL_DATA/Terrain/Tiles/roads_and_cliffs/Cliff(0001)_01.tile");
 		map.put(1000102, "$SURVIVAL_DATA/Terrain/Tiles/roads_and_cliffs/Cliff(0001)_02.tile");
 		map.put(1000103, "$SURVIVAL_DATA/Terrain/Tiles/roads_and_cliffs/Cliff(0001)_03.tile");
@@ -961,7 +963,7 @@ public class TileData {
 	
 	public static String getTilePath(int id) {
 		String str = map.get(id);
-		if(str == null) return null;
+		if (str == null) return null;
 		return ScrapMechanicAssetHandler.resolvePath(str);
 	}
 	
@@ -982,7 +984,7 @@ public class TileData {
 			TileData.yMin = yMin;
 			TileData.yMax = yMax;
 			TileData.data = data;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			TileData.data = null;
 			
 			e.printStackTrace();
@@ -994,44 +996,44 @@ public class TileData {
 	}
 	
 	public static boolean hasTile(int x, int y) {
-		if(x < xMin || x > xMax + 2 || y < yMin || y > yMax + 2) return false;
-		if(data == null) return false;
+		if (x < xMin || x > xMax + 2 || y < yMin || y > yMax + 2) return false;
+		if (data == null) return false;
 		return true;
 	}
 	
 	public static int getTileOffsetX(int x, int y) {
-		if(!hasTile(x, y)) return 0;
+		if (!hasTile(x, y)) return 0;
 		return data.get("tileOffsetX").get(y).getInt(x);
 	}
 	
 	public static int getTileId(int x, int y) {
-		if(!hasTile(x, y)) return 0;
+		if (!hasTile(x, y)) return 0;
 		return tileIds.get(y).getInt(x);
 	}
 	
 	public static int getTileOffsetY(int x, int y) {
-		if(!hasTile(x, y)) return 0;
+		if (!hasTile(x, y)) return 0;
 		return data.get("tileOffsetY").get(y).getInt(x);
 	}
 	
 	public static int getTileRotation(int x, int y) {
-		if(!hasTile(x, y)) return 0;
+		if (!hasTile(x, y)) return 0;
 		return data.get("rotation").get(y).getInt(x);
 	}
 	
 	public static float getTileElevation(int x, int y) {
-		if(!hasTile(x, y)) return 0;
+		if (!hasTile(x, y)) return 0;
 		return data.get("elevation").get(y).getFloat(x);
 	}
 	
 	public static float getTileCliffLevel(int x, int y) {
-		if(!hasTile(x, y)) return 0;
+		if (!hasTile(x, y)) return 0;
 		return data.get("cliffLevel").get(y).getFloat(x);
 	}
 	
 	public static String getTilePath(int x, int y) {
-		if(x < xMin || x > xMax + 2 || y < yMin || y > yMax + 2) return null;
-		if(tileIds == null) return null;
+		if (x < xMin || x > xMax + 2 || y < yMin || y > yMax + 2) return null;
+		if (tileIds == null) return null;
 		
 		Data row = tileIds.get(y);
 		int id = row.getInt(x);

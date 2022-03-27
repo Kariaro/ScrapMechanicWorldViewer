@@ -23,9 +23,10 @@ import org.lwjgl.system.windows.User32;
  */
 public class LwjglWindowSetup implements Runnable {
 	private static LwjglWindowSetup INSTANCE;
+	private static double deltaTime;
 	
 	public static final BufferedImage ICON = null;
-	public static final int TARGET_FPS = 60;
+	public static int TARGET_FPS = 60;
 	
 	protected final ConcurrentLinkedDeque<Runnable> tasks;
 	private WorldRender render;
@@ -141,13 +142,17 @@ public class LwjglWindowSetup implements Runnable {
 		// TODO: Upgrade the render loop to make it more accurate.
 		//       The current implementation of sleep will sleep to much in some cases.
 		
-		double SLEEP_TIME = 1000.0 / (double)TARGET_FPS;
-		
 		int frames = 0;
 		long last = System.currentTimeMillis();
-		double next = System.currentTimeMillis() + SLEEP_TIME;
+		double next = System.currentTimeMillis();
 		try {
+			long lastFrame = System.nanoTime();
 			while (running) {
+				double SLEEP_TIME = 1000.0 / (double)TARGET_FPS;
+				
+				if (Input.pollKey(GLFW_KEY_U)) {
+					TARGET_FPS = (TARGET_FPS == 60) ? 15 : 60;
+				}
 				// Run tasks
 				while (!tasks.isEmpty()) {
 					tasks.poll().run();
@@ -169,6 +174,10 @@ public class LwjglWindowSetup implements Runnable {
 				
 				
 				try {
+					long currentFrame = System.nanoTime();
+					deltaTime = (currentFrame - lastFrame) / 1000000000.0;
+					lastFrame = currentFrame;
+					
 					render.render();
 					render.update();
 					frames++;
@@ -196,6 +205,13 @@ public class LwjglWindowSetup implements Runnable {
 	}
 	
 	/**
+	 * Returns the current delta time since the last frame
+	 */
+	public static double getDeltaTime() {
+		return deltaTime;
+	}
+	
+	/**
 	 * Returns {@code true} if the current thread is running on the main thread
 	 */
 	public static boolean isCurrentThread() {
@@ -203,7 +219,7 @@ public class LwjglWindowSetup implements Runnable {
 	}
 	
 	/**
-	 * Run a task on the main thread.
+	 * Run a task on the main thread
 	 * @param runnable a task
 	 */
 	public static void runLater(Runnable runnable) {

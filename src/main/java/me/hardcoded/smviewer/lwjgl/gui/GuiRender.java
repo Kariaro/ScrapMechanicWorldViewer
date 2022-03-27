@@ -30,8 +30,8 @@ public class GuiRender {
 	}
 	
 	public void add(GuiComponent comp) {
-		if(comp == null || components.contains(comp)) return;
-		if(comp.getFont() == null) {
+		if (comp == null || components.contains(comp)) return;
+		if (comp.getFont() == null) {
 			comp.setFont(defaultFont);
 		}
 		
@@ -43,7 +43,7 @@ public class GuiRender {
 		GL11.glEnable(GL11.GL_ALPHA);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
-		for(GuiComponent comp : components) {
+		for (GuiComponent comp : components) {
 			comp.render();
 		}
 		

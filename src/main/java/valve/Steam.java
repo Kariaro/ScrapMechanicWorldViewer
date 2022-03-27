@@ -25,11 +25,11 @@ public final class Steam {
 	 */
 	public static File getSteamInstallPath() {
 		String installPath = RegQuery.readRegistryValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Valve\\Steam", "InstallPath");
-		if(installPath == null) { // 32 bit
+		if (installPath == null) { // 32 bit
 			installPath = RegQuery.readRegistryValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", "InstallPath");
 		}
 		
-		if(installPath == null) {
+		if (installPath == null) {
 			LOGGER.log(Level.WARNING, "Could not find the steam installPath in the registry");
 			return null;
 		}
@@ -48,12 +48,12 @@ public final class Steam {
 		library_paths.add(new File(install_path, "steamapps/common"));
 		
 		File file = new File(install_path, "steamapps/libraryfolders.vdf");
-		if(!file.exists()) {
+		if (!file.exists()) {
 			return library_paths;
 		}
 		
 		ValveData data = new ValveData(file).get("libraryfolders");
-		for(String key : data.getGroupNames()) {
+		for (String key : data.getGroupNames()) {
 			String path = data.get(key).getValue("path");
 			library_paths.add(new File(path, "steamapps/common"));
 		}
@@ -68,12 +68,12 @@ public final class Steam {
 	 */
 	public static File findGamePath(String name) {
 		List<File> library_paths = getSteamLibraryPaths();
-		for(File file : library_paths) {
-			if(!file.exists()) continue;
+		for (File file : library_paths) {
+			if (!file.exists()) continue;
 			File[] games = file.listFiles();
 			
-			for(File game : games) {
-				if(game.getName().equals(name)) {
+			for (File game : games) {
+				if (game.getName().equals(name)) {
 					return game;
 				}
 			}

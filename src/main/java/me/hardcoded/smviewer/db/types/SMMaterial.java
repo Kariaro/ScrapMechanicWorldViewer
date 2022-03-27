@@ -19,13 +19,13 @@ public class SMMaterial {
 	
 	@JsonSetter(value = "hlsl")
 	private void setContent(Map<String, Object> map) {
-		if(map.containsKey("defines")) {
+		if (map.containsKey("defines")) {
 			Object obj = map.get("defines");
-			if(obj instanceof List) {
+			if (obj instanceof List) {
 				@SuppressWarnings("unchecked")
 				List<String> obj_list = (List<String>)obj;
 				
-				for(String str : obj_list) {
+				for (String str : obj_list) {
 					defines.add(str);
 				}
 			}
@@ -49,7 +49,7 @@ public class SMMaterial {
 	 * @return {@code true} if this material contains the specified {@code flag}
 	 */
 	public boolean hasFlag(Flags flag) {
-		if(flag == null) return false;
+		if (flag == null) return false;
 		return flags.contains(flag.name());
 	}
 	
@@ -59,7 +59,7 @@ public class SMMaterial {
 	 * @return {@code true} if this material contains the specified {@code type}
 	 */
 	public boolean hasDefined(Types type) {
-		if(type == null) return false;
+		if (type == null) return false;
 		return defines.contains(type.name());
 	}
 	

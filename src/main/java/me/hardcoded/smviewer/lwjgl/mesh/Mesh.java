@@ -41,7 +41,7 @@ public class Mesh {
 	}
 	
 	protected Mesh(float[] positions, float[] textCoords, float[] normals, float[] tangents, int[] indices) { // int[] jointIndices, float[] weights) {
-		if(LwjglAsyncThread.isCurrentThread()) {
+		if (LwjglAsyncThread.isCurrentThread()) {
 			throw new RuntimeException("Meshes can only be loaded on the main thread");
 		}
 		
@@ -125,31 +125,31 @@ public class Mesh {
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 			GL30.glBindVertexArray(0);
 		} finally {
-			if(posBuffer != null) {
+			if (posBuffer != null) {
 				MemoryUtil.memFree(posBuffer);
 			}
 			
-			if(textCoordsBuffer != null) {
+			if (textCoordsBuffer != null) {
 				MemoryUtil.memFree(textCoordsBuffer);
 			}
 			
-			if(vecNormalsBuffer != null) {
+			if (vecNormalsBuffer != null) {
 				MemoryUtil.memFree(vecNormalsBuffer);
 			}
 			
-			if(vecTangentsBuffer != null) {
+			if (vecTangentsBuffer != null) {
 				MemoryUtil.memFree(vecTangentsBuffer);
 			}
 			
-			if(weightsBuffer != null) {
+			if (weightsBuffer != null) {
 				MemoryUtil.memFree(weightsBuffer);
 			}
 			
-			if(jointIndicesBuffer != null) {
+			if (jointIndicesBuffer != null) {
 				MemoryUtil.memFree(jointIndicesBuffer);
 			}
 			
-			if(indicesBuffer != null) {
+			if (indicesBuffer != null) {
 				MemoryUtil.memFree(indicesBuffer);
 			}
 		}
@@ -221,7 +221,7 @@ public class Mesh {
 		
 		// Delete the VBOs
 		GL15.glBindBuffer(GL_ARRAY_BUFFER, 0);
-		for(int vboId : vboIdList) {
+		for (int vboId : vboIdList) {
 			GL15.glDeleteBuffers(vboId);
 		}
 		

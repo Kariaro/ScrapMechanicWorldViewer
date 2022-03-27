@@ -28,7 +28,7 @@ public abstract class SQLiteObject {
 	}
 	
 	public Object getField(String name, String field) {
-		if(name == null) throw new UnsupportedOperationException();
+		if (name == null) throw new UnsupportedOperationException();
 		return sqlite.executeSingle("SELECT " + field + " FROM " + name);
 	}
 	
@@ -37,7 +37,7 @@ public abstract class SQLiteObject {
 	}
 	
 	public boolean setField(String name, String field, Object value) {
-		if(name == null) throw new UnsupportedOperationException();
+		if (name == null) throw new UnsupportedOperationException();
 		return sqlite.executeUpdate("UPDATE " + name + " SET " + field + " = " + value);
 	}
 }

@@ -12,7 +12,7 @@ public class FileUtils {
 	public static byte[] readStreamBytes(InputStream stream) {
 		try {
 			return stream.readAllBytes();
-		} catch(IOException e) {
+		} catch (IOException e) {
 			LOGGER.throwing(e);
 		}
 		
@@ -22,7 +22,7 @@ public class FileUtils {
 	public static byte[] readFileBytes(File file) {
 		try {
 			return readStreamBytes(new FileInputStream(file));
-		} catch(IOException e) {
+		} catch (IOException e) {
 			LOGGER.throwing(e);
 		}
 		

@@ -23,8 +23,8 @@ public class TileParts {
 		this.parts = new HashMap<>();
 		this.meshes = new HashMap<>();
 		
-		for(int y = 0; y < tile.getHeight(); y++) {
-			for(int x = 0; x < tile.getWidth(); x++) {
+		for (int y = 0; y < tile.getHeight(); y++) {
+			for (int x = 0; x < tile.getWidth(); x++) {
 				long index = ((long)(x) & 0xffffffffL) | (((long)y) << 32L);
 				
 				parts.put(index, tile.getPart(x, y));
@@ -53,7 +53,7 @@ public class TileParts {
 		long index = ((long)(x) & 0xffffffffL) | (((long)y) << 32L);
 		TileMesh mesh = meshes.get(index);
 		
-		if(mesh == null) {
+		if (mesh == null) {
 			TilePart part = getPart(x, y);
 			mesh = new TileMesh(part);
 			meshes.put(index, mesh);

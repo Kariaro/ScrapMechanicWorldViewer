@@ -19,7 +19,7 @@ public class Main {
 		try {
 			//world = World.loadWorldFromAppdata("TestingSQLite.db");
 			world = World.loadWorldFromAppdata("Survival/Amazing World.db");
-		} catch(Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Failed to load world file");
 			LOGGER.throwing(e);
 			return;
@@ -32,7 +32,7 @@ public class Main {
 		LOGGER.info("Tick: %d", game.getGameTick());
 		
 		LOGGER.info("Mods:");
-		for(WorldHeader.Mod mod : game.getMods()) {
+		for (WorldHeader.Mod mod : game.getMods()) {
 			LOGGER.info("    Mod: %s", mod);
 			LOGGER.info("      localId: %d", mod.localId);
 			LOGGER.info("      fileId : %d", mod.fileId);

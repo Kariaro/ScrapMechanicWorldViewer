@@ -31,7 +31,7 @@ public class GuiText extends GuiComponent {
 	}
 	
 	public void setFont(GuiFont font) {
-		if(font == null) return;
+		if (font == null) return;
 		this.font = font;
 	}
 	
@@ -41,7 +41,7 @@ public class GuiText extends GuiComponent {
 	
 	@Override
 	public void render() {
-		if(font == null) return;
+		if (font == null) return;
 
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		font.bind();
@@ -58,7 +58,7 @@ public class GuiText extends GuiComponent {
 			double scale = fontSize * (1 / box.getHeight());
 			
 			GL11.glBegin(GL11.GL_TRIANGLES);
-			for(int i = 0; i < chars.length(); i++) {
+			for (int i = 0; i < chars.length(); i++) {
 				int index = CHARACTERS.indexOf(chars.charAt(i));
 				
 				double xx = (box.getWidth() + ATTLAS_SPACE) * (index % max_width);

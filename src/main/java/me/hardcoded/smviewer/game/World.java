@@ -91,7 +91,7 @@ public class World implements AutoCloseable {
 	public static World loadWorld(File path) {
 		try {
 			return new World(path);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			LOGGER.throwing(e);
 		}
 		

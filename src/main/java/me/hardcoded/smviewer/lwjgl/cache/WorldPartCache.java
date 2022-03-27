@@ -33,10 +33,10 @@ public class WorldPartCache implements WorldObjectCache {
 		
 		try {
 			Renderable rend = part.renderable;
-			for(Lod lod : rend.lodList) {
+			for (Lod lod : rend.lodList) {
 				meshes.add(new PartMesh(lod, shader, part));
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -59,10 +59,10 @@ public class WorldPartCache implements WorldObjectCache {
 		RigidBody body = shape.body;
 		
 		Matrix4f matrix = new Matrix4f();
-		if(body.isGridLocked_0_2 == 2) {
+		if (body.isGridLocked_0_2 == 2) {
 			matrix.rotate(body.quat);
 		} else {
-			if(body.staticFlags < -1) {
+			if (body.staticFlags < -1) {
 				matrix.rotate(body.quat);
 			}
 		}

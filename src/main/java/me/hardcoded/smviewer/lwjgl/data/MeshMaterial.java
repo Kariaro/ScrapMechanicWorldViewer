@@ -25,13 +25,13 @@ public class MeshMaterial {
 	}
 	
 	public void bind(Shader shader) {
-		if(sm == null) return;
+		if (sm == null) return;
 		
-		if(sm.hasDefined(Types.FLIP_BACKFACE_NORMALS)) {
+		if (sm.hasDefined(Types.FLIP_BACKFACE_NORMALS)) {
 			//GL11.glDisable(GL11.GL_CULL_FACE);
 		}
 		
-		if(sm.hasDefined(Types.ALPHA)) {
+		if (sm.hasDefined(Types.ALPHA)) {
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			shader.setUniform("hasAlpha", true);
@@ -39,13 +39,13 @@ public class MeshMaterial {
 	}
 	
 	public void unbind(Shader shader) {
-		if(sm == null) return;
+		if (sm == null) return;
 		
-		if(sm.hasDefined(Types.FLIP_BACKFACE_NORMALS)) {
+		if (sm.hasDefined(Types.FLIP_BACKFACE_NORMALS)) {
 			//GL11.glEnable(GL11.GL_CULL_FACE);
 		}
 		
-		if(sm.hasDefined(Types.ALPHA)) {
+		if (sm.hasDefined(Types.ALPHA)) {
 			GL11.glDisable(GL11.GL_BLEND);
 			shader.setUniform("hasAlpha", false);
 		}
@@ -53,18 +53,18 @@ public class MeshMaterial {
 	
 	private int cache_flags = -1;
 	public int getPipeFlags() {
-		if(sm == null) return 0;
-		if(cache_flags == -1) {
+		if (sm == null) return 0;
+		if (cache_flags == -1) {
 			int flags = 0;
 			
-			if(!sm.hasDefined(Types.FLIP_BACKFACE_NORMALS)) {
+			if (!sm.hasDefined(Types.FLIP_BACKFACE_NORMALS)) {
 				flags |= RenderPipeline.PIPE_CULL_FACE;
 			}
 			
-			if(sm.hasDefined(Types.AO_TEX)) flags  |= RenderPipeline.PIPE_AO_TEX;
-			if(sm.hasDefined(Types.ASG_TEX)) flags |= RenderPipeline.PIPE_ASG_TEX;
-			if(sm.hasDefined(Types.NOR_TEX)) flags |= RenderPipeline.PIPE_NOR_TEX;
-			if(sm.hasDefined(Types.ALPHA)) flags |= RenderPipeline.PIPE_ALPHA;
+			if (sm.hasDefined(Types.AO_TEX)) flags  |= RenderPipeline.PIPE_AO_TEX;
+			if (sm.hasDefined(Types.ASG_TEX)) flags |= RenderPipeline.PIPE_ASG_TEX;
+			if (sm.hasDefined(Types.NOR_TEX)) flags |= RenderPipeline.PIPE_NOR_TEX;
+			if (sm.hasDefined(Types.ALPHA)) flags |= RenderPipeline.PIPE_ALPHA;
 			
 			cache_flags = flags;
 		}

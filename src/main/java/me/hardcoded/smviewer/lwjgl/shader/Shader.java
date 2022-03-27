@@ -35,7 +35,7 @@ public abstract class Shader {
 	
 	protected Shader(String vertexPath, String fragmentPath, Map<String, Object> defines) {
 		programId = GL20.glCreateProgram();
-		if(programId == 0) {
+		if (programId == 0) {
 			throw new ShaderException("Failed to create shader: GL20.glCreateProgram() returned 0");
 		}
 		
@@ -53,7 +53,7 @@ public abstract class Shader {
 	private String replaceDefines(String code, Map<String, Object> defines) {
 		String result = code;
 		
-		for(String key : defines.keySet()) {
+		for (String key : defines.keySet()) {
 			String pattern = "#define " + key + " [^\\r\\n]";
 			Object value = defines.get(key);
 			result = result.replaceFirst(pattern, "#define " + key + " " + value);
@@ -67,14 +67,14 @@ public abstract class Shader {
 	
 	private int createShader(String shaderCode, int shaderType) throws ShaderException {
 		int shaderId = glCreateShader(shaderType);
-		if(shaderId == 0) {
+		if (shaderId == 0) {
 			throw new ShaderException("Error creating shader. Type: " + shaderType);
 		}
 		
 		glShaderSource(shaderId, shaderCode);
 		glCompileShader(shaderId);
 		
-		if(glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
+		if (glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
 			System.out.println(shaderCode);
 			throw new ShaderException("Error compiling Shader code: " + glGetShaderInfoLog(shaderId, 1024));
 		}
@@ -92,7 +92,7 @@ public abstract class Shader {
 	}
 	
 	protected void setMatrix4f(int uniformId, Matrix4f value) {
-		try(MemoryStack stack = MemoryStack.stackPush()) {
+		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer fb = stack.mallocFloat(16);
 			value.get(fb);
 			GL20.glUniformMatrix4fv(uniformId, false, fb);
@@ -111,7 +111,7 @@ public abstract class Shader {
 	}
 	
 	protected void setUniform(String uniformName, Matrix4f value) {
-		try(MemoryStack stack = MemoryStack.stackPush()) {
+		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer fb = stack.mallocFloat(16);
 			value.get(fb);
 			glUniformMatrix4fv(_uniform(uniformName), false, fb);
@@ -119,7 +119,7 @@ public abstract class Shader {
 	}
 	
 	protected void setUniform(String uniformName, Matrix3f value) {
-		try(MemoryStack stack = MemoryStack.stackPush()) {
+		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer fb = stack.mallocFloat(12);
 			value.get(fb);
 			glUniformMatrix3fv(_uniform(uniformName), false, fb);
@@ -168,7 +168,7 @@ public abstract class Shader {
 	}
 	
 	private int _uniform(String uniformName) {
-		if(!uniforms.containsKey(uniformName)) {
+		if (!uniforms.containsKey(uniformName)) {
 			createUniform(uniformName);
 			return uniforms.get(uniformName);
 		}
@@ -178,20 +178,20 @@ public abstract class Shader {
 	
 	private void link() throws ShaderException {
 		glLinkProgram(programId);
-		if(glGetProgrami(programId, GL_LINK_STATUS) == 0) {
+		if (glGetProgrami(programId, GL_LINK_STATUS) == 0) {
 			throw new ShaderException("Error linking Shader code: " + glGetProgramInfoLog(programId, 1024));
 		}
 		
-		if(vertexShaderId != 0) {
+		if (vertexShaderId != 0) {
 			glDetachShader(programId, vertexShaderId);
 		}
 		
-		if(fragmentShaderId != 0) {
+		if (fragmentShaderId != 0) {
 			glDetachShader(programId, fragmentShaderId);
 		}
 		
 		glValidateProgram(programId);
-		if(glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
+		if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
 			System.err.println("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
 		}
 	}
@@ -206,7 +206,7 @@ public abstract class Shader {
 	
 	public final void cleanup() {
 		unbind();
-		if(programId != 0) {
+		if (programId != 0) {
 			glDeleteProgram(programId);
 		}
 	}

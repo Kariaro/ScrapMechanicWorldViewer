@@ -42,7 +42,7 @@ public class WorldBlockCache implements WorldObjectCache {
 			block_dif = Texture.loadTexture(ScrapMechanicAssetHandler.resolvePath(block.dif), 0, GL20.GL_LINEAR);
 			block_asg = Texture.loadTexture(ScrapMechanicAssetHandler.resolvePath(block.asg), 1, GL20.GL_LINEAR);
 			block_nor = Texture.loadTexture(ScrapMechanicAssetHandler.resolvePath(block.nor), 2, GL20.GL_LINEAR);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -61,10 +61,10 @@ public class WorldBlockCache implements WorldObjectCache {
 		Matrix4f matrix = new Matrix4f();
 		
 		{
-			if(shape.body.isGridLocked_0_2 == 2) {
+			if (shape.body.isGridLocked_0_2 == 2) {
 				matrix.rotate(body.quat);
 			} else {
-				if(body.staticFlags < -1) {
+				if (body.staticFlags < -1) {
 					matrix.rotate(body.quat);
 				}
 			}

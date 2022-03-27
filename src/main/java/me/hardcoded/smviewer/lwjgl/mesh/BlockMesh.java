@@ -106,15 +106,15 @@ public class BlockMesh {
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 			GL30.glBindVertexArray(0);
 		} finally {
-			if(verticesBuffer != null) {
+			if (verticesBuffer != null) {
 				MemoryUtil.memFree(verticesBuffer);
 			}
 			
-			if(normalsBuffer != null) {
+			if (normalsBuffer != null) {
 				MemoryUtil.memFree(normalsBuffer);
 			}
 			
-			if(tangentsBuffer != null) {
+			if (tangentsBuffer != null) {
 				MemoryUtil.memFree(tangentsBuffer);
 			}
 		}

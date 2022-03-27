@@ -24,12 +24,12 @@ public class SMAsset {
 	private void setDefaultColors(Map<String, Object> map) {
 		defaultColors = new LinkedHashMap<>();
 		
-		for(String key : map.keySet()) {
+		for (String key : map.keySet()) {
 			Object value = map.get(key);
 			
-			if(value instanceof ArrayList) {
+			if (value instanceof ArrayList) {
 				defaultColors.put(key, (List<String>)value);
-			} else if(value instanceof String) {
+			} else if (value instanceof String) {
 				defaultColors.put(key, List.of((String)value));
 			} else {
 				throw new RuntimeException("Unknown 'defaultColors' type '" + value + "' (" + (value == null ? "<null>":value.getClass()) + ")");

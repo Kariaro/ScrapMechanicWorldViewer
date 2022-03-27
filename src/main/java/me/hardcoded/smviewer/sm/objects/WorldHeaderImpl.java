@@ -83,11 +83,11 @@ public class WorldHeaderImpl extends SQLiteObject implements WorldHeader {
 			byte[] bytes = getModsBlob();
 			int length = getNumMods(bytes);
 			
-			for(int i = 0; i < length; i++) {
+			for (int i = 0; i < length; i++) {
 				mods.add(new Mod(bytes, 4 + i * 24));
 			}
 			
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		

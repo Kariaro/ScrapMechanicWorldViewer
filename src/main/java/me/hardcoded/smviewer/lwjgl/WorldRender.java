@@ -130,10 +130,10 @@ public class WorldRender {
 		if (last != now && last + 1000 < System.currentTimeMillis()) {
 			last = now;
 			/*
-			if(lastTimed == 0) {
+			if (lastTimed == 0) {
 				lastTimed = System.currentTimeMillis();
 			} else {
-				if(System.currentTimeMillis() - lastTimed > 1000) {
+				if (System.currentTimeMillis() - lastTimed > 1000) {
 					lastTimed += 1000;
 					System.out.println(updates);
 					updates = 0;
@@ -146,7 +146,7 @@ public class WorldRender {
 //				File targetPath = new File("res/clone/", fileName);
 //				
 //				// Copy world from game path to local path.
-//				if(!originPath.canRead()) {
+//				if (!originPath.canRead()) {
 //					// Could not do this action
 //					return;
 //				}
@@ -161,7 +161,7 @@ public class WorldRender {
 //				world.close();
 //				
 //				renderPipeline.loadWorld(world);
-//			} catch(Exception e) {
+//			} catch (Exception e) {
 //				LOGGER.error("Failed to load world file");
 //				LOGGER.throwing(e);
 //				//throw new Error("Failed to load world file");
@@ -240,9 +240,9 @@ public class WorldRender {
 			bc = ((rgba      ) & 0xff) / 255.0f;
 		}
 		
-		//if(xs < 1) xs = 0.5f;
-		//if(ys < 1) ys = 0.5f;
-		//if(zs < 1) zs = 0.5f;
+		//if (xs < 1) xs = 0.5f;
+		//if (ys < 1) ys = 0.5f;
+		//if (zs < 1) zs = 0.5f;
 		
 		x -= 0.5f;
 		y -= 0.5f;
@@ -354,8 +354,8 @@ public class WorldRender {
 		for (RigidBody body : bodies) {
 			//System.out.println(body.bodyId);
 			for (ChildShape shape : body.shapes) {
-				if(blocks.containsKey(shape.uuid)) continue;
-				if(parts.containsKey(shape.uuid)) continue;
+				if (blocks.containsKey(shape.uuid)) continue;
+				if (parts.containsKey(shape.uuid)) continue;
 				
 				renderCube(
 					shape.xPos + 0.5f,
@@ -387,7 +387,7 @@ public class WorldRender {
 //					}
 //				}
 				
-				//if(!has) continue;
+				//if (!has) continue;
 				renderCube(
 					body.yMin + 0.5f,
 					body.xMax + 0.5f,
@@ -414,14 +414,14 @@ public class WorldRender {
 					Vector3f middle = bounds.getMiddle();
 					
 //					boolean has = false;
-//					for(ChildShape shape : body.shapes) {
-//						if(shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
+//					for (ChildShape shape : body.shapes) {
+//						if (shape.uuid.toString().equals("c0159b96-edf3-46cd-9fbe-96ee1126304b")) {
 //							has = true;
 //							break;
 //						}
 //					}
 //					
-//					if(!has) continue;
+//					if (!has) continue;
 					Matrix4f matrix = new Matrix4f();
 					
 					{

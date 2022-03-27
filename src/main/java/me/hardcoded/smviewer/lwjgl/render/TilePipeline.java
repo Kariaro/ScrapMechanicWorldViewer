@@ -40,29 +40,29 @@ public class TilePipeline extends RenderPipe {
 		int yy = (int)(cam_pos.y / 64);
 		
 		List<TileCache> list = new ArrayList<>();
-		for(int y = yy - ss - 1; y < yy + ss; y++) {
-			for(int x = xx - ss - 1; x < xx + ss; x++) {
+		for (int y = yy - ss - 1; y < yy + ss; y++) {
+			for (int x = xx - ss - 1; x < xx + ss; x++) {
 				WorldTileCache render = handler.getTileCache(x, y);
-				if(render != null) {
+				if (render != null) {
 					list.add(render.getTileCache(x, y));
 				}
 			}
 		}
 		
-		for(TileCache tile : list) {
+		for (TileCache tile : list) {
 			push(RenderObject.Tile.get()
 				.setVao(tile.mesh.getVaoId())
 				.setVertexCount(tile.mesh.getVertexCount())
 				.setModelMatrix(tile.mesh_modelMatrix)
 			);
 			
-			for(WorldHarvestableCache cache : tile.harvestables.keySet()) {
+			for (WorldHarvestableCache cache : tile.harvestables.keySet()) {
 				HarvestableMesh harvestable_mesh = cache.meshes.get(0);
-				if(!harvestable_mesh.isLoaded()) continue;
+				if (!harvestable_mesh.isLoaded()) continue;
 				
 				List<TileObject<Harvestable>> cache_list = tile.harvestables.get(cache);
-				for(TileObject<Harvestable> object : cache_list) {
-					for(int i = 0; i < harvestable_mesh.meshes.length; i++) {
+				for (TileObject<Harvestable> object : cache_list) {
+					for (int i = 0; i < harvestable_mesh.meshes.length; i++) {
 						Mesh mesh = harvestable_mesh.meshes[i];
 						
 						push(RenderObject.Asset.get()
@@ -77,13 +77,13 @@ public class TilePipeline extends RenderPipe {
 				}
 			}
 			
-			for(WorldAssetCache cache : tile.assets.keySet()) {
+			for (WorldAssetCache cache : tile.assets.keySet()) {
 				final AssetMesh asset_mesh = cache.meshes.get(0);
-				if(!asset_mesh.isLoaded()) continue;
+				if (!asset_mesh.isLoaded()) continue;
 				
 				List<TileObject<Asset>> cache_list = tile.assets.get(cache);
-				for(TileObject<Asset> object : cache_list) {
-					for(int i = 0; i < asset_mesh.meshes.length; i++) {
+				for (TileObject<Asset> object : cache_list) {
+					for (int i = 0; i < asset_mesh.meshes.length; i++) {
 						Mesh mesh = asset_mesh.meshes[i];
 						
 						push(RenderObject.Asset.get()
@@ -98,19 +98,19 @@ public class TilePipeline extends RenderPipe {
 				}
 			}
 			
-			for(WorldBlueprintCache bp_cache : tile.blueprints.keySet()) {
-				if(!bp_cache.isLoaded()) continue;
+			for (WorldBlueprintCache bp_cache : tile.blueprints.keySet()) {
+				if (!bp_cache.isLoaded()) continue;
 				
 				List<TileObject<Blueprint>> bp_cache_list = tile.blueprints.get(bp_cache);
-				for(TileObject<Blueprint> bp_object : bp_cache_list) {
+				for (TileObject<Blueprint> bp_object : bp_cache_list) {
 					BlueprintCache bp = bp_cache.getCache();
 					
 					// Add blocks
-					for(WorldBlockCache cache : bp.blocks.keySet()) {
+					for (WorldBlockCache cache : bp.blocks.keySet()) {
 						List<RenderObject.Block> cache_list = bp.blocks.get(cache);
 						
 						final int len = cache_list.size();
-						for(int i = 0; i < len; i++) {
+						for (int i = 0; i < len; i++) {
 							RenderObject.Block ro = cache_list.get(i);
 							
 							push(RenderObject.Block.get()
@@ -129,11 +129,11 @@ public class TilePipeline extends RenderPipe {
 					}
 					
 					// Add parts
-					for(WorldPartCache cache : bp.parts.keySet()) {
+					for (WorldPartCache cache : bp.parts.keySet()) {
 						List<RenderObject.Part> cache_list = bp.parts.get(cache);
 						
 						final int len = cache_list.size();
-						for(int i = 0; i < len; i++) {
+						for (int i = 0; i < len; i++) {
 							RenderObject.Part ro = cache_list.get(i);
 							
 							push(RenderObject.Part.get()

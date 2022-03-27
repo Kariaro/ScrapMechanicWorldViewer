@@ -25,10 +25,10 @@ public class WorldHarvestableCache implements WorldObjectCache {
 		
 		try {
 			Renderable rend = harvestable.renderable;
-			for(Lod lod : rend.lodList) {
+			for (Lod lod : rend.lodList) {
 				meshes.add(new HarvestableMesh(lod, shader, harvestable));
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

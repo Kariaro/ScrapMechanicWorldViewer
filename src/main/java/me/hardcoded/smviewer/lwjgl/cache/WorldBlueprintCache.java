@@ -54,15 +54,15 @@ public class WorldBlueprintCache implements WorldObjectCache {
 		this.handler = handler;
 		
 		String value = blueprint.getValue();
-		if(value.isBlank()) {
+		if (value.isBlank()) {
 			// This is some sort of error
 			this.print = String.format("Blueprint@InvalidJSON@%08x", hashCode());
 			return;
 		}
 		
-		if(!blueprint.isLoaded()) {
+		if (!blueprint.isLoaded()) {
 			File file = handler.getContext().resolve(value);
-			if(file != null) {
+			if (file != null) {
 				content = FileUtils.readFile(file);
 			}
 			
@@ -77,7 +77,7 @@ public class WorldBlueprintCache implements WorldObjectCache {
 		LwjglAsyncThread.runAsync(() -> {
 			try {
 				loadBlocks();
-			} catch(Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		});
@@ -93,11 +93,11 @@ public class WorldBlueprintCache implements WorldObjectCache {
 		ObjectMapper mapper = new ObjectMapper();
 		BP_Object[] objects = mapper.readValue(parser, BP_Object[].class);
 		
-		for(BP_Object obj : objects) {
+		for (BP_Object obj : objects) {
 			list.add(obj);
 			
 			System.out.println("body: " + obj);
-			for(BodyChild shape : obj.childs) {
+			for (BodyChild shape : obj.childs) {
 				System.out.println("    child: " + shape);
 			}
 		}
@@ -107,19 +107,19 @@ public class WorldBlueprintCache implements WorldObjectCache {
 	
 	private void tryLoadCache() {
 		boolean loaded = true;
-		for(BP_Object obj : list) {
-			for(BodyChild shape : obj.childs) {
+		for (BP_Object obj : list) {
+			for (BodyChild shape : obj.childs) {
 				{
 					WorldPartCache cache = handler.getPartCache(shape.shapeId);
-					if(cache != null) {
+					if (cache != null) {
 						PartMesh part_mesh = cache.meshes.get(0);
-						if(!part_mesh.isLoaded()) loaded = false;
+						if (!part_mesh.isLoaded()) loaded = false;
 					}
 				}
 			}
 		}
 		
-		if(!loaded) {
+		if (!loaded) {
 			LwjglAsyncThread.runAsync(() -> {
 				// LOGGER.warn("Failed to fully load blueprint. Waiting");
 				tryLoadCache();
@@ -129,13 +129,13 @@ public class WorldBlueprintCache implements WorldObjectCache {
 		}
 		
 		BlueprintCache blueprint_cache = new BlueprintCache();
-		for(BP_Object obj : list) {
-			for(BodyChild shape : obj.childs) {
+		for (BP_Object obj : list) {
+			for (BodyChild shape : obj.childs) {
 				{
 					WorldBlockCache cache = handler.getBlockCache(shape.shapeId);
-					if(cache != null) {
+					if (cache != null) {
 						List<RenderObject.Block> list = blueprint_cache.blocks.get(cache);
-						if(list == null) {
+						if (list == null) {
 							list = new ArrayList<>();
 							blueprint_cache.blocks.put(cache, list);
 						}
@@ -159,15 +159,15 @@ public class WorldBlueprintCache implements WorldObjectCache {
 				
 				{
 					WorldPartCache cache = handler.getPartCache(shape.shapeId);
-					if(cache != null) {
+					if (cache != null) {
 						List<RenderObject.Part> list = blueprint_cache.parts.get(cache);
-						if(list == null) {
+						if (list == null) {
 							list = new ArrayList<>();
 							blueprint_cache.parts.put(cache, list);
 						}
 						
 						PartMesh part_mesh = cache.meshes.get(0);
-						for(int i = 0; i < part_mesh.meshes.length; i++) {
+						for (int i = 0; i < part_mesh.meshes.length; i++) {
 							Mesh mesh = part_mesh.meshes[i];
 							
 							list.add(RenderObject.Part.get()
@@ -230,12 +230,12 @@ public class WorldBlueprintCache implements WorldObjectCache {
 			try {
 				int value = Integer.parseInt(string, 16);
 				
-				if(string.length() == 6) {
+				if (string.length() == 6) {
 					this.color = (value << 8) | 0xff;
 				} else {
 					this.color = value;
 				}
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				
 			}
 		}

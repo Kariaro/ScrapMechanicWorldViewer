@@ -30,14 +30,14 @@ public class StaticMeshLoaderAsync {
 	
 	public static AsyncMesh[] load(String resourcePath, int flags) throws Exception {
 		AIScene aiScene = aiImportFile(resourcePath, flags);
-		if(aiScene == null) {
+		if (aiScene == null) {
 			throw new Exception("Error loading model");
 		}
 		
 		int numMaterials = aiScene.mNumMaterials();
 		PointerBuffer aiMaterials = aiScene.mMaterials();
 		List<LoadedMaterial> materials = new ArrayList<>();
-		for(int i = 0; i < numMaterials; i++) {
+		for (int i = 0; i < numMaterials; i++) {
 			AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(i));
 			processMaterial(aiMaterial, materials);
 		}
@@ -46,7 +46,7 @@ public class StaticMeshLoaderAsync {
 		PointerBuffer aiMeshes = aiScene.mMeshes();
 		
 		AsyncMesh[] meshes = new AsyncMesh[numMeshes];
-		for(int i = 0; i < numMeshes; i++) {
+		for (int i = 0; i < numMeshes; i++) {
 			AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
 			meshes[i] = processMesh(aiMesh, materials);
 		}
@@ -61,19 +61,19 @@ public class StaticMeshLoaderAsync {
 		
 		Vector4f ambient = LoadedMaterial.DEFAULT_COLOR;
 		int result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, colour);
-		if(result == 0) {
+		if (result == 0) {
 			ambient = new Vector4f(colour.r(), colour.g(), colour.b(), colour.a());
 		}
 		
 		Vector4f diffuse = LoadedMaterial.DEFAULT_COLOR;
 		result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, colour);
-		if(result == 0) {
+		if (result == 0) {
 			diffuse = new Vector4f(colour.r(), colour.g(), colour.b(), colour.a());
 		}
 		
 		Vector4f specular = LoadedMaterial.DEFAULT_COLOR;
 		result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, aiTextureType_NONE, 0, colour);
-		if(result == 0) {
+		if (result == 0) {
 			specular = new Vector4f(colour.r(), colour.g(), colour.b(), colour.a());
 		}
 		
@@ -100,7 +100,7 @@ public class StaticMeshLoaderAsync {
 		LoadedMaterial material;
 		int materialIdx = aiMesh.mMaterialIndex();
 		
-		if(materialIdx >= 0 && materialIdx < materials.size()) {
+		if (materialIdx >= 0 && materialIdx < materials.size()) {
 			material = materials.get(materialIdx);
 		} else {
 			material = new LoadedMaterial();
@@ -119,7 +119,7 @@ public class StaticMeshLoaderAsync {
 	private static void processVertices(AIMesh aiMesh, List<Float> vertices) {
 		AIVector3D.Buffer aiVertices = aiMesh.mVertices();
 		
-		while(aiVertices.remaining() > 0) {
+		while (aiVertices.remaining() > 0) {
 			AIVector3D aiVertex = aiVertices.get();
 			vertices.add(aiVertex.x());
 			vertices.add(aiVertex.y());
@@ -130,7 +130,7 @@ public class StaticMeshLoaderAsync {
 	private static void processTextCoords(AIMesh aiMesh, List<Float> textures) {
 		AIVector3D.Buffer textCoords = aiMesh.mTextureCoords(0);
 		int numTextCoords = textCoords != null ? textCoords.remaining() : 0;
-		for(int i = 0; i < numTextCoords; i++) {
+		for (int i = 0; i < numTextCoords; i++) {
 			AIVector3D textCoord = textCoords.get();
 			textures.add(textCoord.x());
 			textures.add(1 - textCoord.y());
@@ -140,10 +140,10 @@ public class StaticMeshLoaderAsync {
 	private static void processIndices(AIMesh aiMesh, List<Integer> indices) {
 		int numFaces = aiMesh.mNumFaces();
 		AIFace.Buffer aiFaces = aiMesh.mFaces();
-		for(int i = 0; i < numFaces; i++) {
+		for (int i = 0; i < numFaces; i++) {
 			AIFace aiFace = aiFaces.get(i);
 			IntBuffer buffer = aiFace.mIndices();
-			while(buffer.remaining() > 0) {
+			while (buffer.remaining() > 0) {
 				indices.add(buffer.get());
 			}
 		}
@@ -151,9 +151,9 @@ public class StaticMeshLoaderAsync {
 	
 	private static void processNormals(AIMesh aiMesh, List<Float> normals) {
 		AIVector3D.Buffer aiNormals = aiMesh.mNormals();
-		if(aiNormals == null) return;
+		if (aiNormals == null) return;
 		
-		while(aiNormals.remaining() > 0) {
+		while (aiNormals.remaining() > 0) {
 			AIVector3D aiNormal = aiNormals.get();
 			normals.add(aiNormal.x());
 			normals.add(aiNormal.y());
@@ -163,9 +163,9 @@ public class StaticMeshLoaderAsync {
 	
 	private static void processTangents(AIMesh aiMesh, List<Float> tangents) {
 		AIVector3D.Buffer aiTangents = aiMesh.mTangents();
-		if(aiTangents == null) return;
+		if (aiTangents == null) return;
 		
-		while(aiTangents.remaining() > 0) {
+		while (aiTangents.remaining() > 0) {
 			AIVector3D aiTangent = aiTangents.get();
 			tangents.add(aiTangent.x());
 			tangents.add(aiTangent.y());
@@ -179,11 +179,11 @@ public class StaticMeshLoaderAsync {
 	}
 
 	private static float[] listToArray(List<Float> list) {
-		if(list == null) return new float[0];
+		if (list == null) return new float[0];
 		final int size = list.size();
 		float[] result = new float[size];
 		
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			Float value = list.get(i);
 			result[i] = value == null ? Float.NaN:value;
 		}

@@ -59,7 +59,7 @@ public class Texture {
 		
 		cacheTextureId.put(path, this.textureId);
 		
-		if(!LwjglAsyncThread.isCurrentThread()) {
+		if (!LwjglAsyncThread.isCurrentThread()) {
 			LwjglAsyncThread.runAsync(() -> {
 				loadData(interpolation);
 			});
@@ -116,25 +116,25 @@ public class Texture {
 	}
 	
 	public void bind() {
-		if(this == NONE) return;
+		if (this == NONE) return;
 		GL20.glActiveTexture(activeId);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
 	}
 	
 	public void unbind() {
-		if(this == NONE) return;
+		if (this == NONE) return;
 		GL20.glActiveTexture(activeId);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 	}
 
 	public void cleanup() {
-		if(this == NONE) return;
+		if (this == NONE) return;
 		glDeleteTextures(textureId);
 	}
 	
 	@Override
 	public String toString() {
-		if(this == NONE) return "Texture[none]";
+		if (this == NONE) return "Texture[none]";
 		return new StringBuilder().append("Texture[id=").append(textureId).append("] (").append(width).append("x").append(height).append(")").toString();
 	}
 	
@@ -147,13 +147,13 @@ public class Texture {
 	}
 	
 	private static Texture loadTexture0(File file, String path, int activeId, int interpolation) throws IOException {
-		if(!file.exists()) {
+		if (!file.exists()) {
 			// LOGGER.warn("Tried to load texture '" + path + "' but that file does not exist");
 			return NONE;
 		}
 		
 		Texture tex = cache.get(path);
-		if(tex == null) {
+		if (tex == null) {
 			tex = new Texture(file, path, activeId, interpolation);
 			cache.put(path, tex);
 			return new Texture(cacheTextureId.get(path), activeId);
@@ -166,7 +166,7 @@ public class Texture {
 		File file = new File(Texture.class.getResource(path).toURI());
 		
 		String pathCheck = file.getAbsolutePath();
-		if(cacheTextureId.containsKey(pathCheck)) {
+		if (cacheTextureId.containsKey(pathCheck)) {
 			return new Texture(cacheTextureId.get(pathCheck), 0);
 		}
 		
@@ -182,7 +182,7 @@ public class Texture {
 	}
 	
 	private static ByteBuffer loadBuffer(BufferedImage bi, boolean flip_vertical) {
-		if(bi == null) return null;
+		if (bi == null) return null;
 		
 		int height = bi.getHeight();
 		int width = bi.getWidth();
@@ -192,10 +192,10 @@ public class Texture {
 		ByteBuffer buf = ByteBuffer.allocateDirect(4 * width * height);
 		int[] pixels = new int[width * height];
 		bi.getRGB(0, 0, width, height, pixels, 0, width);
-		for(int i = 0; i < height; i++) {
-			for(int j = 0; j < width; j++) {
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
 				int pos;
-				if(flip_vertical) {
+				if (flip_vertical) {
 					pos = (height - i - 1) * width + j;
 				} else {
 					pos = i * width + j;
@@ -209,7 +209,7 @@ public class Texture {
 				buf.put((byte)r);
 				buf.put((byte)g);
 				buf.put((byte)b);
-				if(alpha) {
+				if (alpha) {
 					buf.put((byte)((pixel >> 24) & 0xff));
 				} else {
 					buf.put((byte)0xff);

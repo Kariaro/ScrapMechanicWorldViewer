@@ -57,7 +57,7 @@ class ScrapMechanicLoader {
 		loadAllMaterials();
 		
 //		Set<String> set = new LinkedHashSet<>();
-//		for(String key : handler.materials.keySet()) {
+//		for (String key : handler.materials.keySet()) {
 //			SMMaterial mat = handler.materials.get(key);
 //			
 //			set.addAll(mat.flags);
@@ -69,44 +69,44 @@ class ScrapMechanicLoader {
 	
 	private void loadAllShapeSets() throws Exception {
 		Set<String> set = new HashSet<>();
-		for(String path : paths) {
+		for (String path : paths) {
 			loadShapeSets(new File(path, SHAPE_SETS), set);
 		}
 	}
 	
 	private void loadAllAssetSets() throws Exception {
 		Set<String> set = new HashSet<>();
-		for(String path : paths) {
+		for (String path : paths) {
 			loadAssetSets(new File(path, ASSET_SETS), set);
 		}
 	}
 	
 	private void loadAllClutter() throws Exception {
-		for(String path : paths) {
+		for (String path : paths) {
 			loadClutter(new File(path, CLUTTER));
 		}
 	}
 	
 	private void loadAllHarvestables() throws Exception {
 		Set<String> set = new HashSet<>();
-		for(String path : paths) {
+		for (String path : paths) {
 			loadHarvestableSets(new File(path, HARVESTABLE_SETS), set);
 		}
 	}
 	
 	private void loadAllMaterials() throws Exception {
 		Set<String> set = new HashSet<>();
-		for(String path : paths) {
+		for (String path : paths) {
 			loadPartMaterials(new File(path, PARTMATERIALS), set);
 		}
 		
-		for(String path : paths) {
+		for (String path : paths) {
 			loadPartMaterials(new File(path, TERRAINMATERIALS), set);
 		}
 	}
 	
 	private void loadPartMaterials(File partmaterials, Set<String> loaded) throws Exception {
-		if(!partmaterials.exists()) return;
+		if (!partmaterials.exists()) return;
 		LOGGER.debug("Reading path: %s", partmaterials);
 		
 		String content = FileUtils.readFile(partmaterials);
@@ -117,13 +117,13 @@ class ScrapMechanicLoader {
 		mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
 		List<Map<String, SMMaterial>> list = mapper.readValues(parser, new TypeReference<Map<String, SMMaterial>>() {}).readAll();
 		
-		for(int i = 0; i < list.size(); i++) {
+		for (int i = 0; i < list.size(); i++) {
 			Map<String, SMMaterial> map = list.get(i);
 			
-			for(String key : map.keySet()) {
+			for (String key : map.keySet()) {
 				SMMaterial mat = map.get(key);
 				
-				if(!handler.materials.containsKey(key)) {
+				if (!handler.materials.containsKey(key)) {
 					mat.name = key;
 					handler.materials.put(key, mat);
 				}
@@ -132,7 +132,7 @@ class ScrapMechanicLoader {
 	}
 	
 	private void loadShapeSets(File shapesets, Set<String> loaded) throws Exception {
-		if(!shapesets.exists()) return;
+		if (!shapesets.exists()) return;
 		LOGGER.debug("Reading path: %s", shapesets);
 		
 		String content = FileUtils.readFile(shapesets);
@@ -149,8 +149,8 @@ class ScrapMechanicLoader {
 			values = mapper.readValue(parser, String[].class);
 		}
 		
-		for(String value : values) {
-			if(loaded.contains(value)) continue;
+		for (String value : values) {
+			if (loaded.contains(value)) continue;
 			loaded.add(value);
 			
 			String path = resolvePath(value);
@@ -164,7 +164,7 @@ class ScrapMechanicLoader {
 	
 	@SuppressWarnings("rawtypes")
 	private void loadHarvestableSets(File harvestablesets, Set<String> loaded) throws Exception {
-		if(!harvestablesets.exists()) return;
+		if (!harvestablesets.exists()) return;
 		LOGGER.debug("Reading path: %s", harvestablesets);
 		
 		String content = FileUtils.readFile(harvestablesets);
@@ -179,16 +179,16 @@ class ScrapMechanicLoader {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
 			
-			for(Map map : mapper.readValue(parser, Map[].class)) {
+			for (Map map : mapper.readValue(parser, Map[].class)) {
 				Object obj = map.get("name");
-				if(obj != null) {
+				if (obj != null) {
 					values.add(ValueUtils.toString(obj, ""));
 				}
 			}
 		}
 		
-		for(String value : values) {
-			if(loaded.contains(value)) continue;
+		for (String value : values) {
+			if (loaded.contains(value)) continue;
 			loaded.add(value);
 			
 			String path = resolvePath(value);
@@ -202,7 +202,7 @@ class ScrapMechanicLoader {
 	
 	@SuppressWarnings("rawtypes")
 	private void loadAssetSets(File assetsets, Set<String> loaded) throws Exception {
-		if(!assetsets.exists()) return;
+		if (!assetsets.exists()) return;
 		LOGGER.debug("Reading path: %s", assetsets);
 		
 		String content = FileUtils.readFile(assetsets);
@@ -217,16 +217,16 @@ class ScrapMechanicLoader {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
 			
-			for(Map map : mapper.readValue(parser, Map[].class)) {
+			for (Map map : mapper.readValue(parser, Map[].class)) {
 				Object obj = map.get("assetSet");
-				if(obj != null) {
+				if (obj != null) {
 					values.add(ValueUtils.toString(obj, ""));
 				}
 			}
 		}
 		
-		for(String value : values) {
-			if(loaded.contains(value)) continue;
+		for (String value : values) {
+			if (loaded.contains(value)) continue;
 			loaded.add(value);
 			
 			String path = resolvePath(value);
@@ -243,7 +243,7 @@ class ScrapMechanicLoader {
 		String typeName = parser.nextFieldName();
 		parser.nextValue();
 		
-		switch(typeName) {
+		switch (typeName) {
 			case "partList":
 				loadParts(parser);
 				break;
@@ -266,8 +266,8 @@ class ScrapMechanicLoader {
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		SMPart[] array = mapper.readValue(parser, SMPart[].class);
 		
-		for(SMPart part : array) {
-			if(handler.parts.containsKey(part.uuid)) continue;
+		for (SMPart part : array) {
+			if (handler.parts.containsKey(part.uuid)) continue;
 			handler.parts.put(part.uuid, part);
 		}
 	}
@@ -276,8 +276,8 @@ class ScrapMechanicLoader {
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		SMBlock[] array = mapper.readValue(parser, SMBlock[].class);
 		
-		for(SMBlock block : array) {
-			if(handler.blocks.containsKey(block.uuid)) continue;
+		for (SMBlock block : array) {
+			if (handler.blocks.containsKey(block.uuid)) continue;
 			handler.blocks.put(block.uuid, block);
 		}
 	}
@@ -286,8 +286,8 @@ class ScrapMechanicLoader {
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		SMAsset[] array = mapper.readValue(parser, SMAsset[].class);
 		
-		for(SMAsset asset : array) {
-			if(handler.assets.containsKey(asset.uuid)) continue;
+		for (SMAsset asset : array) {
+			if (handler.assets.containsKey(asset.uuid)) continue;
 			handler.assets.put(asset.uuid, asset);
 		}
 	}
@@ -296,14 +296,14 @@ class ScrapMechanicLoader {
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		SMHarvestable[] array = mapper.readValue(parser, SMHarvestable[].class);
 		
-		for(SMHarvestable harvestable : array) {
-			if(handler.harvestables.containsKey(harvestable.uuid)) continue;
+		for (SMHarvestable harvestable : array) {
+			if (handler.harvestables.containsKey(harvestable.uuid)) continue;
 			handler.harvestables.put(harvestable.uuid, harvestable);
 		}
 	}
 	
 	private void loadClutter(File file) throws Exception {
-		if(!file.exists()) return;
+		if (!file.exists()) return;
 		
 		String content = FileUtils.readFile(file);
 		JsonFactory factory = new JsonFactory();
@@ -315,8 +315,8 @@ class ScrapMechanicLoader {
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		SMClutter[] array = mapper.readValue(parser, SMClutter[].class);
 		
-		for(SMClutter clutter : array) {
-			if(handler.clutters.containsKey(clutter.uuid)) continue;
+		for (SMClutter clutter : array) {
+			if (handler.clutters.containsKey(clutter.uuid)) continue;
 			handler.clutters.put(clutter.uuid, clutter);
 		}
 	}

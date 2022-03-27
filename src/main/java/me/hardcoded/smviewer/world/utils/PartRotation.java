@@ -103,7 +103,7 @@ public final class PartRotation {
 	
 	public static Matrix4f getRotationMultiplier(int rotation) {
 		Matrix4f mat = PartRotationIndex[rotation];
-		if(mat == null) return new Matrix4f();
+		if (mat == null) return new Matrix4f();
 		return mat.get(new Matrix4f());
 	}
 	
@@ -114,10 +114,10 @@ public final class PartRotation {
 	static {
 		PartRotationMultiplier = new Matrix4f[24];
 		
-		for(int i = 0; i < 6; i++) {
+		for (int i = 0; i < 6; i++) {
 			float[] arr = PartRotationArray[i];
 			
-			for(int j = 0; j < 4; j++) {
+			for (int j = 0; j < 4; j++) {
 				Matrix4f matrix = new Matrix4f();
 				matrix.rotate(arr[0], arr[1], arr[2], arr[3]);
 				matrix.rotate(arr[7 + j * 4], arr[4], arr[5], arr[6]);

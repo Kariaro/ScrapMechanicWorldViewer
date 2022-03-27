@@ -35,36 +35,36 @@ public class PartPipeline extends RenderPipe {
 	
 	@Override
 	public void render() {
-		if(reload_cache) {
+		if (reload_cache) {
 			World world = pipeline.getWorld();
 			List<RigidBody> list = world.getRigidBodies();
 			
 			boolean loaded = true;
-			for(RigidBody body : list) {
-				for(ChildShape shape : body.shapes) {
+			for (RigidBody body : list) {
+				for (ChildShape shape : body.shapes) {
 					WorldPartCache cache = handler.getPartCache(shape.uuid);
-					if(cache != null) {
+					if (cache != null) {
 						PartMesh part_mesh = cache.meshes.get(0);
-						if(!part_mesh.isLoaded()) {
+						if (!part_mesh.isLoaded()) {
 							loaded = false;
 						}
 					}
 				}
 			}
 			
-			if(!loaded) {
+			if (!loaded) {
 				return;
 			}
 			
 			this.parts = new ArrayList<>();
 			
-			for(RigidBody body : list) {
-				for(ChildShape shape : body.shapes) {
+			for (RigidBody body : list) {
+				for (ChildShape shape : body.shapes) {
 					WorldPartCache cache = handler.getPartCache(shape.uuid);
-					if(cache != null) {
+					if (cache != null) {
 						PartMesh part_mesh = cache.meshes.get(0);
 						
-						for(int i = 0; i < part_mesh.meshes.length; i++) {
+						for (int i = 0; i < part_mesh.meshes.length; i++) {
 							Mesh mesh = part_mesh.meshes[i];
 							
 							parts.add(RenderObject.Part.get()
@@ -86,9 +86,9 @@ public class PartPipeline extends RenderPipe {
 		}
 		
 		Vector3f camera = pipeline.getCamera().getPosition();
-		for(RenderObject.Part object : parts) {
+		for (RenderObject.Part object : parts) {
 			float dist = object.modelMatrix.transformPosition(new Vector3f()).distance(camera);
-			if(dist < 1000) {
+			if (dist < 1000) {
 				push(object);
 			}
 		}

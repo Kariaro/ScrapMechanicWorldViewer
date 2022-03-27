@@ -34,24 +34,24 @@ public class AssetMesh extends RenderableMeshImpl {
 		float a = 1;
 		
 		// FIXME: Mat will never be null, remove this
-		if(mat == null) {
+		if (mat == null) {
 			shader.setColor(r, g, b, a);
 			return;
 		}
 		
 		Map<String, Integer> map = asset.getMaterials();
-		if(map.containsKey(mat.key)) {
+		if (map.containsKey(mat.key)) {
 			int color = map.get(mat.key);
 			r = ((color >> 24) & 0xff) / 255.0f;
 			g = ((color >> 16) & 0xff) / 255.0f;
 			b = ((color >>  8) & 0xff) / 255.0f;
 			a = ((color >>  0) & 0xff) / 255.0f;
-		} else if(mat.map != null) {
+		} else if (mat.map != null) {
 			Map<String, Object> custom = mat.map.custom;
-			if(custom != null && custom.containsKey("color")) {
+			if (custom != null && custom.containsKey("color")) {
 				String value = (String)custom.get("color");
 				
-				if(defaultColors.containsKey(value)) {
+				if (defaultColors.containsKey(value)) {
 					int[] array = defaultColors.get(value);
 					
 					//int index = (int)(System.currentTimeMillis() % 100000L) / 1000;
@@ -69,23 +69,23 @@ public class AssetMesh extends RenderableMeshImpl {
 	
 	public int getColor(Asset asset, int index) {
 		MeshMaterial mat = mats[index];
-		if(mat == null) {
+		if (mat == null) {
 			return 0xffffff;
 		}
 		
 		Map<String, Integer> map = asset.getMaterials();
-		if(map.containsKey(mat.key)) {
+		if (map.containsKey(mat.key)) {
 			return map.get(mat.key);
-		} else if(mat.map != null) {
+		} else if (mat.map != null) {
 			Map<String, Object> custom = mat.map.custom;
-			if(custom != null && custom.containsKey("color")) {
+			if (custom != null && custom.containsKey("color")) {
 				String value = (String)custom.get("color");
 				
-				if(defaultColors.containsKey(value)) {
+				if (defaultColors.containsKey(value)) {
 					int[] array = defaultColors.get(value);
 					
 					//int index = (int)(System.currentTimeMillis() % 100000L) / 1000;
-					if(index >= array.length) {
+					if (index >= array.length) {
 						return array[0];
 					} else {
 						return array[index];
@@ -98,18 +98,18 @@ public class AssetMesh extends RenderableMeshImpl {
 	}
 	
 	public void render(Asset asset) {
-		if(!isLoaded) return;
+		if (!isLoaded) return;
 		
-		for(int i = 0; i < meshes.length; i++) {
+		for (int i = 0; i < meshes.length; i++) {
 			List<Texture> texs = textures[i];
 			MeshMaterial mat = mats[i];
 			
 			bindColor(asset, mat);
-			for(Texture t : texs) t.bind();
+			for (Texture t : texs) t.bind();
 			mat.bind(shader);
 			meshes[i].render();
 			mat.unbind(shader);
-			for(Texture t : texs) t.unbind();
+			for (Texture t : texs) t.unbind();
 		}
 	}
 }

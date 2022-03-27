@@ -48,7 +48,7 @@ public final class ScrapMechanicAssetHandler {
 		File sm_userpath = new File(appdata_path, "Axolot Games/Scrap Mechanic/User");
 		File[] sm_users = sm_userpath.listFiles();
 		
-		if(sm_users.length < 1) {
+		if (sm_users.length < 1) {
 			throw new RuntimeException("No steam profile found");
 		}
 		
@@ -60,9 +60,9 @@ public final class ScrapMechanicAssetHandler {
 			
 			ScrapMechanicAssetHandler.setBasePath(game_path.getAbsolutePath());
 			ScrapMechanicAssetHandler.INSTANCE.load();
-		} catch(FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			LOGGER.throwing(e);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			LOGGER.throwing(e);
 		}
 	}
@@ -106,7 +106,7 @@ public final class ScrapMechanicAssetHandler {
 	public static void setBasePath(String path) throws FileNotFoundException {
 		File file = new File(path);
 		
-		if(!file.exists() || !file.isDirectory())
+		if (!file.exists() || !file.isDirectory())
 			throw new FileNotFoundException("The directory '" + path + "' does not exist!");
 		
 		
@@ -117,24 +117,24 @@ public final class ScrapMechanicAssetHandler {
 	}
 	
 	public static String resolvePath(String path) {
-		if(path == null) {
+		if (path == null) {
 			// LOGGER.warn("ScrapMechanicAssetHandler.resolvePath was called with a null value");
 			return "";
 		}
 		
-		if(path.startsWith("$GAME_DATA")) {
+		if (path.startsWith("$GAME_DATA")) {
 			return path.replace("$GAME_DATA", INSTANCE.gameDataPath.getAbsolutePath());
 		}
 		
-		if(path.startsWith("$CHALLENGE_DATA")) {
+		if (path.startsWith("$CHALLENGE_DATA")) {
 			return path.replace("$CHALLENGE_DATA", INSTANCE.challengeDataPath.getAbsolutePath());
 		}
 		
-		if(path.startsWith("$SURVIVAL_DATA")) {
+		if (path.startsWith("$SURVIVAL_DATA")) {
 			return path.replace("$SURVIVAL_DATA", INSTANCE.survivalDataPath.getAbsolutePath());
 		}
 		
-//		if(path.startsWith("$MOD_DATA")) {
+//		if (path.startsWith("$MOD_DATA")) {
 //			File dir = new File($USER_DATA, "Mods/SQLiteTesting/");
 //			
 //			String resolve = path.substring(9);

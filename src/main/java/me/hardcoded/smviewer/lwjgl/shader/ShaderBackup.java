@@ -33,7 +33,7 @@ public class ShaderBackup {
 	
 	protected int createShader(String shaderPath, int shaderType) throws Exception {
 		int shaderId = glCreateShader(shaderType);
-		if(shaderId == 0) {
+		if (shaderId == 0) {
 			throw new Exception("Error creating shader. Type: " + shaderType);
 		}
 		
@@ -41,7 +41,7 @@ public class ShaderBackup {
 		glShaderSource(shaderId, shaderCode);
 		glCompileShader(shaderId);
 		
-		if(glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
+		if (glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
 			throw new Exception("Error compiling Shader code: " + glGetShaderInfoLog(shaderId, 1024));
 		}
 		
@@ -51,14 +51,14 @@ public class ShaderBackup {
 	
 	public int createShaderCode(String shaderCode, int shaderType) throws Exception {
 		int shaderId = glCreateShader(shaderType);
-		if(shaderId == 0) {
+		if (shaderId == 0) {
 			throw new Exception("Error creating shader. Type: " + shaderType);
 		}
 		
 		glShaderSource(shaderId, shaderCode);
 		glCompileShader(shaderId);
 		
-		if(glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
+		if (glGetShaderi(shaderId, GL_COMPILE_STATUS) == 0) {
 			throw new Exception("Error compiling Shader code: " + glGetShaderInfoLog(shaderId, 1024));
 		}
 		
@@ -76,7 +76,7 @@ public class ShaderBackup {
 	}
 	
 	public void setUniform(String uniformName, Matrix4f value) {
-		try(MemoryStack stack = MemoryStack.stackPush()) {
+		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer fb = stack.mallocFloat(16);
 			value.get(fb);
 			glUniformMatrix4fv(_uniform(uniformName), false, fb);
@@ -84,7 +84,7 @@ public class ShaderBackup {
 	}
 	
 	public void setUniform(String uniformName, Matrix3f value) {
-		try(MemoryStack stack = MemoryStack.stackPush()) {
+		try (MemoryStack stack = MemoryStack.stackPush()) {
 			FloatBuffer fb = stack.mallocFloat(12);
 			value.get(fb);
 			glUniformMatrix3fv(_uniform(uniformName), false, fb);
@@ -132,7 +132,7 @@ public class ShaderBackup {
 	}
 	
 	private int _uniform(String uniformName) {
-		if(!uniforms.containsKey(uniformName)) {
+		if (!uniforms.containsKey(uniformName)) {
 			createUniform(uniformName);
 			return uniforms.get(uniformName);
 		}
@@ -142,20 +142,20 @@ public class ShaderBackup {
 	
 	public final void link() throws Exception {
 		glLinkProgram(programId);
-		if(glGetProgrami(programId, GL_LINK_STATUS) == 0) {
+		if (glGetProgrami(programId, GL_LINK_STATUS) == 0) {
 			throw new Exception("Error linking Shader code: " + glGetProgramInfoLog(programId, 1024));
 		}
 		
-		if(vertexShaderId != 0) {
+		if (vertexShaderId != 0) {
 			glDetachShader(programId, vertexShaderId);
 		}
 		
-		if(fragmentShaderId != 0) {
+		if (fragmentShaderId != 0) {
 			glDetachShader(programId, fragmentShaderId);
 		}
 		
 		glValidateProgram(programId);
-		if(glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
+		if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
 			System.err.println("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
 		}
 	}
@@ -170,7 +170,7 @@ public class ShaderBackup {
 	
 	public final void cleanup() {
 		unbind();
-		if(programId != 0) {
+		if (programId != 0) {
 			glDeleteProgram(programId);
 		}
 	}

@@ -25,7 +25,7 @@ public class LwjglAsyncThread implements Runnable {
 	private final long dc;
 	
 	public LwjglAsyncThread(long dc, long context, boolean success) {
-		if(INSTANCE != null) throw new RuntimeException("LwjglAsyncThread was already instantiated");
+		if (INSTANCE != null) throw new RuntimeException("LwjglAsyncThread was already instantiated");
 		INSTANCE = this;
 		
 		this.tasks = new ConcurrentLinkedDeque<>();
@@ -37,20 +37,20 @@ public class LwjglAsyncThread implements Runnable {
 	@Override
 	public void run() {
 		thread = Thread.currentThread();
-		if(!success) return;
+		if (!success) return;
 		
 		// Add context to this thread
 		WGL.wglMakeCurrent(dc, context);
 		GL.createCapabilities();
 		
-		while(true) {
+		while (true) {
 			try {
 				Thread.sleep(10);
-			} catch(InterruptedException e) {
+			} catch (InterruptedException e) {
 				break;
 			}
 			
-			while(!tasks.isEmpty()) {
+			while (!tasks.isEmpty()) {
 				Runnable task = tasks.poll();
 				task.run();
 			}
@@ -71,7 +71,7 @@ public class LwjglAsyncThread implements Runnable {
 	 */
 	public static void runAsync(Runnable runnable) {
 		// If we failed to share the lists we load everything on the main thread
-		if(!INSTANCE.success) {
+		if (!INSTANCE.success) {
 			LwjglWindowSetup.runLater(runnable);
 			return;
 		}

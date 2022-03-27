@@ -12,7 +12,7 @@ class GenericData {
 		
 		int a = 1;
 		StringBuilder sb = new StringBuilder();
-		for(byte b : data) {
+		for (byte b : data) {
 			sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
 		}
 		String nows = sb.toString();
@@ -25,7 +25,7 @@ class GenericData {
 		
 		nows = nows.substring(8 * 2);
 		
-		if(!last.equals(nows)) {
+		if (!last.equals(nows)) {
 			System.out.println(nows);
 			System.out.println("unk_0_4: " + unk_0_4);
 			System.out.println("worldId_4_2: " + worldId_4_2);

@@ -45,7 +45,7 @@ public class MathUtils {
 	}
 	
 	public static float[] toFloatArray(Vector4f[] src, float[] dest) {
-		for(int i = 0; i < src.length; i++) {
+		for (int i = 0; i < src.length; i++) {
 			Vector4f v = src[i];
 			dest[i * 4    ] = v.x;
 			dest[i * 4 + 1] = v.y;
@@ -56,7 +56,7 @@ public class MathUtils {
 	}
 	
 	public static float[] toFloatArray(Vector3f[] src, float[] dest) {
-		for(int i = 0; i < src.length; i++) {
+		for (int i = 0; i < src.length; i++) {
 			Vector3f v = src[i];
 			dest[i * 3    ] = v.x;
 			dest[i * 3 + 1] = v.y;
@@ -66,14 +66,14 @@ public class MathUtils {
 	}
 	
 	public static float[] toFloatArray(Vector4f[][] src, int depth, float[] dest) {
-		for(int i = 0; i < src.length; i++) {
+		for (int i = 0; i < src.length; i++) {
 			int ix = i * 4 * depth;
 			
 			Vector4f[] v = src[i];
-			if(v == null) continue;
+			if (v == null) continue;
 			
-			for(int j = 0; j < depth; j++) {
-				if(v[j] == null) continue;
+			for (int j = 0; j < depth; j++) {
+				if (v[j] == null) continue;
 				dest[ix + j * 4    ] = v[j].x;
 				dest[ix + j * 4 + 1] = v[j].y;
 				dest[ix + j * 4 + 2] = v[j].z;
@@ -84,11 +84,11 @@ public class MathUtils {
 	}
 	
 	public static float[] toFloatArray(Vector3f[][] src, int depth, float[] dest) {
-		for(int i = 0; i < src.length; i++) {
+		for (int i = 0; i < src.length; i++) {
 			int ix = i * 3 * depth;
 			
 			Vector3f[] v = src[i];
-			for(int j = 0; j < depth; j++) {
+			for (int j = 0; j < depth; j++) {
 				dest[ix + j * 3    ] = v[j].x;
 				dest[ix + j * 3 + 1] = v[j].y;
 				dest[ix + j * 3 + 2] = v[j].z;
@@ -98,11 +98,11 @@ public class MathUtils {
 	}
 	
 	public static float[] toFloatArray(Vector2f[][] src, int depth, float[] dest) {
-		for(int i = 0; i < src.length; i++) {
+		for (int i = 0; i < src.length; i++) {
 			int ix = i * 2 * depth;
 			
 			Vector2f[] v = src[i];
-			for(int j = 0; j < depth; j++) {
+			for (int j = 0; j < depth; j++) {
 				dest[ix + j * 2    ] = v[j].x;
 				dest[ix + j * 2 + 1] = v[j].y;
 			}

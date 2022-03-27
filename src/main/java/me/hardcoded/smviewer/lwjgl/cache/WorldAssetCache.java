@@ -23,30 +23,30 @@ public class WorldAssetCache implements WorldObjectCache {
 		this.defaultColors = new HashMap<>();
 		this.meshes = new ArrayList<>();
 		
-		if(asset.defaultColors != null) {
+		if (asset.defaultColors != null) {
 			Map<String, List<String>> def = asset.defaultColors;
 			
-			for(String key : def.keySet()) {
+			for (String key : def.keySet()) {
 				List<String> list = def.get(key);
 				
 				// Skip bad values
-				if(list == null || list.size() == 0) continue;
+				if (list == null || list.size() == 0) continue;
 				
 				int[] array = new int[list.size()];
 				defaultColors.put(key, array);
 				
-				for(int i = 0; i < list.size(); i++) {
+				for (int i = 0; i < list.size(); i++) {
 					String color = list.get(i);
 					
 					try {
 						int value = Integer.parseInt(color, 16);
 						
-						if(color.length() == 6) {
+						if (color.length() == 6) {
 							array[i] = (value << 8) | 0xff;
 						} else {
 							array[i] = value;
 						}
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						// Do nothing
 					}
 				}
@@ -55,11 +55,11 @@ public class WorldAssetCache implements WorldObjectCache {
 		
 		try {
 			Renderable rend = asset.renderable;
-			for(Lod lod : rend.lodList) {
+			for (Lod lod : rend.lodList) {
 				AssetMesh mesh = new AssetMesh(lod, shader, asset, defaultColors);
 				meshes.add(mesh);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

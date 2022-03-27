@@ -27,10 +27,10 @@ public class BodyList extends SQLiteObject {
 		List<RigidBody> list = new ArrayList<>();
 		ResultSet set = sqlite.execute("SELECT * FROM RigidBody");
 		try {
-			while(set.next()) {
+			while (set.next()) {
 				list.add(new RigidBody(set));
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -45,7 +45,7 @@ public class BodyList extends SQLiteObject {
 		
 		int a = 1;
 		StringBuilder sb = new StringBuilder();
-		for(byte b : data) {
+		for (byte b : data) {
 			sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
 		}
 		String nows = sb.toString();
@@ -58,7 +58,7 @@ public class BodyList extends SQLiteObject {
 		
 		nows = nows.substring(8 * 2);
 		
-//		if(!last.equals(nows)) {
+//		if (!last.equals(nows)) {
 //			System.out.println(nows);
 //			System.out.println("unk_0_4: " + unk_0_4);
 //			System.out.println("worldId_4_2: " + worldId_4_2);
@@ -145,7 +145,7 @@ public class BodyList extends SQLiteObject {
 			//System.out.println(bounds);
 			
 			ResultSet childSet = sqlite.execute("SELECT * FROM ChildShape WHERE bodyId = " + bodyId);
-			while(childSet.next()) {
+			while (childSet.next()) {
 				shapes.add(new ChildShape(this, childSet));
 			}
 			
@@ -175,7 +175,7 @@ public class BodyList extends SQLiteObject {
 			yWorld = Util.getFloat(data, 47, true);
 			zWorld = Util.getFloat(data, 51, true);
 			
-			if(isGridLocked_0_2 == 1) {
+			if (isGridLocked_0_2 == 1) {
 				// This value has with how the object is stuck....
 				staticFlags = Util.getInt(data, 55, true);
 				//System.out.println("55: " + staticFlags);
@@ -188,7 +188,7 @@ public class BodyList extends SQLiteObject {
 			
 			/*try {
 				JDBC4Connection conn = sqlite.getConnection();
-				if(isStatic_0_2 == 2) data[79] = 0;
+				if (isStatic_0_2 == 2) data[79] = 0;
 				data[59] = 0;
 				
 				data[55] = 1;
@@ -199,11 +199,11 @@ public class BodyList extends SQLiteObject {
 				PreparedStatement statement = conn.prepareStatement("UPDATE RigidBody SET data = ? WHERE id = " + bodyId);
 				statement.setBytes(1, data);
 				statement.execute();
-			} catch(Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}*/
 			
-			if(isGridLocked_0_2 == 2) {
+			if (isGridLocked_0_2 == 2) {
 				xVelocity = Util.getFloat(data, 55, true);
 				yVelocity = Util.getFloat(data, 59, true);
 				zVelocity = Util.getFloat(data, 63, true);
@@ -214,7 +214,7 @@ public class BodyList extends SQLiteObject {
 				
 				flags = Byte.toUnsignedInt(data[79]);
 				
-				if(bodyId == 1566) { // 1531
+				if (bodyId == 1566) { // 1531
 					//System.out.println();
 					//System.out.printf("Quaternion:      %8.5f, %8.5f, %8.5f, %8.5f\n", aa, bb, cc, dd);
 					//System.out.printf("WorldPosition:   %8.5f, %8.5f, %8.5f\n", xWorld, yWorld, zWorld);
@@ -227,13 +227,13 @@ public class BodyList extends SQLiteObject {
 					
 					int a = 1;
 					StringBuilder sb = new StringBuilder();
-					for(int i = 0; i < data.length; i++) {
+					for (int i = 0; i < data.length; i++) {
 						byte b = data[i];
 						sb.append(String.format("%02x%s", b, ((a++ % 16) == 0) ? "":""));
 					}
 					String nows = sb.toString();
 					
-					if(!nows.equals(last)) {
+					if (!nows.equals(last)) {
 						
 						//System.out.println(nows);
 						//last = nows;
@@ -321,7 +321,7 @@ public class BodyList extends SQLiteObject {
 			
 			colorRGBA = Util.getInt(data, 37, false);
 			
-			if(shapeType == 0x1f) {
+			if (shapeType == 0x1f) {
 				xSize = Util.getShort(data, 41, true);
 				ySize = Util.getShort(data, 43, true);
 				zSize = Util.getShort(data, 45, true);
@@ -380,7 +380,7 @@ public class BodyList extends SQLiteObject {
 			
 			size_0_4 = Util.getInt(data, 0, true);
 			
-			for(int i = 0; i < size_0_4; i++) {
+			for (int i = 0; i < size_0_4; i++) {
 				int offset = 8 + i * 24;
 				// 24 bytes between each entry
 				// 16 bytes entry

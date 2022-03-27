@@ -35,33 +35,33 @@ public class BlockPipeline extends RenderPipe {
 	
 	@Override
 	public void render() {
-		if(reload_cache) {
+		if (reload_cache) {
 			World world = pipeline.getWorld();
 			List<RigidBody> list = world.getRigidBodies();
 			
 			boolean loaded = true;
-			for(RigidBody body : list) {
-				for(ChildShape shape : body.shapes) {
+			for (RigidBody body : list) {
+				for (ChildShape shape : body.shapes) {
 					WorldPartCache cache = handler.getPartCache(shape.uuid);
-					if(cache != null) {
+					if (cache != null) {
 						PartMesh part_mesh = cache.meshes.get(0);
-						if(!part_mesh.isLoaded()) {
+						if (!part_mesh.isLoaded()) {
 							loaded = false;
 						}
 					}
 				}
 			}
 			
-			if(!loaded) {
+			if (!loaded) {
 				return;
 			}
 			
 			this.blocks = new ArrayList<>();
 			
-			for(RigidBody body : list) {
-				for(ChildShape shape : body.shapes) {
+			for (RigidBody body : list) {
+				for (ChildShape shape : body.shapes) {
 					WorldBlockCache cache = handler.getBlockCache(shape.uuid);
-					if(cache != null) {
+					if (cache != null) {
 						blocks.add(RenderObject.Block.get()
 							.setVao(cache.hashCode()) // Set the id to the hashCode of the object. This will make sure some blocks are unique
 							.setColor(shape.colorRGBA)
@@ -81,9 +81,9 @@ public class BlockPipeline extends RenderPipe {
 		}
 		
 		Vector3f camera = pipeline.getCamera().getPosition();
-		for(RenderObject.Block object : blocks) {
+		for (RenderObject.Block object : blocks) {
 			float dist = object.modelMatrix.transformPosition(new Vector3f()).distance(camera);
-			if(dist < 100) {
+			if (dist < 100) {
 				push(object);
 			}
 		}

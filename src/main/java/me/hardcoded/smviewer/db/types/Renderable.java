@@ -59,7 +59,7 @@ public class Renderable {
 		@JsonSetter(value = "subMeshList")
 		private void setSubMeshList(List<MeshMap> list) {
 			isMeshList = true;
-			for(int i = 0; i < list.size(); i++) {
+			for (int i = 0; i < list.size(); i++) {
 				subMeshMap.put(String.valueOf(i), list.get(i));
 			}
 		}

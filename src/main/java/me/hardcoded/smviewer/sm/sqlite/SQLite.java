@@ -42,7 +42,7 @@ public class SQLite implements AutoCloseable {
 		try {
 			Statement statement = connection.createStatement();
 			return statement.executeQuery(sql);
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			LOGGER.throwing(e);
 		}
 		
@@ -52,8 +52,8 @@ public class SQLite implements AutoCloseable {
 	public Object executeSingle(String sql) {
 		try {
 			ResultSet set = execute(sql);
-			if(set.next()) return set.getObject(1);
-		} catch(SQLException e) {
+			if (set.next()) return set.getObject(1);
+		} catch (SQLException e) {
 			LOGGER.throwing(e);
 		}
 		
@@ -64,7 +64,7 @@ public class SQLite implements AutoCloseable {
 		try {
 			Statement statement = connection.createStatement();
 			return statement.execute(sql);
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			LOGGER.throwing(e);
 		}
 		

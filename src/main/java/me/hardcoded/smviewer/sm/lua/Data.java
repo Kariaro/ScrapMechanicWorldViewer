@@ -11,7 +11,7 @@ public class Data {
 	}
 	
 	public Data get(Object key) {
-		if(obj instanceof Map) {
+		if (obj instanceof Map) {
 			return new Data(toMap().get(key));
 		}
 		
@@ -19,7 +19,7 @@ public class Data {
 	}
 	
 	public Set<Object> keySet() {
-		if(obj instanceof Map) {
+		if (obj instanceof Map) {
 			return toMap().keySet();
 		}
 		
@@ -28,7 +28,7 @@ public class Data {
 	
 	@SuppressWarnings("unchecked")
 	public Map<Object, Object> toMap() {
-		if(obj instanceof Map) {
+		if (obj instanceof Map) {
 			return (Map<Object, Object>)obj;
 		}
 		
@@ -36,7 +36,7 @@ public class Data {
 	}
 	
 	public int getInt() {
-		if(obj instanceof Number) {
+		if (obj instanceof Number) {
 			return ((Number)obj).intValue();
 		}
 		
@@ -46,7 +46,7 @@ public class Data {
 	public int getInt(Object key) {
 		Object obj = toMap().get(key);
 		
-		if(obj instanceof Number) {
+		if (obj instanceof Number) {
 			return ((Number)obj).intValue();
 		}
 		
@@ -56,7 +56,7 @@ public class Data {
 	public float getFloat(Object key) {
 		Object obj = toMap().get(key);
 		
-		if(obj instanceof Number) {
+		if (obj instanceof Number) {
 			return ((Number)obj).floatValue();
 		}
 		

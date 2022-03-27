@@ -49,7 +49,7 @@ public class GuiFont {
 		try {
 			BufferedImage bi = createAtlasFromLocalResource(path);
 			texture = Texture.loadBufferedImageTexture(bi, GL11.GL_LINEAR);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			LOGGER.throwing(e);
 			throw new NullPointerException("Failed to load any font");
 		}
@@ -85,7 +85,7 @@ public class GuiFont {
 			g.setColor(Color.WHITE);
 			
 			int max_width = (int)(ATTLAS_WIDTH / (box.getWidth() + ATTLAS_SPACE));
-			for(int i = 0; i < CHARACTERS.length(); i++) {
+			for (int i = 0; i < CHARACTERS.length(); i++) {
 				char c = CHARACTERS.charAt(i);
 				
 				float x = (float)(box.getWidth() + ATTLAS_SPACE) * (i % max_width);
@@ -118,7 +118,7 @@ public class GuiFont {
 //		try {
 //			font = Font.createFont(Font.TRUETYPE_FONT, GuiFont.class.getResourceAsStream(name));
 //			font = font.deriveFont(ATTLAS_SIZE);
-//		} catch(Exception e) {
+//		} catch (Exception e) {
 //			font = new Font("Arial", Font.PLAIN, 20);
 //			e.printStackTrace();
 //		}
@@ -138,7 +138,7 @@ public class GuiFont {
 //			g.setColor(Color.WHITE);
 //			
 //			int max_width = (int)(ATTLAS_WIDTH / (box.getWidth() + ATTLAS_SPACE));
-//			for(int i = 0; i < CHARACTERS.length(); i++) {
+//			for (int i = 0; i < CHARACTERS.length(); i++) {
 //				char c = CHARACTERS.charAt(i);
 //				
 //				float x = (float)(box.getWidth() + ATTLAS_SPACE) * (i % max_width);

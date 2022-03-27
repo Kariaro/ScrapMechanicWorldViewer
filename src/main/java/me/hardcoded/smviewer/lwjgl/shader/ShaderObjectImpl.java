@@ -43,7 +43,7 @@ public abstract class ShaderObjectImpl extends Shader {
 		
 		load_lightPositionViewSpace = new int[LwjglSettings.MAX_LIGHTS];
 		//load_lightColor = new int[LwjglOptions.MAX_LIGHTS];
-		for(int i = 0; i < LwjglSettings.MAX_LIGHTS; i++) {
+		for (int i = 0; i < LwjglSettings.MAX_LIGHTS; i++) {
 			load_lightPositionViewSpace[i] = getUniformLocation("load_lightPositionViewSpace[" + i + "]");
 			//load_lightColor[i] = getUniformLocation("load_lightColor[" + i + "]");
 		}
@@ -72,8 +72,8 @@ public abstract class ShaderObjectImpl extends Shader {
 	
 	public void loadLights(List<Light> lights, Matrix4f viewMatrix) {
 		final int lightCount = lights.size();
-		for(int i = 0; i < LwjglSettings.MAX_LIGHTS; i++) {
-			if(i < lightCount) {
+		for (int i = 0; i < LwjglSettings.MAX_LIGHTS; i++) {
+			if (i < lightCount) {
 				Light light = lights.get(i);
 				setVector3f(load_lightPositionViewSpace[i], calculateLightViewPosition(viewMatrix, light.getPosition()));
 				//setVector3f(load_lightColor[i], light.getColor());

@@ -16,7 +16,7 @@ public class RegQuery {
 	public static String readRegistryValue(String path, String key) {
 		try {
 			return executeRegistry(path, key);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -28,7 +28,7 @@ public class RegQuery {
 		byte[] bytes = FileUtils.readStreamBytes(process.getInputStream());
 		process.waitFor();
 		
-		if(bytes.length < 1) return null;
+		if (bytes.length < 1) return null;
 		
 		String value = new String(bytes);
 		value = value.substring(2);

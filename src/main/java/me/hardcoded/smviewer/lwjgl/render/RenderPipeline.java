@@ -276,11 +276,10 @@ public class RenderPipeline {
 	private void renderShadows() {
 		int mvp_x = -(int)(camera.x / 64);
 		int mvp_y = -(int)(camera.y / 64);
-		if(last_mvp_x == mvp_x && last_mvp_y == mvp_y) return;
+		if (last_mvp_x == mvp_x && last_mvp_y == mvp_y) return;
 		
 		this.mvpMatrix = MathUtils.getOrthoProjectionMatrix(500, 500, 400);
 		{
-			@SuppressWarnings("unused")
 			float angle = (float)Math.toRadians((System.currentTimeMillis() % 7200L) / 20.0f);
 			mvpMatrix.rotateLocalX(1.0f);
 			//mvpMatrix.rotateZ(angle);
@@ -701,7 +700,7 @@ public class RenderPipeline {
 					((color >> 24) & 0xff) / 255.0f,
 					((color >> 16) & 0xff) / 255.0f,
 					((color >>  8) & 0xff) / 255.0f,
-					((color >>  0) & 0xff) / 255.0f
+					((color      ) & 0xff) / 255.0f
 				);
 			}
 			
@@ -722,7 +721,7 @@ public class RenderPipeline {
 					((color >> 24) & 0xff) / 255.0f,
 					((color >> 16) & 0xff) / 255.0f,
 					((color >>  8) & 0xff) / 255.0f,
-					((color >>  0) & 0xff) / 255.0f
+					((color      ) & 0xff) / 255.0f
 				);
 			} else if (defaults != null && defaults.length > 0) {
 				if (index >= defaults.length) {
@@ -734,7 +733,7 @@ public class RenderPipeline {
 					((color >> 24) & 0xff) / 255.0f,
 					((color >> 16) & 0xff) / 255.0f,
 					((color >>  8) & 0xff) / 255.0f,
-					((color >>  0) & 0xff) / 255.0f
+					((color      ) & 0xff) / 255.0f
 				);
 			}
 			

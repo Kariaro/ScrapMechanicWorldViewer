@@ -14,8 +14,8 @@ public class ShapeUtils {
 		Vector3f posi = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
 		Vector3f size = new Vector3f(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
 		
-		for(BodyList.ChildShape shape : body.shapes) {
-			if(shape.shapeType == 0x1f) {
+		for (BodyList.ChildShape shape : body.shapes) {
+			if (shape.shapeType == 0x1f) {
 				float x = shape.xPos;
 				float y = shape.yPos;
 				float z = shape.zPos;
@@ -23,18 +23,18 @@ public class ShapeUtils {
 				float ys = y + shape.ySize;
 				float zs = z + shape.zSize;
 				
-				if(x < posi.x) posi.x = x;
-				if(y < posi.y) posi.y = y;
-				if(z < posi.z) posi.z = z;
-				if(xs > size.x) size.x = xs;
-				if(ys > size.y) size.y = ys;
-				if(zs > size.z) size.z = zs;
+				if (x < posi.x) posi.x = x;
+				if (y < posi.y) posi.y = y;
+				if (z < posi.z) posi.z = z;
+				if (xs > size.x) size.x = xs;
+				if (ys > size.y) size.y = ys;
+				if (zs > size.z) size.z = zs;
 				continue;
 			}
 			
 			// TODO: Get bounding box of all parts. This should be cached
 			SMPart part = ScrapMechanicAssetHandler.getPart(shape.uuid);
-			if(part != null) {
+			if (part != null) {
 				float x = shape.xPos;
 				float y = shape.yPos;
 				float z = shape.zPos;
@@ -42,7 +42,7 @@ public class ShapeUtils {
 				Matrix4f rot = new Matrix4f(PartRotation.getRotationMultiplier(shape.partRotation));
 				BoxBounds bounds = part.getBounds();
 				rot.setTranslation(0, 0, 0);
-				if(bounds != null) {
+				if (bounds != null) {
 					rot.translate(
 						bounds.getWidth(),
 						bounds.getHeight(),
@@ -54,22 +54,22 @@ public class ShapeUtils {
 				float xs = x + zero.x;
 				float ys = y + zero.y;
 				float zs = z + zero.z;
-				if(xs < x) {
+				if (xs < x) {
 					float tmp = xs; xs = x; x = tmp;
 				}
-				if(ys < y) {
+				if (ys < y) {
 					float tmp = ys; ys = y; y = tmp;
 				}
-				if(zs < z) {
+				if (zs < z) {
 					float tmp = zs; zs = z; z = tmp;
 				}
 
-				if(x < posi.x) posi.x = x;
-				if(y < posi.y) posi.y = y;
-				if(z < posi.z) posi.z = z;
-				if(xs > size.x) size.x = xs;
-				if(ys > size.y) size.y = ys;
-				if(zs > size.z) size.z = zs;
+				if (x < posi.x) posi.x = x;
+				if (y < posi.y) posi.y = y;
+				if (z < posi.z) posi.z = z;
+				if (xs > size.x) size.x = xs;
+				if (ys > size.y) size.y = ys;
+				if (zs > size.z) size.z = zs;
 			}
 		}
 		

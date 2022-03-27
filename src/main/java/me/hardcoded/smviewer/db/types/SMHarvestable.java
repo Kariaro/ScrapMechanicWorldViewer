@@ -37,12 +37,12 @@ public class SMHarvestable {
 	@JsonSetter(value = "color")
 	private void setColor(Object object) {
 		String string = "";
-		if(object instanceof List) {
+		if (object instanceof List) {
 			List<String> list = (List<String>)object;
-			if(!list.isEmpty()) {
+			if (!list.isEmpty()) {
 				string = list.get(0);
 			}
-		} else if(object instanceof String) {
+		} else if (object instanceof String) {
 			string = (String)object;
 		} else {
 			// Bad
@@ -52,12 +52,12 @@ public class SMHarvestable {
 		try {
 			int value = Integer.parseInt(string, 16);
 			
-			if(string.length() == 6) {
+			if (string.length() == 6) {
 				this.color = (value << 8) | 0xff;
 			} else {
 				this.color = value;
 			}
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			
 		}
 	}

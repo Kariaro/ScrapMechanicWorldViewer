@@ -37,8 +37,8 @@ public class TileMesh {
 		int tgrw = tile.getWidth() * 0x40 + 1;
 		
 		float mul = 2;
-		for(int y = 0; y < height * 32; y++) {
-			for(int x = 0; x < width * 32; x++) {
+		for (int y = 0; y < height * 32; y++) {
+			for (int x = 0; x < width * 32; x++) {
 				int vidx = (x + y * width * 32) * 3 * 6;
 				int cidx = (x + y * width * 32) * 4 * 6;
 				int midx = (x + y * width * 32) * 16 * 6;
@@ -71,8 +71,8 @@ public class TileMesh {
 				//   | .'      |
 				//   01 ------11
 				
-				for(int j = 0; j < 6; j++) {
-					writeMaterial(materials, midx +  0, m00);
+				for (int j = 0; j < 6; j++) {
+					writeMaterial(materials, midx     , m00);
 					writeMaterial(materials, midx +  4, m01);
 					writeMaterial(materials, midx +  8, m10);
 					writeMaterial(materials, midx + 12, m11);
@@ -127,7 +127,7 @@ public class TileMesh {
 		
 		/*
 		int a = 1;
-		for(int i = 0; i < 1000; i += 4) {
+		for (int i = 0; i < 1000; i += 4) {
 			System.out.printf("[%04x%04x%04x%04x] ",
 				materials[i + 3],
 				materials[i + 2],
@@ -135,7 +135,7 @@ public class TileMesh {
 				materials[i + 0]
 			);
 			
-			if((a++) > 20) {
+			if ((a++) > 20) {
 				a = 0;
 				System.out.println();
 			}
@@ -165,8 +165,8 @@ public class TileMesh {
 		int tgrw = 0x40 + 1;
 		
 		float mul = 2;
-		for(int y = 0; y < height * 32; y++) {
-			for(int x = 0; x < width * 32; x++) {
+		for (int y = 0; y < height * 32; y++) {
+			for (int x = 0; x < width * 32; x++) {
 				int vidx = (x + y * width * 32) * 3 * 6;
 				int cidx = (x + y * width * 32) * 4 * 6;
 				int midx = (x + y * width * 32) * 16 * 6;
@@ -199,7 +199,7 @@ public class TileMesh {
 				//   | .'      |
 				//   01 ------11
 				
-				for(int j = 0; j < 6; j++) {
+				for (int j = 0; j < 6; j++) {
 					writeMaterial(materials, midx +  0, m00);
 					writeMaterial(materials, midx +  4, m01);
 					writeMaterial(materials, midx +  8, m10);
@@ -326,19 +326,19 @@ public class TileMesh {
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 			GL30.glBindVertexArray(0);
 		} finally {
-			if(verticesBuffer != null) {
+			if (verticesBuffer != null) {
 				MemoryUtil.memFree(verticesBuffer);
 			}
 			
-			if(colorsBuffer != null) {
+			if (colorsBuffer != null) {
 				MemoryUtil.memFree(colorsBuffer);
 			}
 
-			if(texturesBuffer != null) {
+			if (texturesBuffer != null) {
 				MemoryUtil.memFree(texturesBuffer);
 			}
 			
-			if(materialsBuffer != null) {
+			if (materialsBuffer != null) {
 				MemoryUtil.memFree(materialsBuffer);
 			}
 		}
@@ -364,11 +364,11 @@ public class TileMesh {
 		GL20.glEnableVertexAttribArray(6);
 		
 		final int textures = TileShader.textures.length;
-		for(int i = 0; i < textures; i++) TileShader.textures[i].bind();
+		for (int i = 0; i < textures; i++) TileShader.textures[i].bind();
 		
 		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
 		
-		for(int i = 0; i < textures; i++) TileShader.textures[i].unbind();
+		for (int i = 0; i < textures; i++) TileShader.textures[i].unbind();
 		
 		GL20.glDisableVertexAttribArray(0);
 		GL20.glDisableVertexAttribArray(1);

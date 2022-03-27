@@ -53,11 +53,11 @@ public class TileShader extends ShaderObjectImpl {
 		File terrain_path = new File(ScrapMechanicAssetHandler.$GAME_DATA, "Terrain/Textures/Ground/");
 		
 		try {
-			for(int i = 0; i < names.length; i++) {
+			for (int i = 0; i < names.length; i++) {
 				String path = new File(terrain_path, names[i]).getAbsolutePath();
 				textures[i] = Texture.loadTexture(path, i, GL11.GL_LINEAR);
 			}
-		} catch(IOException e) {
+		} catch (IOException e) {
 			throw new ShaderException("Failed to load ground textures");
 		}
 	}

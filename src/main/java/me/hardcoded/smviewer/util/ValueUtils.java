@@ -19,7 +19,7 @@ public class ValueUtils {
 	}
 	
 	public static int toInt(Object obj, int def) {
-		if(obj instanceof Number) {
+		if (obj instanceof Number) {
 			return ((Number)obj).intValue();
 		}
 		
@@ -38,7 +38,7 @@ public class ValueUtils {
 	}
 	
 	public static float toFloat(Object obj, float def) {
-		if(obj instanceof Number) {
+		if (obj instanceof Number) {
 			return ((Number)obj).floatValue();
 		}
 		
@@ -57,7 +57,7 @@ public class ValueUtils {
 	}
 	
 	public static double toDouble(Object obj, double def) {
-		if(obj instanceof Number) {
+		if (obj instanceof Number) {
 			return ((Number)obj).doubleValue();
 		}
 		
@@ -75,8 +75,8 @@ public class ValueUtils {
 	}
 	
 	public static String toString(Object obj, String def) {
-		if(obj == null) return def;
-		if(obj instanceof String) {
+		if (obj == null) return def;
+		if (obj instanceof String) {
 			return (String)obj;
 		}
 		
@@ -94,7 +94,7 @@ public class ValueUtils {
 	}
 	
 	public static boolean toBoolean(Object obj, boolean def) {
-		if(obj instanceof Boolean) {
+		if (obj instanceof Boolean) {
 			return (Boolean)obj;
 		}
 		
