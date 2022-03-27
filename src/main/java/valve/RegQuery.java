@@ -2,7 +2,7 @@ package valve;
 
 import java.io.IOException;
 
-import com.hardcoded.util.FileUtils;
+import me.hardcoded.smviewer.util.FileUtils;
 
 public class RegQuery {
 	private static final String QUERY = "REG QUERY ";
