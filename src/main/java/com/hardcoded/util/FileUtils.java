@@ -4,7 +4,7 @@ import java.io.*;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 
-import com.hardcoded.logger.Log;
+import me.hardcoded.smreader.logger.Log;
 
 public class FileUtils {
 	private static final Log LOGGER = Log.getLogger();

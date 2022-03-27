@@ -5,7 +5,7 @@ This tool uses LWJGL 3.
 
 <b>NOTE: Because this tool is still under construction trying it out might be hard to run this and will probably result in errors.</b>
 
-This is a try to create a independant sqlite library for scrap mechanic with a render implemented.
+This is a try to create an independent sqlite library for scrap mechanic with a render implemented.
 
 
 ## Features

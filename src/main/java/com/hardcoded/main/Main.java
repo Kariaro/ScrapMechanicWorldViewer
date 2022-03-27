@@ -1,7 +1,7 @@
 package com.hardcoded.main;
 
 import com.hardcoded.game.World;
-import com.hardcoded.logger.Log;
+import me.hardcoded.smreader.logger.Log;
 import com.hardcoded.lwjgl.LwjglWorldViewer;
 import com.hardcoded.sm.api.WorldHeader;
 import com.hardcoded.sm.api.WorldHeader.Mod;

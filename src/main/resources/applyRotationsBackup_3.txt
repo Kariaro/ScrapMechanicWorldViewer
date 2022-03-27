@@ -1,0 +1,84 @@
+float[] Y_rot = new float[] {
+			 hp, 1, 0, 0, 0, 1, 0,
+			  0, 1, 1, 0,
+			-hp, 0, 1, 0,
+			-pi, 0, 1, 1,
+			 hp, 1, 1, 1
+		};
+		
+		float[] NegY_rot = new float[] {
+			-hp, 1, 0, 0, 0, 1, 0,
+			  0, 1, 0, 1,
+			 hp, 0, 0, 1,
+			 pi, 0, 0, 0,
+			-hp, 1, 0, 0
+		};
+
+		float[] Z_rot = new float[] {
+			  0, 0, 0, 1, 0, 0, 1,
+			  0, 1, 1, 1,
+			-hp, 0, 1, 1,
+			-pi, 0, 0, 1,
+			 hp, 1, 0, 1
+		};
+
+		float[] NegZ_rot = new float[] {
+			 pi, 1, 0, 0, 0, 0, 1,
+			  0, 1, 0, 0,
+			 hp, 0, 0, 0,
+			 pi, 0, 1, 0,
+			-hp, 1, 1, 0
+		};
+		
+		float[] X_rot = new float[] {
+			-hp, 0, 1, 0, 1, 0, 0,
+			 hp, 1, 0, 0,
+			  0, 1, 1, 0,
+			-hp, 1, 1, 1,
+			 pi, 1, 0, 1
+		};
+
+		float[] NegX_rot = new float[] {
+			 hp, 0, 1, 0, 1, 0, 0,
+			 hp, 0, 1, 0,
+			 pi, 0, 0, 0,
+			-hp, 0, 0, 1,
+			  0, 0, 1, 1
+		};
+		
+		float[][] RotData = {
+			Y_rot, NegY_rot,
+			Z_rot, NegZ_rot,
+			X_rot, NegX_rot
+		};
+		
+		for(int i = 0; i < 6; i++) {
+			float[] arr = RotData[i];
+			
+			for(int j = 0; j < 4; j++) {
+				int val = rotations[i * 4 + j];
+				
+				if(val == rot) {
+					matrix.rotate(arr[0], arr[1], arr[2], arr[3]);
+					matrix.rotate(arr[7 + j * 4], arr[4], arr[5], arr[6]);
+					matrix.translate(
+						arr[8 + j * 4],
+						arr[9 + j * 4],
+						arr[10 + j * 4]
+					);
+					
+					/*if(i == 0 && j == 0) {
+						System.out.printf("matrix.rotate(%f, %f, %f, %f);\n", arr[0], arr[1], arr[2], arr[3]);
+						System.out.printf("matrix.rotate(%f, %f, %f, %f);\n", arr[7 + j * 4], arr[4], arr[5], arr[6]);
+						System.out.printf("matrix.translate(%f, %f, %f);\n\n", arr[8 + j * 4], arr[9 + j * 4], arr[10 + j * 4]);
+					}*/
+					break;
+				}
+			}
+		}
+		
+		matrix.translate(
+			(bounds.getWidth() - 1) / 2.0f,
+			(bounds.getHeight() - 1) / 2.0f,
+			(bounds.getDepth() - 1) / 2.0f
+		);

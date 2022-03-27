@@ -1,0 +1,291 @@
+private void applyRotation(ChildShape shape, Matrix4f matrix) {
+		String[] types = {
+		//        001  010  011
+			null,"-Z","-Y","-X",null,
+		//        101  110  111
+			      "X", "Y", "Z"
+		};
+		
+		int NZ = 0b001;
+		int NY = 0b010;
+		int NX = 0b011;
+		int PX = 0b101;
+		int PY = 0b110;
+		int PZ = 0b111;
+		
+		int[] rotations = {
+			0b100101,
+			0b110010,
+			0b1100011,
+			0b1010110,
+			0b1100101,
+			0b1010010,
+			0b100011,
+			0b110110,
+			0b1110101,
+			0b1110010,
+			0b1110011,
+			0b1110110,
+			0b10101,
+			0b10010,
+			0b10011,
+			0b10110,
+			0b100111,
+			0b110111,
+			0b1100111,
+			0b1010111,
+			0b100001,
+			0b110001,
+			0b1100001,
+			0b1010001,
+		};
+		/*
+		// Y
+		{ "south": -Y, "east":  X },
+		{ "south": -X, "east": -Y },
+		{ "south":  Y, "east": -X },
+		{ "south":  X, "east":  Y },
+		// NegY
+		{ "south":  Y, "east":  X },
+		{ "south":  X, "east": -Y },
+		{ "south": -Y, "east": -X },
+		{ "south": -X, "east":  Y },
+		// Z
+		{ "south":  Z, "east":  X },
+		{ "south":  Z, "east": -Y },
+		{ "south":  Z, "east": -X },
+		{ "south":  Z, "east":  Y },
+		// NegZ
+		{ "south": -Z, "east":  X },
+		{ "south": -Z, "east": -Y },
+		{ "south": -Z, "east": -X },
+		{ "south": -Z, "east":  Y },
+		// X
+		{ "south": -Y, "east":  Z },
+		{ "south": -X, "east":  Z },
+		{ "south":  Y, "east":  Z },
+		{ "south":  X, "east":  Z },
+		// NegX
+		{ "south": -Y, "east": -Z },
+		{ "south": -X, "east": -Z },
+		{ "south":  Y, "east": -Z },
+		{ "south":  X, "east": -Z }
+		*/
+		int rot = shape.rotation_41_1;
+		int south = (rot >> 4) & 0b111;
+		int east = rot & 0b111;
+		
+		float pi = (float)Math.PI;
+		float hp = pi / 2.0f;
+		
+		boolean debug = !shape.uuid.toString().equals("ea4237f4-851a-4751-a1bc-3f85b7488243");
+		boolean print = false;
+		int si = (south & 0b100) >> 2;
+		int ei = (east & 0b100) >> 2;
+		int ssh = si > 0 ? (0b1000 - south):south;
+		int eet = ei > 0 ? (0b1000 - east):east;
+		
+		if(!debug) {
+			if(print) {
+				if(south == NY && east == PX) System.out.println("-----------------------------------");
+				System.out.printf("%2s, %2s: %8s\n", types[south], types[east], Integer.toBinaryString(rot));
+				//System.out.println(ssh + ", " + types[ssh]);
+				//System.out.println(eet + ", " + types[eet]);
+			}
+		}
+		
+		/*
+		if(debug) {
+			System.out.printf("%2s, %2s\n", types[south], types[east]);
+		}*/
+		
+		PartBounds bounds = part.getBounds();
+		
+		/*
+		// Y
+		{ "south": -Y, "east":  X },
+		{ "south": -X, "east": -Y },
+		{ "south":  Y, "east": -X },
+		{ "south":  X, "east":  Y },
+		*/
+		if(south == NY && east == PX) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.translate(1, 1, 0);
+		} else
+		if(south == NX && east == NY) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 0, 1, 0);
+			matrix.translate(0, 1, 0);
+		} else
+		if(south == PY && east == NX) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-pi, 0, 1, 0);
+			matrix.translate(0, 1, 1);
+		} else
+		if(south == PX && east == PY) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 0, 1, 0);
+			matrix.translate(1, 1, 1);
+		}
+		
+		/*
+		// NegY
+		{ "south":  Y, "east":  X },
+		{ "south":  X, "east": -Y },
+		{ "south": -Y, "east": -X },
+		{ "south": -X, "east":  Y },
+		*/
+		if(south == PY && east == PX) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(pi, 1, 0, 0);
+			matrix.translate(1, 0, 1);
+		} else
+		if(south == PX && east == NY) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(pi, 1, 0, 0);
+			matrix.rotate(hp, 0, 1, 0);
+			matrix.translate(0, 0, 1);
+		} else
+		if(south == NY && east == NX) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(pi, 1, 0, 0);
+			matrix.rotate(pi, 0, 1, 0);
+			matrix.translate(0, 0, 0);
+		} else
+		if(south == NX && east == PY) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(pi, 1, 0, 0);
+			matrix.rotate(-hp, 0, 1, 0);
+			matrix.translate(1, 0, 0);
+		}
+		
+		/*
+		// Z
+		{ "south":  Z, "east":  X },
+		{ "south":  Z, "east": -Y },
+		{ "south":  Z, "east": -X },
+		{ "south":  Z, "east":  Y },
+		*/
+		if(south == PZ && east == PX) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 1, 0, 0);
+			matrix.translate(1, 1, 1);
+		} else
+		if(south == PZ && east == NY) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 1, 0, 0);
+			matrix.rotate(-hp, 0, 0, 1);
+			matrix.translate(0, 1, 1);
+		} else
+		if(south == PZ && east == NX) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 1, 0, 0);
+			matrix.rotate(-pi, 0, 0, 1);
+			matrix.translate(0, 0, 1);
+		} else
+		if(south == PZ && east == PY) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 1, 0, 0);
+			matrix.rotate(hp, 0, 0, 1);
+			matrix.translate(1, 0, 1);
+		}
+		
+		/*
+		// NegZ
+		{ "south": -Z, "east":  X },
+		{ "south": -Z, "east": -Y },
+		{ "south": -Z, "east": -X },
+		{ "south": -Z, "east":  Y },
+		*/
+		if(south == NZ && east == PX) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.translate(1, 0, 0);
+		} else
+		if(south == NZ && east == NY) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 0, 0, 1);
+			matrix.translate(0, 0, 0);
+		} else
+		if(south == NZ && east == NX) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(pi, 0, 0, 1);
+			matrix.translate(0, 1, 0);
+		} else
+		if(south == NZ && east == PY) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 0, 0, 1);
+			matrix.translate(1, 1, 0);
+		}
+		
+		/*
+		// X
+		{ "south": -Y, "east":  Z },
+		{ "south": -X, "east":  Z },
+		{ "south":  Y, "east":  Z },
+		{ "south":  X, "east":  Z },
+		*/
+		if(south == NY && east == PZ) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 0, 0, 1);
+			matrix.translate(1, 0, 0);
+		} else
+		if(south == NX && east == PZ) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 0, 0, 1);
+			matrix.rotate(-hp, 1, 0, 0);
+			matrix.translate(1, 1, 0);
+		} else
+		if(south == PY && east == PZ) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 0, 0, 1);
+			matrix.rotate(-pi, 1, 0, 0);
+			matrix.translate(1, 1, 1);
+		} else
+		if(south == PX && east == PZ) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(hp, 0, 0, 1);
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.translate(1, 0, 1);
+		}
+		
+		/*
+		// NegX
+		{ "south": -Y, "east": -Z },
+		{ "south": -X, "east": -Z },
+		{ "south":  Y, "east": -Z },
+		{ "south":  X, "east": -Z },
+		*/
+		if(south == NY && east == NZ) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 0, 0, 1);
+			matrix.translate(0, 1, 0);
+		} else
+		if(south == NX && east == NZ) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 0, 0, 1);
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.translate(0, 0, 0);
+		} else
+		if(south == PY && east == NZ) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 0, 0, 1);
+			matrix.rotate(-pi, 1, 0, 0);
+			matrix.translate(0, 0, 1);
+		} else
+		if(south == PX && east == NZ) {
+			matrix.rotate(hp, 1, 0, 0);
+			matrix.rotate(-hp, 0, 0, 1);
+			matrix.rotate(-hp, 1, 0, 0);
+			matrix.translate(0, 1, 1);
+		}
+		
+		matrix.translate(
+			(bounds.getWidth() - 1) / 2.0f,
+			(bounds.getHeight() - 1) / 2.0f,
+			(bounds.getDepth() - 1) / 2.0f
+		);
+	}

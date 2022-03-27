@@ -5,8 +5,8 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 import com.hardcoded.db.types.*;
-import com.hardcoded.logger.Log;
-import com.hardcoded.logger.Log.Level;
+import me.hardcoded.smreader.logger.Log;
+import me.hardcoded.smreader.logger.Log.Level;
 
 import valve.Steam;
 

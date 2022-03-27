@@ -1,0 +1,98 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id 'application'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_16
+
+group 'me.hardcoded.smviewer'
+version '1.0.0'
+
+
+sourceSets {
+    main {
+        java.srcDirs 'src/main/java'
+        resources.setSrcDirs(['src/main/resources'])
+    }
+    test {
+        java.srcDirs 'src/test/java'
+        resources.setSrcDirs(['src/test/resources'])
+    }
+}
+
+configurations {
+    // implementations that should be included in the jar file
+    packImplementation {
+        transitive false
+    }
+
+    implementation.extendsFrom(packImplementation)
+}
+
+dependencies {
+    implementation 'junit:junit:4.13.2'
+    testImplementation 'junit:junit:4.13.2'
+
+    implementation 'org.xerial:sqlite-jdbc:3.31.1'
+    implementation 'org.joml:joml:1.9.24'
+    implementation 'org.lz4:lz4-java:1.7.1'
+
+    implementation 'org.lwjgl:lwjgl:3.2.1'
+    implementation 'org.lwjgl:lwjgl-stb:3.2.1'
+    implementation 'org.lwjgl:lwjgl-glfw:3.2.1'
+    implementation 'org.lwjgl:lwjgl-opengl:3.2.1'
+    implementation 'org.lwjgl:lwjgl-assimp:3.2.1'
+
+    implementation 'org.lwjgl:lwjgl:3.2.1:natives-windows'
+    implementation 'org.lwjgl:lwjgl-stb:3.2.1:natives-windows'
+    implementation 'org.lwjgl:lwjgl-glfw:3.2.1:natives-windows'
+    implementation 'org.lwjgl:lwjgl-opengl:3.2.1:natives-windows'
+    implementation 'org.lwjgl:lwjgl-assimp:3.2.1:natives-windows'
+
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.11.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+
+    packImplementation 'com.github.kariaro:ScrapMechanicReader:1.0.0'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+}
+
+test {
+    failFast false
+    filter {
+        includeTestsMatching 'me.hardcoded.test.*'
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+    }
+}
+
+jar {
+    from "LICENSE"
+    from {
+        configurations.packImplementation.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'com.github.kariaro'
+            artifactId = 'ScrapMechanicWorldViewer'
+            version = "${version}"
+
+            from components.java
+        }
+    }
+}

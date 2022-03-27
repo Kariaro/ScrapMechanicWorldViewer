@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hardcoded.db.types.*;
-import com.hardcoded.logger.Log;
+import me.hardcoded.smreader.logger.Log;
 import com.hardcoded.util.FileUtils;
 import com.hardcoded.util.StringUtils;
 import com.hardcoded.util.ValueUtils;
